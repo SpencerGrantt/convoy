@@ -15,6 +15,7 @@ export default function NewRunForm() {
   const [vehicles, setVehicles] = useState([])
   const [contracts, setContracts] = useState([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     Promise.all([
@@ -33,24 +34,30 @@ export default function NewRunForm() {
   async function submit(e) {
     e.preventDefault()
     setLoading(true)
-    const { data, error } = await supabase.from('runs').insert({
-      ...form,
-      company_id: profile.company_id,
-      status: form.driver_id ? 'assigned' : 'pending',
-      driver_id: form.driver_id || null,
-      vehicle_id: form.vehicle_id || null,
-      contract_id: form.contract_id || null,
-      scheduled_at: form.scheduled_at || null,
-    }).select().single()
+    setError('')
+    try {
+      const { data, error: insertError } = await supabase.from('runs').insert({
+        ...form,
+        company_id: profile.company_id,
+        status: form.driver_id ? 'assigned' : 'pending',
+        driver_id: form.driver_id || null,
+        vehicle_id: form.vehicle_id || null,
+        contract_id: form.contract_id || null,
+        scheduled_at: form.scheduled_at || null,
+      }).select().single()
 
-    if (!error && data) {
+      if (insertError) throw insertError
+
       await supabase.from('custody_events').insert({
         run_id: data.id, company_id: profile.company_id,
         actor_id: profile.id, event_type: 'created',
       })
       navigate(`/runs/${data.id}`)
+    } catch (e) {
+      setError(e.message ?? 'Failed to create run')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700'
@@ -113,6 +120,13 @@ export default function NewRunForm() {
             <input type="datetime-local" value={form.scheduled_at} onChange={e => set('scheduled_at', e.target.value)} className={field} />
           </div>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <p className="text-red-700 text-sm font-medium">Error</p>
+            <p className="text-red-600 text-xs mt-0.5">{error}</p>
+          </div>
+        )}
 
         <button
           type="submit"

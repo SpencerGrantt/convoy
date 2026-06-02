@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 
 export default function TopBar({ title }) {
   const { profile } = useAuth()
+  const navigate = useNavigate()
   return (
     <header className="bg-brand-900 px-4 py-3 flex items-center justify-between sticky top-0 z-10 safe-top">
       <div className="flex items-center gap-2">
@@ -10,9 +12,12 @@ export default function TopBar({ title }) {
         {title && <span className="text-brand-200 font-medium text-sm">{title}</span>}
       </div>
       {profile && (
-        <div className="h-8 w-8 rounded-full bg-brand-700 flex items-center justify-center text-brand-50 text-xs font-bold">
-          {profile.full_name?.charAt(0)?.toUpperCase() ?? '?'}
-        </div>
+        <button
+          onClick={() => navigate('/settings')}
+          className="h-8 w-8 rounded-full bg-brand-700 flex items-center justify-center text-brand-50 text-xs font-bold active:bg-brand-600"
+        >
+          {profile.full_name?.charAt(0)?.toUpperCase() ?? '⚙'}
+        </button>
       )}
     </header>
   )

@@ -25,41 +25,48 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function fetchOrCreateProfile(userId) {
-    const { data: existing } = await supabase
-      .from('profiles')
-      .select('*, companies(*)')
-      .eq('id', userId)
-      .single()
+    try {
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('*, companies(*)')
+        .eq('id', userId)
+        .single()
 
-    if (existing) {
-      setProfile(existing)
+      if (existing) {
+        setProfile(existing)
+        return
+      }
+
+      // First login — create company + profile
+      const { data: company, error: companyError } = await supabase
+        .from('companies')
+        .insert({ name: 'My Company', sdvosb: true })
+        .select()
+        .single()
+
+      if (companyError) throw companyError
+
+      const { error: profileError } = await supabase.from('profiles').insert({
+        id: userId,
+        company_id: company.id,
+        full_name: '',
+        role: 'owner',
+      })
+
+      if (profileError) throw profileError
+
+      const { data: fresh } = await supabase
+        .from('profiles')
+        .select('*, companies(*)')
+        .eq('id', userId)
+        .single()
+
+      setProfile(fresh)
+    } catch (err) {
+      console.error('fetchOrCreateProfile failed:', err)
+    } finally {
       setLoading(false)
-      return
     }
-
-    // First login — create company + profile
-    const { data: company } = await supabase
-      .from('companies')
-      .insert({ name: 'My Company', sdvosb: true })
-      .select()
-      .single()
-
-    await supabase.from('profiles').insert({
-      id: userId,
-      company_id: company.id,
-      full_name: '',
-      role: 'owner',
-    })
-
-    // Re-fetch with the join
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*, companies(*)')
-      .eq('id', userId)
-      .single()
-
-    setProfile(profile)
-    setLoading(false)
   }
 
   async function signOut() {

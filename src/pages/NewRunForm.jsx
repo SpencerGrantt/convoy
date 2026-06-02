@@ -53,7 +53,7 @@ export default function NewRunForm() {
     setLoading(false)
   }
 
-  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700'
 
   return (
     <div className="pb-24">
@@ -75,8 +75,10 @@ export default function NewRunForm() {
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Cargo</h2>
           <textarea value={form.cargo_description} onChange={e => set('cargo_description', e.target.value)} className={field} rows={2} placeholder="Lab specimens, blood draw kit…" />
           <label className="flex items-center gap-3">
-            <div className={`w-12 h-6 rounded-full transition-colors ${form.temp_sensitive ? 'bg-blue-600' : 'bg-gray-200'} relative cursor-pointer`}
-              onClick={() => set('temp_sensitive', !form.temp_sensitive)}>
+            <div
+              className={`w-12 h-6 rounded-full transition-colors ${form.temp_sensitive ? 'bg-brand-900' : 'bg-gray-200'} relative cursor-pointer`}
+              onClick={() => set('temp_sensitive', !form.temp_sensitive)}
+            >
               <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${form.temp_sensitive ? 'translate-x-6' : ''}`} />
             </div>
             <span className="text-sm text-gray-700">Temperature sensitive</span>
@@ -115,7 +117,7 @@ export default function NewRunForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl disabled:opacity-50 active:bg-blue-700"
+          className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50 active:bg-brand-800"
         >
           {loading ? 'Creating…' : 'Create Run'}
         </button>

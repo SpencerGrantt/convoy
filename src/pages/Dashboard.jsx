@@ -18,11 +18,11 @@ export default function Dashboard() {
   const company = profile?.companies
   const today = new Date()
 
-  const activeRuns     = runs.filter(r => r.status === 'in_transit').length
-  const deliveredMTD   = runs.filter(r => r.status === 'delivered').length
-  const openContracts  = contracts.filter(c => c.status === 'active').length
+  const activeRuns    = runs.filter(r => r.status === 'in_transit').length
+  const deliveredMTD  = runs.filter(r => r.status === 'delivered').length
+  const openContracts = contracts.filter(c => c.status === 'active').length
 
-  const samDaysLeft  = company?.sam_expiry ? differenceInDays(parseISO(company.sam_expiry), today) : null
+  const samDaysLeft = company?.sam_expiry ? differenceInDays(parseISO(company.sam_expiry), today) : null
   const expiringContracts = contracts.filter(c => {
     if (!c.end_date) return false
     return differenceInDays(parseISO(c.end_date), today) <= 30
@@ -31,7 +31,6 @@ export default function Dashboard() {
   return (
     <div className="pb-24">
       <TopBar />
-
       <div className="px-4 pt-4 space-y-4">
         {samDaysLeft !== null && samDaysLeft <= 30 && (
           <AlertBanner
@@ -50,15 +49,15 @@ export default function Dashboard() {
         <div>
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Overview</h2>
           <div className="grid grid-cols-2 gap-3">
-            <MetricCard label="Active Runs"      value={activeRuns}    icon="🚗" color="blue"   />
-            <MetricCard label="Delivered MTD"    value={deliveredMTD}  icon="✅" color="green"  />
-            <MetricCard label="Open Contracts"   value={openContracts} icon="📋" color="yellow" />
+            <MetricCard label="Active Runs"    value={activeRuns}    icon="🚗" color="navy"   />
+            <MetricCard label="Delivered MTD"  value={deliveredMTD}  icon="✅" color="green"  />
+            <MetricCard label="Open Contracts" value={openContracts} icon="📋" color="yellow" />
             <MetricCard
               label="SAM Expiry"
               value={samDaysLeft !== null ? `${samDaysLeft}d` : '—'}
               sub={company?.sam_expiry ? format(parseISO(company.sam_expiry), 'MMM d, yyyy') : 'Not set'}
               icon="🏛️"
-              color={samDaysLeft !== null && samDaysLeft <= 30 ? 'red' : 'blue'}
+              color={samDaysLeft !== null && samDaysLeft <= 30 ? 'red' : 'navy'}
             />
           </div>
         </div>
@@ -66,7 +65,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Recent Runs</h2>
-            <button onClick={() => navigate('/runs')} className="text-xs text-blue-600 font-medium">View all →</button>
+            <button onClick={() => navigate('/runs')} className="text-xs text-brand-700 font-medium">View all →</button>
           </div>
           {runsLoading ? <LoadingSpinner size="sm" /> : (
             <div className="space-y-2">

@@ -1,6 +1,6 @@
-export default function MetricCard({ label, value, sub, color = 'blue', icon }) {
+export default function MetricCard({ label, value, sub, color = 'navy', icon }) {
   const colors = {
-    blue:   'bg-blue-50 text-blue-700',
+    navy:   'bg-brand-50 text-brand-900',
     green:  'bg-green-50 text-green-700',
     yellow: 'bg-yellow-50 text-yellow-700',
     red:    'bg-red-50 text-red-700',

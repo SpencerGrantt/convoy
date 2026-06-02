@@ -24,7 +24,7 @@ export default function Runs() {
             onClick={() => setActiveTab(tab)}
             className={`px-3 py-2 text-xs font-semibold rounded-t-lg whitespace-nowrap transition-colors ${
               activeTab === tab
-                ? 'text-blue-600 border-b-2 border-blue-600'
+                ? 'text-brand-900 border-b-2 border-brand-900'
                 : 'text-gray-400'
             }`}
           >
@@ -36,7 +36,7 @@ export default function Runs() {
       <div className="px-4 pt-4 space-y-2">
         <button
           onClick={() => navigate('/runs/new')}
-          className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl active:bg-blue-700 transition-colors mb-4"
+          className="w-full bg-brand-900 text-brand-50 font-semibold py-3 rounded-xl active:bg-brand-800 transition-colors mb-4"
         >
           + New Run
         </button>
@@ -57,7 +57,7 @@ export default function Runs() {
                     <div className="flex items-center gap-2 mb-1">
                       <StatusPill status={run.status} />
                       {run.temp_sensitive && (
-                        <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-medium">❄️ Temp</span>
+                        <span className="text-xs bg-brand-50 text-brand-800 px-1.5 py-0.5 rounded font-medium">❄️ Temp</span>
                       )}
                     </div>
                     <p className="text-xs text-gray-500">From: <span className="text-gray-700">{run.pickup_address}</span></p>

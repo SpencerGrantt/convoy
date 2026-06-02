@@ -60,7 +60,7 @@ export default function RunDetailPage() {
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
           <div className="flex items-center justify-between">
             <StatusPill status={run?.status} />
-            {run?.temp_sensitive && <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-lg">❄️ Temp Sensitive</span>}
+            {run?.temp_sensitive && <span className="text-xs bg-brand-50 text-brand-800 px-2 py-1 rounded-lg">❄️ Temp Sensitive</span>}
           </div>
           <div className="space-y-1">
             <p className="text-xs text-gray-400">Pickup</p>
@@ -86,7 +86,7 @@ export default function RunDetailPage() {
           <button
             onClick={advanceStatus}
             disabled={updating}
-            className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl disabled:opacity-50 active:bg-blue-700 transition-colors"
+            className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50 active:bg-brand-800 transition-colors"
           >
             {updating ? 'Updating…' : `Mark as ${STATUS_FLOW[STATUS_FLOW.indexOf(run?.status) + 1]?.replace('_', ' ')}`}
           </button>
@@ -105,7 +105,7 @@ export default function RunDetailPage() {
             <div className="space-y-2">
               {custody.map(event => (
                 <div key={event.id} className="flex gap-3 items-start">
-                  <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-brand-400 mt-1.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-gray-700 capitalize">{event.event_type.replace('_', ' ')}</p>
                     <p className="text-xs text-gray-400">{format(new Date(event.created_at), 'MMM d, h:mm a')} · {event.profiles?.full_name ?? 'System'}</p>

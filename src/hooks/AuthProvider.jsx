@@ -10,27 +10,55 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
-      if (session) fetchProfile(session.user.id)
+      if (session) fetchOrCreateProfile(session.user.id)
       else setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session)
-        if (session) fetchProfile(session.user.id)
+        if (session) fetchOrCreateProfile(session.user.id)
         else { setProfile(null); setLoading(false) }
       }
     )
     return () => subscription.unsubscribe()
   }, [])
 
-  async function fetchProfile(userId) {
-    const { data } = await supabase
+  async function fetchOrCreateProfile(userId) {
+    const { data: existing } = await supabase
       .from('profiles')
       .select('*, companies(*)')
       .eq('id', userId)
       .single()
-    setProfile(data)
+
+    if (existing) {
+      setProfile(existing)
+      setLoading(false)
+      return
+    }
+
+    // First login — create company + profile
+    const { data: company } = await supabase
+      .from('companies')
+      .insert({ name: 'My Company', sdvosb: true })
+      .select()
+      .single()
+
+    await supabase.from('profiles').insert({
+      id: userId,
+      company_id: company.id,
+      full_name: '',
+      role: 'owner',
+    })
+
+    // Re-fetch with the join
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*, companies(*)')
+      .eq('id', userId)
+      .single()
+
+    setProfile(profile)
     setLoading(false)
   }
 

@@ -8,6 +8,7 @@ import StatusPill from '../components/ui/StatusPill'
 import PhotoCapture from '../components/photos/PhotoCapture'
 import SignaturePad from '../components/photos/SignaturePad'
 import CustodyLog from '../components/photos/CustodyLog'
+import ErrorBoundary from '../components/ui/ErrorBoundary'
 
 const PHOTO_TYPES = ['pickup_before', 'pickup_sealed', 'delivery_arrived', 'delivery_signed']
 
@@ -73,6 +74,7 @@ export default function Photos() {
       <div className="px-4 pt-4 space-y-4">
 
         {/* Run summary */}
+
         {run && (
           <div className="bg-brand-900 text-brand-50 rounded-2xl p-4">
             <div className="flex items-center justify-between mb-1">
@@ -105,27 +107,17 @@ export default function Photos() {
         </div>
 
         {/* Photo capture slots */}
-        <PhotoCapture
-          runId={runId}
-          companyId={companyId}
-          photoType="pickup_before"
-          existingPath={getPhoto('pickup_before')?.storage_path}
-          onCaptured={path => setPhotos(prev => [...prev, { photo_type: 'pickup_before', storage_path: path }])}
-        />
-        <PhotoCapture
-          runId={runId}
-          companyId={companyId}
-          photoType="pickup_sealed"
-          existingPath={getPhoto('pickup_sealed')?.storage_path}
-          onCaptured={path => setPhotos(prev => [...prev, { photo_type: 'pickup_sealed', storage_path: path }])}
-        />
-        <PhotoCapture
-          runId={runId}
-          companyId={companyId}
-          photoType="delivery_arrived"
-          existingPath={getPhoto('delivery_arrived')?.storage_path}
-          onCaptured={path => setPhotos(prev => [...prev, { photo_type: 'delivery_arrived', storage_path: path }])}
-        />
+        {['pickup_before','pickup_sealed','delivery_arrived'].map(type => (
+          <ErrorBoundary key={type}>
+            <PhotoCapture
+              runId={runId}
+              companyId={companyId}
+              photoType={type}
+              existingPath={getPhoto(type)?.storage_path}
+              onCaptured={path => setPhotos(prev => [...prev, { photo_type: type, storage_path: path }])}
+            />
+          </ErrorBoundary>
+        ))}
 
         {/* Signature pad */}
         <SignaturePad

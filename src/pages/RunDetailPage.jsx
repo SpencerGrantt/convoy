@@ -18,6 +18,9 @@ export default function RunDetailPage() {
   const [signatures, setSignatures] = useState([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
+  const [updateErr, setUpdateErr] = useState('')
+  const [advanced, setAdvanced] = useState(false)
+  const [pdfMsg, setPdfMsg] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -49,13 +52,34 @@ export default function RunDetailPage() {
     if (idx === -1 || idx >= STATUS_FLOW.length - 1) return
     const nextStatus = STATUS_FLOW[idx + 1]
     setUpdating(true)
-    const update = { status: nextStatus }
-    if (nextStatus === 'in_transit') update.picked_up_at = new Date().toISOString()
-    if (nextStatus === 'delivered')  update.delivered_at  = new Date().toISOString()
-    await supabase.from('runs').update(update).eq('id', id)
-    await supabase.from('custody_events').insert({ run_id: id, company_id: run.company_id, event_type: nextStatus })
-    setRun(r => ({ ...r, ...update }))
-    setUpdating(false)
+    setUpdateErr('')
+    try {
+      const update = { status: nextStatus }
+      if (nextStatus === 'in_transit') update.picked_up_at = new Date().toISOString()
+      if (nextStatus === 'delivered')  update.delivered_at  = new Date().toISOString()
+      const { error } = await supabase.from('runs').update(update).eq('id', id)
+      if (error) throw error
+      await supabase.from('custody_events').insert({ run_id: id, company_id: run.company_id, event_type: nextStatus })
+      setRun(r => ({ ...r, ...update }))
+      setAdvanced(true)
+      setTimeout(() => setAdvanced(false), 2000)
+    } catch (err) {
+      setUpdateErr(err.message)
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  function downloadPDF() {
+    try {
+      const doc = generateCustodyPDF(run, photos, signatures, custody)
+      doc.save(`convoy-run-${id.slice(0, 8)}.pdf`)
+      setPdfMsg('success')
+    } catch (err) {
+      setPdfMsg(`Error: ${err.message}`)
+    } finally {
+      setTimeout(() => setPdfMsg(''), 3000)
+    }
   }
 
   if (loading) return <LoadingSpinner />
@@ -93,11 +117,12 @@ export default function RunDetailPage() {
           <button
             onClick={advanceStatus}
             disabled={updating}
-            className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50 active:bg-brand-800 transition-colors"
+            className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${advanced ? 'bg-green-600 text-white' : 'bg-brand-900 text-brand-50 active:bg-brand-800'}`}
           >
-            {updating ? 'Updating…' : `Mark as ${STATUS_FLOW[STATUS_FLOW.indexOf(run?.status) + 1]?.replace('_', ' ')}`}
+            {updating ? 'Updating…' : advanced ? '✓ Status Updated' : `Mark as ${STATUS_FLOW[STATUS_FLOW.indexOf(run?.status) + 1]?.replace('_', ' ')}`}
           </button>
         )}
+        {updateErr && <p className="text-red-600 text-xs font-medium text-center">{updateErr}</p>}
 
         <button
           onClick={() => navigate(`/photos?runId=${id}`)}
@@ -107,13 +132,10 @@ export default function RunDetailPage() {
         </button>
 
         <button
-          onClick={() => {
-            const doc = generateCustodyPDF(run, photos, signatures, custody)
-            doc.save(`convoy-run-${id.slice(0, 8)}.pdf`)
-          }}
-          className="w-full bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl active:bg-gray-200 transition-colors"
+          onClick={downloadPDF}
+          className={`w-full font-semibold py-3 rounded-xl transition-colors ${pdfMsg === 'success' ? 'bg-green-100 text-green-700' : pdfMsg ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-700 active:bg-gray-200'}`}
         >
-          📄 Download Chain of Custody PDF
+          {pdfMsg === 'success' ? '✓ PDF Downloaded' : pdfMsg || '📄 Download Chain of Custody PDF'}
         </button>
 
         {custody.length > 0 && (

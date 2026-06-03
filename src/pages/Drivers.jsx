@@ -47,19 +47,29 @@ export default function Drivers() {
   const [docType, setDocType] = useState('cdl')
   const [expiry, setExpiry] = useState('')
   const [saving, setSaving] = useState(false)
+  const [docErr, setDocErr] = useState('')
+  const [docSaved, setDocSaved] = useState(false)
 
   async function saveDoc() {
     if (!expiry || !selectedDriver) return
     setSaving(true)
-    await supabase.from('compliance_docs').insert({
-      company_id: profile.company_id,
-      owner_id: selectedDriver.id,
-      doc_type: docType,
-      expiry_date: expiry,
-    })
-    setSaving(false)
-    setSheet(null)
-    refresh()
+    setDocErr('')
+    try {
+      const { error } = await supabase.from('compliance_docs').insert({
+        company_id: profile.company_id,
+        owner_id: selectedDriver.id,
+        doc_type: docType,
+        expiry_date: expiry,
+      })
+      if (error) throw error
+      setDocSaved(true)
+      refresh()
+      setTimeout(() => { setDocSaved(false); setSheet(null) }, 1200)
+    } catch (err) {
+      setDocErr(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700'
@@ -143,8 +153,9 @@ export default function Drivers() {
               <label className="block text-xs text-gray-500 mb-1">Expiry Date</label>
               <input type="date" value={expiry} onChange={e => setExpiry(e.target.value)} className={field} />
             </div>
-            <button onClick={saveDoc} disabled={saving || !expiry} className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50">
-              {saving ? 'Saving…' : 'Save Document'}
+            {docErr && <p className="text-red-600 text-xs font-medium">{docErr}</p>}
+            <button onClick={saveDoc} disabled={saving || !expiry} className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${docSaved ? 'bg-green-600 text-white' : 'bg-brand-900 text-brand-50'}`}>
+              {saving ? 'Saving…' : docSaved ? '✓ Document Saved' : 'Save Document'}
             </button>
           </div>
         </Sheet>

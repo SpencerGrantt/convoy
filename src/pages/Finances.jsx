@@ -35,20 +35,28 @@ function RevenueForm({ companyId, contracts, onSave, onClose }) {
   const [description, setDescription] = useState('')
   const [contractId, setContractId] = useState('')
   const [saving, setSaving] = useState(false)
+  const [err, setErr] = useState('')
 
   async function save() {
     if (!amount) return
     setSaving(true)
-    await supabase.from('revenue_entries').insert({
-      company_id: companyId,
-      amount: parseFloat(amount),
-      description,
-      contract_id: contractId || null,
-      entry_date: new Date().toISOString().slice(0, 10),
-    })
-    setSaving(false)
-    onSave()
-    onClose()
+    setErr('')
+    try {
+      const { error } = await supabase.from('revenue_entries').insert({
+        company_id: companyId,
+        amount: parseFloat(amount),
+        description,
+        contract_id: contractId || null,
+        entry_date: new Date().toISOString().slice(0, 10),
+      })
+      if (error) throw error
+      onSave()
+      onClose()
+    } catch (e) {
+      setErr(e.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700'
@@ -69,6 +77,7 @@ function RevenueForm({ companyId, contracts, onSave, onClose }) {
           {contracts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
+      {err && <p className="text-red-600 text-xs font-medium">{err}</p>}
       <button onClick={save} disabled={saving || !amount} className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50">
         {saving ? 'Saving…' : 'Add Revenue'}
       </button>
@@ -81,20 +90,28 @@ function ExpenseForm({ companyId, onSave, onClose }) {
   const [category, setCategory] = useState('fuel')
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
+  const [err, setErr] = useState('')
 
   async function save() {
     if (!amount) return
     setSaving(true)
-    await supabase.from('expense_entries').insert({
-      company_id: companyId,
-      amount: parseFloat(amount),
-      category,
-      description,
-      entry_date: new Date().toISOString().slice(0, 10),
-    })
-    setSaving(false)
-    onSave()
-    onClose()
+    setErr('')
+    try {
+      const { error } = await supabase.from('expense_entries').insert({
+        company_id: companyId,
+        amount: parseFloat(amount),
+        category,
+        description,
+        entry_date: new Date().toISOString().slice(0, 10),
+      })
+      if (error) throw error
+      onSave()
+      onClose()
+    } catch (e) {
+      setErr(e.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700'
@@ -114,6 +131,7 @@ function ExpenseForm({ companyId, onSave, onClose }) {
         <label className="block text-xs text-gray-500 mb-1">Description</label>
         <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Gas — Van 01" className={field} />
       </div>
+      {err && <p className="text-red-600 text-xs font-medium">{err}</p>}
       <button onClick={save} disabled={saving || !amount} className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50">
         {saving ? 'Saving…' : 'Add Expense'}
       </button>
@@ -144,21 +162,30 @@ function InvoiceForm({ companyId, contracts, onSave, onClose }) {
 
   const total = runs.reduce((sum, r) => sum + (r.revenue_entries?.[0]?.amount ?? 0), 0)
 
+  const [err, setErr] = useState('')
+
   async function generate() {
     setSaving(true)
-    const num = `INV-${Date.now().toString().slice(-6)}`
-    await supabase.from('invoices').insert({
-      company_id: companyId,
-      contract_id: contractId || null,
-      invoice_number: num,
-      period_start: periodStart,
-      period_end: periodEnd,
-      total_amount: total,
-      status: 'draft',
-    })
-    setSaving(false)
-    onSave()
-    onClose()
+    setErr('')
+    try {
+      const num = `INV-${Date.now().toString().slice(-6)}`
+      const { error } = await supabase.from('invoices').insert({
+        company_id: companyId,
+        contract_id: contractId || null,
+        invoice_number: num,
+        period_start: periodStart,
+        period_end: periodEnd,
+        total_amount: total,
+        status: 'draft',
+      })
+      if (error) throw error
+      onSave()
+      onClose()
+    } catch (e) {
+      setErr(e.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700'
@@ -198,6 +225,7 @@ function InvoiceForm({ companyId, contracts, onSave, onClose }) {
           </div>
         </div>
       )}
+      {err && <p className="text-red-600 text-xs font-medium">{err}</p>}
       {fetched && (
         <button onClick={generate} disabled={saving || !contractId} className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50">
           {saving ? 'Generating…' : 'Generate Invoice'}

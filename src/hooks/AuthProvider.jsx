@@ -8,6 +8,14 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // getSession covers the initial load synchronously from localStorage
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      if (session) fetchOrCreateProfile(session.user.id)
+      else setLoading(false)
+    })
+
+    // onAuthStateChange handles sign-in, sign-out, token refresh after load
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session)

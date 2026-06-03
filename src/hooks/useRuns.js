@@ -12,14 +12,15 @@ export function useRuns(filters = {}) {
     let query = supabase
       .from('runs')
       .select('*, profiles!driver_id(full_name, avatar_url), vehicles(name, plate), contracts(name)')
-      .eq('company_id', profile.company_id)
       .order('created_at', { ascending: false })
 
-    // Drivers only see their own assigned runs
+    // Apply explicit filters when profile is available (RLS is the primary guard)
+    if (profile?.company_id) {
+      query = query.eq('company_id', profile.company_id)
+    }
     if (profile?.role === 'driver') {
       query = query.eq('driver_id', profile.id)
     }
-
     if (filters.status && filters.status !== 'all') {
       query = query.eq('status', filters.status)
     }
@@ -34,11 +35,10 @@ export function useRuns(filters = {}) {
   }
 
   useEffect(() => {
-    if (!profile) return
     fetchRuns()
 
     const channel = supabase
-      .channel(`runs-live-${profile.id}`)
+      .channel(profile?.id ? `runs-live-${profile.id}` : 'runs-live')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'runs' }, fetchRuns)
       .subscribe()
 

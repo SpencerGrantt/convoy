@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { generateCustodyPDF } from '../lib/pdf'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
@@ -13,12 +14,14 @@ export default function RunDetailPage() {
   const navigate = useNavigate()
   const [run, setRun] = useState(null)
   const [custody, setCustody] = useState([])
+  const [photos, setPhotos] = useState([])
+  const [signatures, setSignatures] = useState([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
     async function load() {
-      const [{ data: run }, { data: events }] = await Promise.all([
+      const [{ data: run }, { data: events }, { data: ph }, { data: sigs }] = await Promise.all([
         supabase
           .from('runs')
           .select('*, profiles!driver_id(full_name), vehicles(name, plate), contracts(name)')
@@ -29,8 +32,12 @@ export default function RunDetailPage() {
           .select('*, profiles!actor_id(full_name)')
           .eq('run_id', id)
           .order('created_at', { ascending: true }),
+        supabase.from('photos').select('*').eq('run_id', id),
+        supabase.from('signatures').select('*').eq('run_id', id),
       ])
       setRun(run)
+      setPhotos(ph ?? [])
+      setSignatures(sigs ?? [])
       setCustody(events ?? [])
       setLoading(false)
     }
@@ -97,6 +104,16 @@ export default function RunDetailPage() {
           className="w-full bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl active:bg-gray-200 transition-colors"
         >
           📸 View / Add Photos
+        </button>
+
+        <button
+          onClick={() => {
+            const doc = generateCustodyPDF(run, photos, signatures, custody)
+            doc.save(`convoy-run-${id.slice(0, 8)}.pdf`)
+          }}
+          className="w-full bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl active:bg-gray-200 transition-colors"
+        >
+          📄 Download Chain of Custody PDF
         </button>
 
         {custody.length > 0 && (

@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useContracts } from '../hooks/useContracts'
 import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
 import StatusPill from '../components/ui/StatusPill'
 import AlertBanner from '../components/ui/AlertBanner'
 import TopBar from '../components/layout/TopBar'
@@ -11,6 +13,25 @@ export default function Contracts() {
   const { profile } = useAuth()
   const company = profile?.companies
   const today = new Date()
+  const [opportunities, setOpportunities] = useState([])
+  const [matching, setMatching] = useState(false)
+  const [matched, setMatched] = useState(false)
+
+  async function findOpportunities() {
+    setMatching(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('sam-gov-sync', {
+        body: {
+          naicsCodes: company?.naics_codes ?? [],
+          companyName: company?.name ?? 'My Company',
+          samExpiry: company?.sam_expiry,
+        },
+      })
+      if (!error) setOpportunities(data?.opportunities ?? [])
+    } catch {}
+    setMatching(false)
+    setMatched(true)
+  }
 
   const expiring = contracts.filter(c => {
     if (!c.end_date) return false
@@ -47,6 +68,38 @@ export default function Contracts() {
             </div>
           </div>
         )}
+
+        {/* SAM.gov opportunity matcher */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Contract Opportunities</p>
+              <p className="text-xs text-gray-400">AI-scored SAM.gov matches for your NAICS codes</p>
+            </div>
+            <button
+              onClick={findOpportunities}
+              disabled={matching}
+              className="bg-brand-900 text-brand-50 text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-50"
+            >
+              {matching ? 'Scanning…' : '🔍 Find Matches'}
+            </button>
+          </div>
+          {matched && opportunities.length === 0 && (
+            <p className="text-xs text-gray-400">No matches found. Try updating your NAICS codes in Settings.</p>
+          )}
+          {opportunities.map((opp, i) => (
+            <div key={i} className="bg-brand-50 rounded-xl p-3 space-y-1">
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${opp.score >= 7 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                  {opp.score}/10
+                </span>
+                <p className="text-xs font-semibold text-gray-900 flex-1 truncate">{opp.title}</p>
+              </div>
+              <p className="text-xs text-gray-500">{opp.reason}</p>
+              {opp.deadline && <p className="text-xs text-gray-400">Deadline: {opp.deadline}</p>}
+            </div>
+          ))}
+        </div>
 
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Contracts</h2>
         {loading ? <LoadingSpinner /> : (

@@ -108,6 +108,7 @@ export default function Photos() {
   const [custody, setCustody] = useState([])
   const [loading, setLoading] = useState(true)
   const [signerName, setSignerName] = useState('')
+  const [signerLocation, setSignerLocation] = useState('')
   const [savingSig, setSavingSig] = useState(false)
   const [sigDone, setSigDone] = useState(false)
 
@@ -140,7 +141,8 @@ export default function Photos() {
       const blob = await (await fetch(dataUrl)).blob()
       const path = await uploadSignature(blob, runId)
       await supabase.from('signatures').insert({ run_id: runId, company_id: companyId, signer_name: signerName, storage_path: path })
-      await supabase.from('custody_events').insert({ run_id: runId, company_id: companyId, actor_id: profile?.id, event_type: 'signature_captured', note: signerName ? `Signed by ${signerName}` : null })
+      const note = [signerName && `Signed by ${signerName}`, signerLocation && `at ${signerLocation}`].filter(Boolean).join(' ')
+      await supabase.from('custody_events').insert({ run_id: runId, company_id: companyId, actor_id: profile?.id, event_type: 'signature_captured', note: note || null })
       setSigDone(true)
     } catch (err) {
       alert(err.message)
@@ -222,6 +224,12 @@ export default function Photos() {
                 value={signerName}
                 onChange={e => setSignerName(e.target.value)}
                 placeholder="Recipient name (optional)"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700"
+              />
+              <input
+                value={signerLocation}
+                onChange={e => setSignerLocation(e.target.value)}
+                placeholder="Delivery location (optional)"
                 className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700"
               />
               <div className="border-2 border-dashed border-gray-200 rounded-xl overflow-hidden bg-gray-50">

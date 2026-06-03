@@ -8,22 +8,32 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // getSession covers the initial load synchronously from localStorage
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session) fetchOrCreateProfile(session.user.id)
-      else setLoading(false)
-    })
+    let mounted = true
 
-    // onAuthStateChange handles sign-in, sign-out, token refresh after load
+    // Hard timeout: loading can never stay true beyond 5 seconds
+    const fallback = setTimeout(() => {
+      if (mounted) setLoading(false)
+    }, 5000)
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!mounted) return
         setSession(session)
-        if (session) await fetchOrCreateProfile(session.user.id)
-        else { setProfile(null); setLoading(false) }
+        if (session) {
+          await fetchOrCreateProfile(session.user.id)
+        } else {
+          setProfile(null)
+          setLoading(false)
+        }
+        clearTimeout(fallback)
       }
     )
-    return () => subscription.unsubscribe()
+
+    return () => {
+      mounted = false
+      clearTimeout(fallback)
+      subscription.unsubscribe()
+    }
   }, [])
 
   async function fetchOrCreateProfile(userId) {

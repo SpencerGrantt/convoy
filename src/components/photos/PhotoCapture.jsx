@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { uploadPhoto } from '../../lib/storage'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
@@ -23,7 +23,6 @@ const LABELS = {
 
 export default function PhotoCapture({ runId, companyId, photoType, existingPath, onCaptured }) {
   const { profile } = useAuth()
-  const inputRef = useRef(null)
   const [previewUrl, setPreviewUrl] = useState(null)
   const [blob, setBlob] = useState(null)
   const [mode, setMode] = useState(existingPath ? 'done' : 'idle')
@@ -79,8 +78,6 @@ export default function PhotoCapture({ runId, companyId, photoType, existingPath
     setPreviewUrl(null)
     setBlob(null)
     setMode('idle')
-    // Reset input so same file can be re-selected
-    if (inputRef.current) inputRef.current.value = ''
   }
 
   return (
@@ -112,26 +109,20 @@ export default function PhotoCapture({ runId, companyId, photoType, existingPath
         </div>
       )}
 
-      {/* Hidden native file/camera input */}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleFileChange}
-      />
-
       <div className="px-4 py-3">
         {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
 
         {mode === 'idle' && (
-          <button
-            onClick={() => inputRef.current?.click()}
-            className="w-full bg-brand-900 text-brand-50 font-semibold py-2.5 rounded-xl text-sm active:bg-brand-800"
-          >
+          <label className="block w-full bg-brand-900 text-brand-50 font-semibold py-2.5 rounded-xl text-sm text-center cursor-pointer active:bg-brand-800">
             Take Photo
-          </button>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </label>
         )}
 
         {mode === 'preview' && (

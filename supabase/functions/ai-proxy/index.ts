@@ -6,22 +6,27 @@ const CORS = {
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: CORS })
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   try {
     const { prompt, systemPrompt } = await req.json()
+    const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
+
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY secret not set' }), {
+        status: 500, headers: { 'Content-Type': 'application/json', ...CORS }
+      })
+    }
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'x-api-key': Deno.env.get('ANTHROPIC_API_KEY')!,
+        'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-3-5-haiku-20241022',
         max_tokens: 1024,
         system: systemPrompt,
         messages: [{ role: 'user', content: prompt }],
@@ -29,13 +34,19 @@ serve(async (req) => {
     })
 
     const data = await res.json()
+
+    if (!res.ok) {
+      return new Response(JSON.stringify({ error: data }), {
+        status: res.status, headers: { 'Content-Type': 'application/json', ...CORS }
+      })
+    }
+
     return new Response(JSON.stringify(data), {
       headers: { 'Content-Type': 'application/json', ...CORS },
     })
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', ...CORS },
+      status: 500, headers: { 'Content-Type': 'application/json', ...CORS }
     })
   }
 })

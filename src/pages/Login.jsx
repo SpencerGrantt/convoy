@@ -71,7 +71,7 @@ export default function Login() {
           )}
         </div>
 
-        <p className="text-center text-brand-600 text-xs mt-6">
+        <p className="text-center text-brand-300 text-xs mt-6">
           SDVOSB · SAM.gov Compliant
         </p>
       </div>

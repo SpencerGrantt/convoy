@@ -12,6 +12,7 @@ export function useRuns(filters = {}) {
     let query = supabase
       .from('runs')
       .select('*, profiles!driver_id(full_name, avatar_url), vehicles(name, plate), contracts(name)')
+      .eq('company_id', profile.company_id)
       .order('created_at', { ascending: false })
 
     // Drivers only see their own assigned runs
@@ -37,7 +38,7 @@ export function useRuns(filters = {}) {
     fetchRuns()
 
     const channel = supabase
-      .channel('runs-live')
+      .channel(`runs-live-${profile.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'runs' }, fetchRuns)
       .subscribe()
 

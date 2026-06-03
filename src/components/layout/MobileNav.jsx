@@ -4,7 +4,6 @@ import { useAuth } from '../../hooks/useAuth'
 const allTabs = [
   { to: '/',          icon: '🏠', label: 'Home',      roles: ['owner','dispatcher','driver'] },
   { to: '/runs',      icon: '🚗', label: 'Runs',      roles: ['owner','dispatcher','driver'] },
-  { to: '/photos',    icon: '📸', label: 'Photos',    roles: ['owner','dispatcher','driver'] },
   { to: '/contracts', icon: '📋', label: 'Contracts', roles: ['owner','dispatcher'] },
   { to: '/finances',  icon: '💰', label: 'Finances',  roles: ['owner'] },
   { to: '/drivers',   icon: '👤', label: 'Drivers',   roles: ['owner','dispatcher'] },

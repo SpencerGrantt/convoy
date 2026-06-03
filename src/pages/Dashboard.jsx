@@ -30,10 +30,13 @@ export default function Dashboard() {
 
   // Anomaly detection: flag in-transit runs >40% over avg delivery time
   useEffect(() => {
+    if (!profile?.company_id) return
     async function detectAnomalies() {
+      const cid = profile.company_id
       const { data: recent } = await supabase
         .from('runs')
         .select('id, status, pickup_address, dropoff_address, picked_up_at, delivered_at')
+        .eq('company_id', cid)
         .eq('status', 'delivered')
         .not('picked_up_at', 'is', null)
         .not('delivered_at', 'is', null)
@@ -49,6 +52,7 @@ export default function Dashboard() {
       const { data: inTransit } = await supabase
         .from('runs')
         .select('id, dropoff_address, picked_up_at')
+        .eq('company_id', cid)
         .eq('status', 'in_transit')
         .not('picked_up_at', 'is', null)
 
@@ -60,7 +64,7 @@ export default function Dashboard() {
       setAnomalies(flagged)
     }
     detectAnomalies()
-  }, [])
+  }, [profile?.company_id])
 
 
   const company = profile?.companies

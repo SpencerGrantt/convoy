@@ -8,16 +8,10 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session) fetchOrCreateProfile(session.user.id)
-      else setLoading(false)
-    })
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session)
-        if (session) fetchOrCreateProfile(session.user.id)
+        if (session) await fetchOrCreateProfile(session.user.id)
         else { setProfile(null); setLoading(false) }
       }
     )
@@ -54,12 +48,10 @@ export function AuthProvider({ children }) {
         companyId = company.id
       }
 
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: userId,
-        company_id: companyId,
-        full_name: '',
-        role,
-      })
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({ id: userId, company_id: companyId, full_name: '', role },
+          { onConflict: 'id', ignoreDuplicates: true })
 
       if (profileError) throw profileError
 

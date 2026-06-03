@@ -28,10 +28,15 @@ export default function Settings() {
     if (newPassword !== confirmPw) { setPwMsg('Passwords do not match.'); return }
     setPwSaving(true)
     setPwMsg('')
-    const { error } = await supabase.auth.updateUser({ password: newPassword })
-    if (error) setPwMsg(`Error: ${error.message}`)
-    else { setPwMsg('Password updated — use it next time you sign in.'); setNewPassword(''); setConfirmPw('') }
-    setPwSaving(false)
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword })
+      if (error) setPwMsg(`Error: ${error.message}`)
+      else { setPwMsg('Password updated — use it next time you sign in.'); setNewPassword(''); setConfirmPw('') }
+    } catch (err) {
+      setPwMsg(`Error: ${err.message}`)
+    } finally {
+      setPwSaving(false)
+    }
   }
 
   const [inviteEmail, setInviteEmail] = useState('')

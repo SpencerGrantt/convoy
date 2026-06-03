@@ -18,6 +18,22 @@ export default function Settings() {
   const [samExpiry, setSamExpiry]     = useState(company?.sam_expiry ?? '')
   const [sdvosb, setSdvosb]           = useState(company?.sdvosb ?? false)
 
+  const [newPassword, setNewPassword]   = useState('')
+  const [confirmPw, setConfirmPw]       = useState('')
+  const [pwSaving, setPwSaving]         = useState(false)
+  const [pwMsg, setPwMsg]               = useState('')
+
+  async function changePassword() {
+    if (newPassword.length < 6) { setPwMsg('Password must be at least 6 characters.'); return }
+    if (newPassword !== confirmPw) { setPwMsg('Passwords do not match.'); return }
+    setPwSaving(true)
+    setPwMsg('')
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) setPwMsg(`Error: ${error.message}`)
+    else { setPwMsg('Password updated — use it next time you sign in.'); setNewPassword(''); setConfirmPw('') }
+    setPwSaving(false)
+  }
+
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole]   = useState('driver')
   const [inviting, setInviting]       = useState(false)
@@ -99,6 +115,42 @@ export default function Settings() {
             <div>
               <label className="block text-xs text-gray-500 mb-1">Email</label>
               <p className="text-sm text-gray-500">{profile?.id ? 'Managed by Supabase Auth' : '—'}</p>
+            </div>
+            <div className="pt-2 border-t border-gray-100 space-y-3">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Change Password</h3>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">New Password</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className={field}
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Confirm Password</label>
+                <input
+                  type="password"
+                  value={confirmPw}
+                  onChange={e => setConfirmPw(e.target.value)}
+                  placeholder="••••••••"
+                  className={field}
+                />
+              </div>
+              {pwMsg && (
+                <p className={`text-xs font-medium ${pwMsg.startsWith('Error') || pwMsg.startsWith('Password') ? 'text-red-600' : 'text-green-600'}`}>
+                  {pwMsg}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={changePassword}
+                disabled={pwSaving || !newPassword || !confirmPw}
+                className="w-full bg-brand-900 text-brand-50 font-bold py-2.5 rounded-xl disabled:opacity-50 text-sm"
+              >
+                {pwSaving ? 'Updating…' : 'Set Password'}
+              </button>
             </div>
           </div>
         )}

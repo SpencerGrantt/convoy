@@ -118,7 +118,6 @@ export default function PhotoCapture({ runId, companyId, photoType, existingPath
             <input
               type="file"
               accept="image/*"
-              capture="environment"
               className="hidden"
               onChange={handleFileChange}
             />

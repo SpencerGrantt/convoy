@@ -7,7 +7,8 @@ export default function Settings() {
   const { profile, signOut } = useAuth()
   const company = profile?.companies
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved]   = useState(false)
+  const [saveErr, setSaveErr] = useState('')
   const [activeTab, setActiveTab] = useState('account')
 
   const [name, setName]               = useState(profile?.full_name ?? '')
@@ -18,10 +19,11 @@ export default function Settings() {
   const [samExpiry, setSamExpiry]     = useState(company?.sam_expiry ?? '')
   const [sdvosb, setSdvosb]           = useState(company?.sdvosb ?? false)
 
-  const [newPassword, setNewPassword]   = useState('')
-  const [confirmPw, setConfirmPw]       = useState('')
-  const [pwSaving, setPwSaving]         = useState(false)
-  const [pwMsg, setPwMsg]               = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPw, setConfirmPw]     = useState('')
+  const [pwSaving, setPwSaving]       = useState(false)
+  const [pwSaved, setPwSaved]         = useState(false)
+  const [pwMsg, setPwMsg]             = useState('')
 
   async function changePassword() {
     if (newPassword.length < 6) { setPwMsg('Password must be at least 6 characters.'); return }
@@ -30,8 +32,15 @@ export default function Settings() {
     setPwMsg('')
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword })
-      if (error) setPwMsg(`Error: ${error.message}`)
-      else { setPwMsg('Password updated — use it next time you sign in.'); setNewPassword(''); setConfirmPw('') }
+      if (error) {
+        setPwMsg(`Error: ${error.message}`)
+      } else {
+        setNewPassword('')
+        setConfirmPw('')
+        setPwSaved(true)
+        setPwMsg('')
+        setTimeout(() => setPwSaved(false), 2500)
+      }
     } catch (err) {
       setPwMsg(`Error: ${err.message}`)
     } finally {
@@ -47,21 +56,27 @@ export default function Settings() {
   async function save(e) {
     e.preventDefault()
     setSaving(true)
-    const naicsCodes = naics.split(',').map(s => s.trim()).filter(Boolean)
-    await Promise.all([
-      supabase.from('profiles').update({ full_name: name }).eq('id', profile.id),
-      supabase.from('companies').update({
-        name: companyName,
-        cage_code: cageCode || null,
-        uei: uei || null,
-        naics_codes: naicsCodes,
-        sam_expiry: samExpiry || null,
-        sdvosb,
-      }).eq('id', company?.id),
-    ])
-    setSaved(true)
-    setSaving(false)
-    setTimeout(() => setSaved(false), 2000)
+    setSaveErr('')
+    try {
+      const naicsCodes = naics.split(',').map(s => s.trim()).filter(Boolean)
+      await Promise.all([
+        supabase.from('profiles').update({ full_name: name }).eq('id', profile.id),
+        supabase.from('companies').update({
+          name: companyName,
+          cage_code: cageCode || null,
+          uei: uei || null,
+          naics_codes: naicsCodes,
+          sam_expiry: samExpiry || null,
+          sdvosb,
+        }).eq('id', company?.id),
+      ])
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch (err) {
+      setSaveErr(`Error: ${err.message}`)
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function inviteUser() {
@@ -152,9 +167,9 @@ export default function Settings() {
                 type="button"
                 onClick={changePassword}
                 disabled={pwSaving || !newPassword || !confirmPw}
-                className="w-full bg-brand-900 text-brand-50 font-bold py-2.5 rounded-xl disabled:opacity-50 text-sm"
+                className={`w-full font-bold py-2.5 rounded-xl disabled:opacity-50 text-sm transition-colors ${pwSaved ? 'bg-green-600 text-white' : 'bg-brand-900 text-brand-50'}`}
               >
-                {pwSaving ? 'Updating…' : 'Set Password'}
+                {pwSaving ? 'Updating…' : pwSaved ? '✓ Password Updated' : 'Set Password'}
               </button>
             </div>
           </div>
@@ -238,9 +253,16 @@ export default function Settings() {
         )}
 
         {activeTab !== 'team' && (
-          <button type="submit" disabled={saving} className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50">
-            {saved ? '✓ Saved' : saving ? 'Saving…' : 'Save Changes'}
-          </button>
+          <>
+            {saveErr && <p className="text-red-600 text-xs font-medium px-1">{saveErr}</p>}
+            <button
+              type="submit"
+              disabled={saving}
+              className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-brand-900 text-brand-50'}`}
+            >
+              {saving ? 'Saving…' : saved ? '✓ Changes Saved' : 'Save Changes'}
+            </button>
+          </>
         )}
       </form>
 

@@ -37,20 +37,28 @@ export function AuthProvider({ children }) {
         return
       }
 
-      // First login — create company + profile
-      const { data: company, error: companyError } = await supabase
-        .from('companies')
-        .insert({ name: 'My Company', sdvosb: true })
-        .select()
-        .single()
+      // Check for invite metadata (company_id + role set during invite)
+      const { data: { user } } = await supabase.auth.getUser()
+      const meta = user?.user_metadata ?? {}
+      let companyId = meta.company_id
+      const role = meta.role ?? 'owner'
 
-      if (companyError) throw companyError
+      if (!companyId) {
+        // New owner — create a fresh company
+        const { data: company, error: companyError } = await supabase
+          .from('companies')
+          .insert({ name: 'My Company', sdvosb: true })
+          .select()
+          .single()
+        if (companyError) throw companyError
+        companyId = company.id
+      }
 
       const { error: profileError } = await supabase.from('profiles').insert({
         id: userId,
-        company_id: company.id,
+        company_id: companyId,
         full_name: '',
-        role: 'owner',
+        role,
       })
 
       if (profileError) throw profileError

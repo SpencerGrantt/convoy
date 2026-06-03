@@ -3,6 +3,7 @@ import { useRuns } from '../hooks/useRuns'
 import { useContracts } from '../hooks/useContracts'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
+import { requestNotificationPermission, scheduleOverdueRunCheck, checkContractRenewals } from '../lib/notifications'
 import MetricCard from '../components/ui/MetricCard'
 import AlertBanner from '../components/ui/AlertBanner'
 import StatusPill from '../components/ui/StatusPill'
@@ -17,6 +18,15 @@ export default function Dashboard() {
   const { contracts } = useContracts()
   const navigate = useNavigate()
   const [anomalies, setAnomalies] = useState([])
+
+  // Request notification permission + fire contract/run checks
+  useEffect(() => {
+    requestNotificationPermission().then(granted => {
+      if (!granted) return
+      if (runs.length) scheduleOverdueRunCheck(runs)
+      if (contracts.length) checkContractRenewals(contracts)
+    })
+  }, [runs, contracts])
 
   // Anomaly detection: flag in-transit runs >40% over avg delivery time
   useEffect(() => {

@@ -1,20 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
 export function useDrivers() {
   const [drivers, setDrivers] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    supabase
+  const fetch = useCallback(async () => {
+    const { data } = await supabase
       .from('profiles')
       .select('*, compliance_docs(*)')
       .eq('role', 'driver')
-      .then(({ data }) => {
-        setDrivers(data ?? [])
-        setLoading(false)
-      })
+    setDrivers(data ?? [])
+    setLoading(false)
   }, [])
 
-  return { drivers, loading }
+  useEffect(() => { fetch() }, [fetch])
+
+  return { drivers, loading, refresh: fetch }
 }

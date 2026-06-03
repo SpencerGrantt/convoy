@@ -1,12 +1,14 @@
+import { useState, useEffect } from 'react'
 import { useRuns } from '../hooks/useRuns'
 import { useContracts } from '../hooks/useContracts'
 import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
 import MetricCard from '../components/ui/MetricCard'
 import AlertBanner from '../components/ui/AlertBanner'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
-import { format, differenceInDays, parseISO } from 'date-fns'
+import { format, differenceInDays, parseISO, differenceInMinutes } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 
 export default function Dashboard() {
@@ -14,6 +16,42 @@ export default function Dashboard() {
   const { runs, loading: runsLoading } = useRuns({ limit: 5 })
   const { contracts } = useContracts()
   const navigate = useNavigate()
+  const [anomalies, setAnomalies] = useState([])
+
+  // Anomaly detection: flag in-transit runs >40% over avg delivery time
+  useEffect(() => {
+    async function detectAnomalies() {
+      const { data: recent } = await supabase
+        .from('runs')
+        .select('id, status, pickup_address, dropoff_address, picked_up_at, delivered_at')
+        .eq('status', 'delivered')
+        .not('picked_up_at', 'is', null)
+        .not('delivered_at', 'is', null)
+        .order('delivered_at', { ascending: false })
+        .limit(30)
+
+      if (!recent?.length) return
+
+      const durations = recent.map(r => differenceInMinutes(new Date(r.delivered_at), new Date(r.picked_up_at)))
+      const avg = durations.reduce((a, b) => a + b, 0) / durations.length
+      const threshold = avg * 1.4
+
+      const { data: inTransit } = await supabase
+        .from('runs')
+        .select('id, dropoff_address, picked_up_at')
+        .eq('status', 'in_transit')
+        .not('picked_up_at', 'is', null)
+
+      const flagged = (inTransit ?? []).filter(r => {
+        const elapsed = differenceInMinutes(new Date(), new Date(r.picked_up_at))
+        return elapsed > threshold
+      })
+
+      setAnomalies(flagged)
+    }
+    detectAnomalies()
+  }, [])
+
 
   const company = profile?.companies
   const today = new Date()
@@ -43,6 +81,13 @@ export default function Dashboard() {
             key={c.id}
             type="warning"
             message={`Contract "${c.name}" expires ${format(parseISO(c.end_date), 'MMM d')} — ${differenceInDays(parseISO(c.end_date), today)} days remaining.`}
+          />
+        ))}
+        {anomalies.map(r => (
+          <AlertBanner
+            key={r.id}
+            type="error"
+            message={`⏱ Run to ${r.dropoff_address} is running 40%+ over average delivery time.`}
           />
         ))}
 

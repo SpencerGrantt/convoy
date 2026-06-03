@@ -31,8 +31,8 @@ export default function AiAssistant() {
     try {
       const reply = await askAI(userMsg, systemPrompt)
       setMessages(prev => [...prev, { role: 'assistant', text: reply }])
-    } catch {
-      setMessages(prev => [...prev, { role: 'assistant', text: 'Error reaching AI. Check your connection and Edge Function setup.' }])
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'assistant', text: `Error: ${err?.message ?? JSON.stringify(err)}` }])
     }
     setLoading(false)
   }

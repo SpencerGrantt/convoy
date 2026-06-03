@@ -26,6 +26,7 @@ export async function askAI(prompt, systemPrompt) {
   const { data, error } = await supabase.functions.invoke('ai-proxy', {
     body: { prompt, systemPrompt },
   })
-  if (error) throw error
+  if (error) throw new Error(`Edge Function error: ${error.message}`)
+  if (data?.error) throw new Error(`Anthropic error: ${JSON.stringify(data.error)}`)
   return data?.content?.[0]?.text ?? ''
 }

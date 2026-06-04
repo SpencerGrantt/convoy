@@ -13,11 +13,11 @@ export default function TopBar({ title }) {
         {title && <span className="text-gray-300 text-lg">/</span>}
         {title && <span className="text-gray-600 font-medium text-sm">{title}</span>}
       </div>
-      {profile && (
-        <button
-          onClick={() => navigate('/settings')}
-          className="flex items-center gap-2 active:opacity-70 transition-opacity"
-        >
+      <button
+        onClick={() => navigate('/settings')}
+        className="flex items-center gap-2 active:opacity-70 transition-opacity"
+      >
+        {profile && (
           <div className="text-right">
             <p className="text-gray-900 text-xs font-semibold leading-tight">
               {profile.full_name || 'Account'}
@@ -26,11 +26,11 @@ export default function TopBar({ title }) {
               {roleLabel[profile.role] ?? profile.role}
             </p>
           </div>
-          <div className="h-8 w-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-700 text-xs font-bold flex-shrink-0">
-            {profile.full_name?.charAt(0)?.toUpperCase() ?? '⚙'}
-          </div>
-        </button>
-      )}
+        )}
+        <div className="h-8 w-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+          {profile?.full_name?.charAt(0)?.toUpperCase() ?? '⚙'}
+        </div>
+      </button>
     </header>
   )
 }

@@ -5,12 +5,12 @@ import { useAuth } from './hooks/useAuth'
 import MobileNav from './components/layout/MobileNav'
 import LoadingSpinner from './components/ui/LoadingSpinner'
 
-// Eagerly load core screens
-import Login     from './pages/Login'
-import Dashboard from './pages/Dashboard'
-import Runs      from './pages/Runs'
+// Eagerly load only the login screen — everything else is lazy
+import Login from './pages/Login'
 
-// Lazy load heavy screens to reduce initial bundle
+// Lazy load all app screens to keep initial bundle small
+const Dashboard     = lazy(() => import('./pages/Dashboard'))
+const Runs          = lazy(() => import('./pages/Runs'))
 const NewRunForm    = lazy(() => import('./pages/NewRunForm'))
 const RunDetailPage = lazy(() => import('./pages/RunDetailPage'))
 const Photos        = lazy(() => import('./pages/Photos'))
@@ -31,7 +31,7 @@ function AppRoutes() {
   const { session } = useAuth()
   return (
     <>
-      <main>
+      <main role="main">
         <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/login" element={session ? <Navigate to="/" replace /> : <Login />} />

@@ -50,7 +50,7 @@ export default function Login() {
               ← Back
             </button>
           </div>
-          <p className="text-center text-brand-300 text-xs mt-6">SDVOSB · SAM.gov Compliant</p>
+          <p className="text-center text-brand-100 text-xs mt-6">SDVOSB · SAM.gov Compliant</p>
         </div>
       </div>
     )
@@ -129,7 +129,7 @@ export default function Login() {
           </div>
         </div>
 
-        <p className="text-center text-brand-300 text-xs mt-6">
+        <p className="text-center text-brand-100 text-xs mt-6">
           SDVOSB · SAM.gov Compliant
         </p>
       </div>

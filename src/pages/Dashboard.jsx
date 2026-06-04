@@ -107,14 +107,13 @@ export default function Dashboard() {
         <div>
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Overview</h2>
           <div className="grid grid-cols-2 gap-3">
-            <MetricCard label="Active Runs"    value={activeRuns}    icon="🚗" color="navy"   />
-            <MetricCard label="Delivered MTD"  value={deliveredMTD}  icon="✅" color="green"  />
-            <MetricCard label="Open Contracts" value={openContracts} icon="📋" color="yellow" />
+            <MetricCard label="Active Runs"    value={activeRuns}    color="blue"   />
+            <MetricCard label="Delivered MTD"  value={deliveredMTD}  color="green"  />
+            <MetricCard label="Open Contracts" value={openContracts} color="yellow" />
             <MetricCard
               label="SAM Expiry"
               value={samDaysLeft !== null ? `${samDaysLeft}d` : '—'}
               sub={company?.sam_expiry ? format(parseISO(company.sam_expiry), 'MMM d, yyyy') : 'Not set'}
-              icon="🏛️"
               color={samDaysLeft !== null && samDaysLeft <= 30 ? 'red' : 'navy'}
             />
           </div>
@@ -123,7 +122,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Recent Runs</h2>
-            <button onClick={() => navigate('/runs')} className="text-xs text-brand-700 font-medium">View all →</button>
+            <button onClick={() => navigate('/runs')} className="text-xs text-brand-600 font-medium">View all →</button>
           </div>
           <div className="space-y-2">
               {!runsLoading && runs.length === 0 && (

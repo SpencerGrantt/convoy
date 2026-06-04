@@ -58,7 +58,7 @@ function RevenueForm({ companyId, contracts, onSave, onClose }) {
     }
   }
 
-  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700'
+  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
   return (
     <div className="space-y-3">
       <div>
@@ -77,7 +77,7 @@ function RevenueForm({ companyId, contracts, onSave, onClose }) {
         </select>
       </div>
       {err && <p className="text-red-600 text-xs font-medium">{err}</p>}
-      <button onClick={save} disabled={saving || !amount} className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50">
+      <button onClick={save} disabled={saving || !amount} className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
         {saving ? 'Saving…' : 'Add Revenue'}
       </button>
     </div>
@@ -113,7 +113,7 @@ function ExpenseForm({ companyId, onSave, onClose }) {
     }
   }
 
-  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700'
+  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
   return (
     <div className="space-y-3">
       <div>
@@ -131,7 +131,7 @@ function ExpenseForm({ companyId, onSave, onClose }) {
         <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Gas — Van 01" className={field} />
       </div>
       {err && <p className="text-red-600 text-xs font-medium">{err}</p>}
-      <button onClick={save} disabled={saving || !amount} className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50">
+      <button onClick={save} disabled={saving || !amount} className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
         {saving ? 'Saving…' : 'Add Expense'}
       </button>
     </div>
@@ -187,7 +187,7 @@ function InvoiceForm({ companyId, contracts, onSave, onClose }) {
     }
   }
 
-  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700'
+  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
   return (
     <div className="space-y-3">
       <div>
@@ -226,7 +226,7 @@ function InvoiceForm({ companyId, contracts, onSave, onClose }) {
       )}
       {err && <p className="text-red-600 text-xs font-medium">{err}</p>}
       {fetched && (
-        <button onClick={generate} disabled={saving || !contractId} className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50">
+        <button onClick={generate} disabled={saving || !contractId} className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
           {saving ? 'Generating…' : 'Generate Invoice'}
         </button>
       )}
@@ -252,10 +252,10 @@ export default function Finances() {
       <div className="px-4 pt-4 space-y-4">
 
           <div className="grid grid-cols-2 gap-3">
-            <MetricCard label="Revenue MTD"  value={fmt(totalRevenue)}  icon="💵" color="green"  />
-            <MetricCard label="Expenses MTD" value={fmt(totalExpenses)} icon="🧾" color="yellow" />
-            <MetricCard label="Net Profit"   value={fmt(netProfit)}     icon="📈" color={netProfit >= 0 ? 'green' : 'red'} />
-            <MetricCard label="Outstanding"  value={fmt(outstanding)}   icon="⏳" color="red"    />
+            <MetricCard label="Revenue MTD"  value={fmt(totalRevenue)}  color="green"  />
+            <MetricCard label="Expenses MTD" value={fmt(totalExpenses)} color="yellow" />
+            <MetricCard label="Net Profit"   value={fmt(netProfit)}     color={netProfit >= 0 ? 'green' : 'red'} />
+            <MetricCard label="Outstanding"  value={fmt(outstanding)}   color="red"    />
           </div>
 
           {/* Quick add buttons */}
@@ -274,7 +274,7 @@ export default function Finances() {
                   <XAxis dataKey="name" tick={{ fontSize: 9 }} />
                   <YAxis tick={{ fontSize: 10 }} />
                   <Tooltip formatter={v => fmt(v)} />
-                  <Bar dataKey="amount" fill="#1a2332" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="amount" fill="#185FA5" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

@@ -74,7 +74,7 @@ export default function SignaturePad({ runId, companyId, onSigned, alreadySigned
             value={signerName}
             onChange={e => setSignerName(e.target.value)}
             placeholder="John Smith"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
 
@@ -83,7 +83,7 @@ export default function SignaturePad({ runId, companyId, onSigned, alreadySigned
           <div className="border-2 border-dashed border-gray-200 rounded-xl overflow-hidden bg-gray-50">
             <ReactSignatureCanvas
               ref={sigRef}
-              penColor="#1a2332"
+              penColor="#185FA5"
               canvasProps={{ className: 'w-full', height: 140 }}
             />
           </div>
@@ -101,7 +101,7 @@ export default function SignaturePad({ runId, companyId, onSigned, alreadySigned
           <button
             onClick={save}
             disabled={saving}
-            className="flex-1 bg-brand-900 text-brand-50 font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50"
+            className="flex-1 bg-brand-600 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50"
           >
             {saving ? 'Saving…' : 'Confirm Signature'}
           </button>

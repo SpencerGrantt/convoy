@@ -23,7 +23,7 @@ export default function Runs() {
             onClick={() => setActiveTab(tab)}
             className={`px-3 py-2 text-xs font-semibold rounded-t-lg whitespace-nowrap transition-colors ${
               activeTab === tab
-                ? 'text-brand-900 border-b-2 border-brand-900'
+                ? 'text-brand-600 border-b-2 border-brand-600'
                 : 'text-gray-400'
             }`}
           >
@@ -35,7 +35,7 @@ export default function Runs() {
       <div className="px-4 pt-4 space-y-2">
         <button
           onClick={() => navigate('/runs/new')}
-          className="w-full bg-brand-900 text-brand-50 font-semibold py-3 rounded-xl active:bg-brand-800 transition-colors mb-4"
+          className="w-full bg-brand-600 text-white font-semibold py-3 rounded-xl active:bg-brand-700 transition-colors mb-4"
         >
           + New Run
         </button>

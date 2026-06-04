@@ -31,43 +31,43 @@ export default function Login() {
 
   if (step === 'sent') {
     return (
-      <div className="min-h-screen bg-brand-900 flex flex-col items-center justify-center px-6">
+      <div className="bg-gray-50 min-h-screen flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-sm">
           <div className="text-center mb-10">
-            <h1 className="text-4xl font-black text-brand-50 tracking-tight">CONVOY</h1>
-            <p className="text-brand-400 text-sm mt-1">Medical Courier Platform</p>
+            <h1 className="text-4xl font-black text-brand-600 tracking-tight">CONVOY</h1>
+            <p className="text-gray-400 text-sm mt-1">Medical Courier Platform</p>
           </div>
-          <div className="bg-brand-800 rounded-2xl p-6 shadow-xl border border-brand-700 text-center space-y-4 py-8">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center space-y-4 py-8">
             <div className="text-4xl">📬</div>
-            <p className="font-semibold text-brand-50">Check your email</p>
-            <p className="text-sm text-brand-300">
-              We sent a magic link to <strong className="text-brand-50">{email}</strong>. Click it to sign in.
+            <p className="font-semibold text-gray-900">Check your email</p>
+            <p className="text-sm text-gray-500">
+              We sent a magic link to <strong className="text-gray-900">{email}</strong>. Click it to sign in.
             </p>
             <button
               onClick={() => { setStep('form'); setError('') }}
-              className="text-brand-300 text-sm font-medium"
+              className="text-gray-400 text-sm font-medium"
             >
               ← Back
             </button>
           </div>
-          <p className="text-center text-brand-100 text-xs mt-6">SDVOSB · SAM.gov Compliant</p>
+          <p className="text-center text-gray-400 text-xs mt-6">SDVOSB · SAM.gov Compliant</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-brand-900 flex flex-col items-center justify-center px-6">
+    <div className="bg-gray-50 min-h-screen flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-black text-brand-50 tracking-tight">CONVOY</h1>
-          <p className="text-brand-400 text-sm mt-1">Medical Courier Platform</p>
+          <h1 className="text-4xl font-black text-brand-600 tracking-tight">CONVOY</h1>
+          <p className="text-gray-400 text-sm mt-1">Medical Courier Platform</p>
         </div>
 
-        <div className="bg-brand-800 rounded-2xl p-6 shadow-xl border border-brand-700">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-brand-300 mb-1 uppercase tracking-wide">
+              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                 Email Address
               </label>
               <input
@@ -75,7 +75,7 @@ export default function Login() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full bg-brand-900 border border-brand-600 rounded-xl px-4 py-3 text-brand-50 placeholder-brand-500 text-lg focus:outline-none focus:ring-2 focus:ring-brand-400"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-brand-500"
                 required
                 autoFocus
               />
@@ -83,7 +83,7 @@ export default function Login() {
 
             {mode === 'password' && (
               <div>
-                <label className="block text-xs font-semibold text-brand-300 mb-1 uppercase tracking-wide">
+                <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                   Password
                 </label>
                 <input
@@ -91,18 +91,18 @@ export default function Login() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-brand-900 border border-brand-600 rounded-xl px-4 py-3 text-brand-50 placeholder-brand-500 text-lg focus:outline-none focus:ring-2 focus:ring-brand-400"
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-brand-500"
                   required
                 />
               </div>
             )}
 
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-50 text-brand-900 font-bold py-3 rounded-xl disabled:opacity-50 active:bg-brand-200 transition-colors"
+              className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50 active:bg-brand-700 transition-colors"
             >
               {loading ? 'Signing in…' : mode === 'password' ? 'Sign In' : 'Send Magic Link'}
             </button>
@@ -113,7 +113,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => { setMode('magic'); setError('') }}
-                className="text-brand-400 text-sm"
+                className="text-gray-400 text-sm"
               >
                 Sign in with magic link instead
               </button>
@@ -121,7 +121,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => { setMode('password'); setError('') }}
-                className="text-brand-400 text-sm"
+                className="text-gray-400 text-sm"
               >
                 Sign in with password instead
               </button>
@@ -129,7 +129,7 @@ export default function Login() {
           </div>
         </div>
 
-        <p className="text-center text-brand-100 text-xs mt-6">
+        <p className="text-center text-gray-400 text-xs mt-6">
           SDVOSB · SAM.gov Compliant
         </p>
       </div>

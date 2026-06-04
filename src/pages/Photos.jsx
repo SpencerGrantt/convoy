@@ -77,7 +77,7 @@ function PhotoSlot({ slot, runId, companyId, profile, existingPath, onCaptured }
           accept="image/*"
           onChange={handleFile}
           disabled={uploading}
-          className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-900 file:text-brand-50 disabled:opacity-50"
+          className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-600 file:text-white disabled:opacity-50"
         />
       </div>
     </div>
@@ -158,7 +158,7 @@ export default function Photos() {
         <div className="px-4 pt-12 text-center space-y-4">
           <p className="text-4xl">📸</p>
           <p className="text-gray-500 font-medium">No run selected</p>
-          <button onClick={() => navigate('/runs')} className="bg-brand-900 text-brand-50 font-semibold px-6 py-3 rounded-xl text-sm">Go to Runs</button>
+          <button onClick={() => navigate('/runs')} className="bg-brand-600 text-white font-semibold px-6 py-3 rounded-xl text-sm">Go to Runs</button>
         </div>
       </div>
     )
@@ -174,13 +174,13 @@ export default function Photos() {
       <div className="px-4 pt-4 space-y-4">
 
         {run && (
-          <div className="bg-brand-900 text-brand-50 rounded-2xl p-4">
+          <div className="bg-brand-600 text-white rounded-2xl p-4">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-xs text-brand-400 uppercase tracking-wide font-medium">Active Run</p>
+              <p className="text-xs text-brand-200 uppercase tracking-wide font-medium">Active Run</p>
               <StatusPill status={run.status} />
             </div>
             <p className="text-sm font-semibold truncate">{run.dropoff_address}</p>
-            <p className="text-xs text-brand-400 mt-0.5 truncate">From: {run.pickup_address}</p>
+            <p className="text-xs text-brand-200 mt-0.5 truncate">From: {run.pickup_address}</p>
           </div>
         )}
 
@@ -190,7 +190,7 @@ export default function Photos() {
           <div className="flex gap-1.5 mb-2">
             {[...SLOTS, { type: 'sig' }].map((s, i) => {
               const done = s.type === 'sig' ? sigDone : !!photos.find(p => p.photo_type === s.type)
-              return <div key={i} className={`flex-1 h-1.5 rounded-full ${done ? 'bg-brand-900' : 'bg-gray-200'}`} />
+              return <div key={i} className={`flex-1 h-1.5 rounded-full ${done ? 'bg-brand-600' : 'bg-gray-200'}`} />
             })}
           </div>
           <p className="text-xs text-gray-400">{capturedCount} / 4 complete</p>
@@ -224,24 +224,24 @@ export default function Photos() {
                 value={signerName}
                 onChange={e => setSignerName(e.target.value)}
                 placeholder="Recipient name (optional)"
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
               <input
                 value={signerLocation}
                 onChange={e => setSignerLocation(e.target.value)}
                 placeholder="Delivery location (optional)"
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
               <div className="border-2 border-dashed border-gray-200 rounded-xl overflow-hidden bg-gray-50">
                 <ReactSignatureCanvas
                   ref={sigRef}
-                  penColor="#1a2332"
+                  penColor="#185FA5"
                   canvasProps={{ className: 'w-full', height: 140 }}
                 />
               </div>
               <div className="flex gap-2">
                 <button onClick={() => sigRef.current?.clear()} className="flex-1 bg-gray-100 text-gray-600 font-semibold py-2.5 rounded-xl text-sm">Clear</button>
-                <button onClick={saveSignature} disabled={savingSig} className="flex-1 bg-brand-900 text-brand-50 font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50">
+                <button onClick={saveSignature} disabled={savingSig} className="flex-1 bg-brand-600 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50">
                   {savingSig ? 'Saving…' : 'Confirm'}
                 </button>
               </div>

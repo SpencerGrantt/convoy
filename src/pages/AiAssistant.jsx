@@ -61,7 +61,7 @@ export default function AiAssistant() {
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap ${
               msg.role === 'user'
-                ? 'bg-brand-900 text-brand-50 rounded-br-sm'
+                ? 'bg-brand-600 text-white rounded-br-sm'
                 : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm shadow-sm'
             }`}>
               {msg.text}
@@ -88,12 +88,12 @@ export default function AiAssistant() {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
           placeholder="Ask anything about your business…"
-          className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700"
+          className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
         <button
           onClick={() => send()}
           disabled={!input.trim() || loading}
-          className="bg-brand-900 text-brand-50 rounded-xl px-4 font-semibold disabled:opacity-40 active:bg-brand-800"
+          className="bg-brand-600 text-white rounded-xl px-4 font-semibold disabled:opacity-40 active:bg-brand-700"
         >
           Send
         </button>

@@ -113,7 +113,7 @@ export default function PhotoCapture({ runId, companyId, photoType, existingPath
         {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
 
         {mode === 'idle' && (
-          <label className="block w-full bg-brand-900 text-brand-50 font-semibold py-2.5 rounded-xl text-sm text-center cursor-pointer active:bg-brand-800">
+          <label className="block w-full bg-brand-600 text-white font-semibold py-2.5 rounded-xl text-sm text-center cursor-pointer active:bg-brand-700">
             Take Photo
             <input
               type="file"
@@ -129,7 +129,7 @@ export default function PhotoCapture({ runId, companyId, photoType, existingPath
             <button onClick={retake} className="flex-1 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-xl text-sm">
               Retake
             </button>
-            <button onClick={confirm} disabled={uploading} className="flex-1 bg-brand-900 text-brand-50 font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50">
+            <button onClick={confirm} disabled={uploading} className="flex-1 bg-brand-600 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50">
               {uploading ? 'Uploading…' : 'Use Photo'}
             </button>
           </div>

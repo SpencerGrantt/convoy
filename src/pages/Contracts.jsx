@@ -51,18 +51,18 @@ export default function Contracts() {
         ))}
 
         {company && (
-          <div className="bg-brand-900 text-brand-50 rounded-2xl p-4 space-y-2">
+          <div className="bg-brand-600 text-white rounded-2xl p-4 space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-lg">🏛️</span>
               <p className="font-bold text-sm">{company.name}</p>
               {company.sdvosb && <span className="bg-brand-700 text-brand-100 text-xs px-1.5 py-0.5 rounded font-medium">SDVOSB</span>}
             </div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-brand-400">
-              <span>CAGE: <strong className="text-brand-50">{company.cage_code ?? '—'}</strong></span>
-              <span>UEI: <strong className="text-brand-50">{company.uei ?? '—'}</strong></span>
-              <span className="col-span-2">NAICS: <strong className="text-brand-50">{company.naics_codes?.join(', ') ?? '—'}</strong></span>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-brand-200">
+              <span>CAGE: <strong className="text-white">{company.cage_code ?? '—'}</strong></span>
+              <span>UEI: <strong className="text-white">{company.uei ?? '—'}</strong></span>
+              <span className="col-span-2">NAICS: <strong className="text-white">{company.naics_codes?.join(', ') ?? '—'}</strong></span>
               {company.sam_expiry && (
-                <span className="col-span-2">SAM Expiry: <strong className="text-brand-50">{format(parseISO(company.sam_expiry), 'MMM d, yyyy')}</strong></span>
+                <span className="col-span-2">SAM Expiry: <strong className="text-white">{format(parseISO(company.sam_expiry), 'MMM d, yyyy')}</strong></span>
               )}
             </div>
           </div>
@@ -78,7 +78,7 @@ export default function Contracts() {
             <button
               onClick={findOpportunities}
               disabled={matching}
-              className="bg-brand-900 text-brand-50 text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-50"
+              className="bg-brand-600 text-white text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-50"
             >
               {matching ? 'Scanning…' : '🔍 Find Matches'}
             </button>

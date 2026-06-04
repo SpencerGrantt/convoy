@@ -117,7 +117,7 @@ export default function RunDetailPage() {
           <button
             onClick={advanceStatus}
             disabled={updating}
-            className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${advanced ? 'bg-green-600 text-white' : 'bg-brand-900 text-brand-50 active:bg-brand-800'}`}
+            className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${advanced ? 'bg-green-600 text-white' : 'bg-brand-600 text-white active:bg-brand-700'}`}
           >
             {updating ? 'Updating…' : advanced ? '✓ Status Updated' : `Mark as ${STATUS_FLOW[STATUS_FLOW.indexOf(run?.status) + 1]?.replace('_', ' ')}`}
           </button>

@@ -71,7 +71,7 @@ export default function Drivers() {
     }
   }
 
-  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700'
+  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
   // Collect all expiring docs for the alert banner
   const expiring = []
@@ -106,7 +106,7 @@ export default function Drivers() {
               return (
                 <div key={driver.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="h-10 w-10 rounded-full bg-brand-900 flex items-center justify-center text-brand-50 font-bold text-sm">
+                    <div className="h-10 w-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-700 font-bold text-sm">
                       {initials}
                     </div>
                     <div className="flex-1">
@@ -151,7 +151,7 @@ export default function Drivers() {
               <input type="date" value={expiry} onChange={e => setExpiry(e.target.value)} className={field} />
             </div>
             {docErr && <p className="text-red-600 text-xs font-medium">{docErr}</p>}
-            <button onClick={saveDoc} disabled={saving || !expiry} className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${docSaved ? 'bg-green-600 text-white' : 'bg-brand-900 text-brand-50'}`}>
+            <button onClick={saveDoc} disabled={saving || !expiry} className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${docSaved ? 'bg-green-600 text-white' : 'bg-brand-600 text-white'}`}>
               {saving ? 'Saving…' : docSaved ? '✓ Document Saved' : 'Save Document'}
             </button>
           </div>

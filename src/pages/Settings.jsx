@@ -101,7 +101,7 @@ export default function Settings() {
     setInviting(false)
   }
 
-  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700'
+  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
   const tabs = ['account', 'company', 'team']
 
   return (
@@ -112,7 +112,7 @@ export default function Settings() {
       <div className="flex border-b border-gray-100 bg-white px-4 gap-4">
         {tabs.map(t => (
           <button key={t} onClick={() => setActiveTab(t)}
-            className={`py-3 text-xs font-semibold capitalize transition-colors border-b-2 ${activeTab === t ? 'border-brand-900 text-brand-900' : 'border-transparent text-gray-400'}`}>
+            className={`py-3 text-xs font-semibold capitalize transition-colors border-b-2 ${activeTab === t ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-400'}`}>
             {t}
           </button>
         ))}
@@ -167,7 +167,7 @@ export default function Settings() {
                 type="button"
                 onClick={changePassword}
                 disabled={pwSaving || !newPassword || !confirmPw}
-                className={`w-full font-bold py-2.5 rounded-xl disabled:opacity-50 text-sm transition-colors ${pwSaved ? 'bg-green-600 text-white' : 'bg-brand-900 text-brand-50'}`}
+                className={`w-full font-bold py-2.5 rounded-xl disabled:opacity-50 text-sm transition-colors ${pwSaved ? 'bg-green-600 text-white' : 'bg-brand-600 text-white'}`}
               >
                 {pwSaving ? 'Updating…' : pwSaved ? '✓ Password Updated' : 'Set Password'}
               </button>
@@ -203,7 +203,7 @@ export default function Settings() {
             </div>
             <label className="flex items-center gap-3">
               <div
-                className={`w-12 h-6 rounded-full transition-colors ${sdvosb ? 'bg-brand-900' : 'bg-gray-200'} relative cursor-pointer`}
+                className={`w-12 h-6 rounded-full transition-colors ${sdvosb ? 'bg-brand-600' : 'bg-gray-200'} relative cursor-pointer`}
                 onClick={() => setSdvosb(!sdvosb)}
               >
                 <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${sdvosb ? 'translate-x-6' : ''}`} />
@@ -245,7 +245,7 @@ export default function Settings() {
               type="button"
               onClick={inviteUser}
               disabled={inviting || !inviteEmail}
-              className="w-full bg-brand-900 text-brand-50 font-bold py-3 rounded-xl disabled:opacity-50"
+              className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50"
             >
               {inviting ? 'Sending…' : 'Send Invite'}
             </button>
@@ -258,7 +258,7 @@ export default function Settings() {
             <button
               type="submit"
               disabled={saving}
-              className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-brand-900 text-brand-50'}`}
+              className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-brand-600 text-white'}`}
             >
               {saving ? 'Saving…' : saved ? '✓ Changes Saved' : 'Save Changes'}
             </button>

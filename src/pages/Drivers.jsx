@@ -3,7 +3,6 @@ import { useDrivers } from '../hooks/useDrivers'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
-import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { differenceInDays, parseISO, format } from 'date-fns'
 
 const DOC_TYPES = [
@@ -100,9 +99,8 @@ export default function Drivers() {
           </div>
         )}
 
-        {loading ? <LoadingSpinner /> : (
-          <>
-            {drivers.length === 0 && <p className="text-sm text-gray-400 text-center py-8">No drivers yet</p>}
+        <>
+            {!loading && drivers.length === 0 && <p className="text-sm text-gray-400 text-center py-8">No drivers yet</p>}
             {drivers.map(driver => {
               const initials = driver.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() ?? '?'
               return (
@@ -137,7 +135,6 @@ export default function Drivers() {
               )
             })}
           </>
-        )}
       </div>
 
       {sheet === 'doc' && selectedDriver && (

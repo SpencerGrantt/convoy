@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useRuns } from '../hooks/useRuns'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
-import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { format } from 'date-fns'
 
 const TABS = ['all', 'pending', 'in_transit', 'delivered']
@@ -41,9 +40,8 @@ export default function Runs() {
           + New Run
         </button>
 
-        {loading ? <LoadingSpinner /> : (
-          <>
-            {runs.length === 0 && (
+        <>
+            {!loading && runs.length === 0 && (
               <p className="text-sm text-gray-400 text-center py-8">No runs found</p>
             )}
             {runs.map(run => (
@@ -76,7 +74,6 @@ export default function Runs() {
               </div>
             ))}
           </>
-        )}
       </div>
     </div>
   )

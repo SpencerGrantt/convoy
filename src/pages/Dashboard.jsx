@@ -8,7 +8,6 @@ import MetricCard from '../components/ui/MetricCard'
 import AlertBanner from '../components/ui/AlertBanner'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
-import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { format, differenceInDays, parseISO, differenceInMinutes } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 
@@ -126,9 +125,8 @@ export default function Dashboard() {
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Recent Runs</h2>
             <button onClick={() => navigate('/runs')} className="text-xs text-brand-700 font-medium">View all →</button>
           </div>
-          {runsLoading ? <LoadingSpinner size="sm" /> : (
-            <div className="space-y-2">
-              {runs.length === 0 && (
+          <div className="space-y-2">
+              {!runsLoading && runs.length === 0 && (
                 <p className="text-sm text-gray-400 text-center py-4">No runs yet</p>
               )}
               {runs.map(run => (
@@ -145,7 +143,6 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-          )}
         </div>
       </div>
     </div>

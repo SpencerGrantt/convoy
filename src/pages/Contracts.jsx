@@ -5,7 +5,6 @@ import { supabase } from '../lib/supabase'
 import StatusPill from '../components/ui/StatusPill'
 import AlertBanner from '../components/ui/AlertBanner'
 import TopBar from '../components/layout/TopBar'
-import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { format, differenceInDays, parseISO } from 'date-fns'
 
 export default function Contracts() {
@@ -102,9 +101,8 @@ export default function Contracts() {
         </div>
 
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Contracts</h2>
-        {loading ? <LoadingSpinner /> : (
-          <div className="space-y-2">
-            {contracts.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No contracts yet</p>}
+        <div className="space-y-2">
+            {!loading && contracts.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No contracts yet</p>}
             {contracts.map(c => (
               <div key={c.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                 <div className="flex items-start justify-between gap-2">
@@ -130,7 +128,6 @@ export default function Contracts() {
               </div>
             ))}
           </div>
-        )}
       </div>
     </div>
   )

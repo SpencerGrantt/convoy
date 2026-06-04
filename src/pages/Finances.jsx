@@ -5,7 +5,6 @@ import { supabase } from '../lib/supabase'
 import MetricCard from '../components/ui/MetricCard'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
-import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { format } from 'date-fns'
 
@@ -250,8 +249,7 @@ export default function Finances() {
   return (
     <div className="pb-24">
       <TopBar title="Finances" />
-      {loading ? <LoadingSpinner /> : (
-        <div className="px-4 pt-4 space-y-4">
+      <div className="px-4 pt-4 space-y-4">
 
           <div className="grid grid-cols-2 gap-3">
             <MetricCard label="Revenue MTD"  value={fmt(totalRevenue)}  icon="💵" color="green"  />
@@ -328,7 +326,6 @@ export default function Finances() {
             ))}
           </div>
         </div>
-      )}
 
       {sheet === 'revenue' && (
         <Sheet title="Add Revenue" onClose={() => setSheet(null)}>

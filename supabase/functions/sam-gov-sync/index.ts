@@ -29,42 +29,72 @@ const MOCK_OPPORTUNITIES = [
   },
 ]
 
+function mmddyyyy(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${m}/${day}/${d.getFullYear()}`
+}
+
+// AbortController is unreliable in Deno — use Promise.race with a timer
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>(resolve => setTimeout(() => resolve(null), ms)),
+  ])
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   try {
-    const { naicsCodes, companyName } = await req.json()
+    const { naicsCodes } = await req.json()
     const samApiKey = Deno.env.get('SAM_GOV_API_KEY')
 
     let opportunities = MOCK_OPPORTUNITIES
 
-    // If a real SAM.gov API key is configured, fetch live results
     if (samApiKey) {
       try {
-        const naicsParam = (naicsCodes ?? []).join(',')
-        const samUrl = `https://api.sam.gov/prod/opportunities/v2/search?limit=10&api_key=${samApiKey}&naicsCodes=${naicsParam}&typeOfSetAside=SDVOSBC&active=true`
+        const today = new Date()
+        const ninetyDaysAgo = new Date()
+        ninetyDaysAgo.setDate(today.getDate() - 90)
 
-        const controller = new AbortController()
-        const timer = setTimeout(() => controller.abort(), 8000)
+        const params = new URLSearchParams({
+          api_key: samApiKey,
+          limit: '10',
+          postedFrom: mmddyyyy(ninetyDaysAgo),
+          postedTo: mmddyyyy(today),
+          active: 'Yes',
+        })
 
-        const samRes = await fetch(samUrl, { signal: controller.signal })
-        clearTimeout(timer)
+        // SAM.gov v2 accepts one naicsCode at a time
+        if (naicsCodes?.[0]) {
+          params.set('naicsCode', String(naicsCodes[0]).trim())
+        }
 
-        if (samRes.ok) {
+        const samUrl = `https://api.sam.gov/opportunities/v2/search?${params}`
+
+        // 30s timeout — SAM.gov can be slow; client allows 50s
+        const samRes = await withTimeout(fetch(samUrl), 30000)
+
+        if (samRes && samRes.ok) {
           const samData = await samRes.json()
-          const raw = samData.opportunitiesData ?? []
+          const raw: any[] = samData.opportunitiesData ?? []
           if (raw.length) {
-            opportunities = raw.slice(0, 3).map((opp: any, i: number) => ({
+            opportunities = raw.slice(0, 5).map((opp, i) => ({
               title: opp.title ?? 'Untitled Opportunity',
-              score: 8 - i,
-              reason: `NAICS ${opp.naicsCode ?? 'match'} — ${opp.baseType ?? 'Solicitation'}`,
-              deadline: opp.responseDeadline ?? opp.deadline ?? 'See SAM.gov',
-              link: opp.uiLink ?? 'https://sam.gov',
+              score: Math.max(6, 8 - i),
+              reason: [
+                opp.typeOfSetAsideDescription,
+                opp.naicsCode ? `NAICS ${opp.naicsCode}` : null,
+                opp.baseType,
+              ].filter(Boolean).join(' — ') || 'Government opportunity',
+              deadline: opp.responseDeadLine ?? opp.archiveDate ?? 'See SAM.gov',
+              link: opp.uiLink ?? `https://sam.gov/opp/${opp.noticeId}/view`,
             }))
           }
         }
       } catch {
-        // SAM.gov timed out or errored — use mock data
+        // SAM.gov unavailable — fall through to mock
       }
     }
 

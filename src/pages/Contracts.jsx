@@ -22,7 +22,7 @@ export default function Contracts() {
     setScanError('')
     try {
       const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Request timed out after 20s')), 20000)
+        setTimeout(() => reject(new Error('Request timed out — SAM.gov is slow to respond, please try again')), 50000)
       )
       const { data, error } = await Promise.race([
         supabase.functions.invoke('sam-gov-sync', {
@@ -91,7 +91,7 @@ export default function Contracts() {
               disabled={matching}
               className="bg-brand-600 text-white text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-50"
             >
-              {matching ? 'Scanning…' : '🔍 Find Matches'}
+              {matching ? 'Fetching from SAM.gov…' : '🔍 Find Matches'}
             </button>
           </div>
           {scanError && <p className="text-xs text-red-400 font-medium">{scanError}</p>}

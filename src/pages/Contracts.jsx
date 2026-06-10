@@ -16,6 +16,7 @@ export default function Contracts() {
   const [matching, setMatching] = useState(false)
   const [matched, setMatched] = useState(false)
   const [scanError, setScanError] = useState('')
+  const [liveResults, setLiveResults] = useState(false)
 
   async function findOpportunities() {
     setMatching(true)
@@ -36,6 +37,7 @@ export default function Contracts() {
       ])
       if (error) throw error
       setOpportunities(data?.opportunities ?? [])
+      setLiveResults(data?.live ?? false)
     } catch (err) {
       setScanError(err?.message ?? 'Scan failed')
     } finally {
@@ -84,7 +86,9 @@ export default function Contracts() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-white">Contract Opportunities</p>
-              <p className="text-xs text-white/40">AI-scored SAM.gov matches for your NAICS codes</p>
+              <p className="text-xs text-white/40">
+            {matched && liveResults ? 'Live SAM.gov results' : matched ? 'SAM.gov unavailable — showing sample results' : 'SAM.gov matches for your NAICS codes'}
+          </p>
             </div>
             <button
               onClick={findOpportunities}

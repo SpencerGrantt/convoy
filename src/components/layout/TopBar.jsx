@@ -7,15 +7,15 @@ export default function TopBar({ title }) {
   const { profile } = useAuth()
   const navigate = useNavigate()
   return (
-    <header className="md:hidden bg-navy-900 border-b border-white/[0.08] px-4 py-3 flex items-center justify-between sticky top-0 z-10 safe-top">
+    <header className="bg-navy-900 border-b border-white/[0.08] px-4 py-3 flex items-center justify-between sticky top-0 z-10 safe-top">
       <div className="flex items-center gap-2">
-        <span className="text-white font-black text-lg tracking-tight">CONVOY</span>
-        {title && <span className="text-white/20 text-lg">/</span>}
-        {title && <span className="text-white/60 font-medium text-sm">{title}</span>}
+        <span className="md:hidden text-white font-black text-lg tracking-tight">CONVOY</span>
+        {title && <span className="md:hidden text-white/20 text-lg">/</span>}
+        {title && <span className="text-white font-semibold text-sm md:text-base">{title}</span>}
       </div>
       <button
         onClick={() => navigate('/settings')}
-        className="flex items-center gap-2 active:opacity-70 transition-opacity"
+        className="flex items-center gap-2.5 active:opacity-70 transition-opacity"
       >
         {profile && (
           <div className="text-right">

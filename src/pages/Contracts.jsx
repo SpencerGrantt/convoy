@@ -15,9 +15,11 @@ export default function Contracts() {
   const [opportunities, setOpportunities] = useState([])
   const [matching, setMatching] = useState(false)
   const [matched, setMatched] = useState(false)
+  const [scanError, setScanError] = useState('')
 
   async function findOpportunities() {
     setMatching(true)
+    setScanError('')
     try {
       const { data, error } = await supabase.functions.invoke('sam-gov-sync', {
         body: {
@@ -26,8 +28,11 @@ export default function Contracts() {
           samExpiry: company?.sam_expiry,
         },
       })
-      if (!error) setOpportunities(data?.opportunities ?? [])
-    } catch {}
+      if (error) throw new Error(error.message ?? JSON.stringify(error))
+      setOpportunities(data?.opportunities ?? [])
+    } catch (err) {
+      setScanError(err?.message ?? 'Scan failed')
+    }
     setMatching(false)
     setMatched(true)
   }
@@ -82,7 +87,8 @@ export default function Contracts() {
               {matching ? 'Scanning…' : '🔍 Find Matches'}
             </button>
           </div>
-          {matched && opportunities.length === 0 && (
+          {scanError && <p className="text-xs text-red-400 font-medium">{scanError}</p>}
+          {matched && !scanError && opportunities.length === 0 && (
             <p className="text-xs text-white/40">No matches found. Try updating your NAICS codes in Settings.</p>
           )}
           {opportunities.map((opp, i) => (

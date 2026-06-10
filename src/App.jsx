@@ -4,6 +4,7 @@ import { AuthProvider } from './hooks/AuthProvider'
 import { useAuth } from './hooks/useAuth'
 import Sidebar from './components/layout/Sidebar'
 import MobileNav from './components/layout/MobileNav'
+import AiFloatingWidget from './components/AiFloatingWidget'
 import LoadingSpinner from './components/ui/LoadingSpinner'
 
 import Login from './pages/Login'
@@ -16,7 +17,6 @@ const Photos        = lazy(() => import('./pages/Photos'))
 const Contracts     = lazy(() => import('./pages/Contracts'))
 const Finances      = lazy(() => import('./pages/Finances'))
 const Drivers       = lazy(() => import('./pages/Drivers'))
-const AiAssistant   = lazy(() => import('./pages/AiAssistant'))
 const Settings      = lazy(() => import('./pages/Settings'))
 
 function AuthGate({ children }) {
@@ -44,7 +44,6 @@ function AppRoutes() {
               <Route path="/contracts" element={<AuthGate><Contracts /></AuthGate>} />
               <Route path="/finances"  element={<AuthGate><Finances /></AuthGate>} />
               <Route path="/drivers"   element={<AuthGate><Drivers /></AuthGate>} />
-              <Route path="/ai"        element={<AuthGate><AiAssistant /></AuthGate>} />
               <Route path="/settings"  element={<AuthGate><Settings /></AuthGate>} />
               <Route path="*"          element={<Navigate to="/" replace />} />
             </Routes>
@@ -52,6 +51,7 @@ function AppRoutes() {
         </main>
       </div>
       {session && <MobileNav />}
+      {session && <AiFloatingWidget />}
     </div>
   )
 }

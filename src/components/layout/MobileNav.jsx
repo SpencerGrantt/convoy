@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Truck, FileText, DollarSign, Users, Bot } from 'lucide-react'
+import { Home, Truck, FileText, DollarSign } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 
 const allTabs = [
@@ -7,8 +7,6 @@ const allTabs = [
   { to: '/runs',      icon: Truck,      label: 'Runs',      roles: ['owner', 'dispatcher', 'driver'] },
   { to: '/contracts', icon: FileText,   label: 'Contracts', roles: ['owner', 'dispatcher'] },
   { to: '/finances',  icon: DollarSign, label: 'Finances',  roles: ['owner'] },
-  { to: '/drivers',   icon: Users,      label: 'Drivers',   roles: ['owner', 'dispatcher'] },
-  { to: '/ai',        icon: Bot,        label: 'AI',        roles: ['owner', 'dispatcher'] },
 ]
 
 export default function MobileNav() {

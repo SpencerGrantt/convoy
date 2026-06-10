@@ -57,6 +57,7 @@ export default function Settings() {
 
   async function save(e) {
     e.preventDefault()
+    if (!profile?.id) { setSaveErr('Not authenticated. Please refresh.'); return }
     setSaving(true)
     setSaveErr('')
     try {

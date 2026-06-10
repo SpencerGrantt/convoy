@@ -18,7 +18,6 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const [anomalies, setAnomalies] = useState([])
 
-  // Request notification permission + fire contract/run checks
   useEffect(() => {
     requestNotificationPermission().then(granted => {
       if (!granted) return
@@ -27,7 +26,6 @@ export default function Dashboard() {
     })
   }, [runs, contracts])
 
-  // Anomaly detection: flag in-transit runs >40% over avg delivery time
   useEffect(() => {
     if (!profile?.company_id) return
     async function detectAnomalies() {
@@ -65,7 +63,6 @@ export default function Dashboard() {
     detectAnomalies()
   }, [profile?.company_id])
 
-
   const company = profile?.companies
   const today = new Date()
 
@@ -80,9 +77,9 @@ export default function Dashboard() {
   })
 
   return (
-    <div className="pb-24">
+    <div className="pb-24 md:pb-8">
       <TopBar />
-      <div className="px-4 pt-4 space-y-4">
+      <div className="px-4 pt-4 space-y-4 md:px-8 md:pt-8">
         {samDaysLeft !== null && samDaysLeft <= 30 && (
           <AlertBanner
             type={samDaysLeft <= 7 ? 'error' : 'warning'}
@@ -100,13 +97,13 @@ export default function Dashboard() {
           <AlertBanner
             key={r.id}
             type="error"
-            message={`⏱ Run to ${r.dropoff_address} is running 40%+ over average delivery time.`}
+            message={`Run to ${r.dropoff_address} is running 40%+ over average delivery time.`}
           />
         ))}
 
         <div>
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Overview</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Overview</h2>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <MetricCard label="Active Runs"    value={activeRuns}    color="blue"   />
             <MetricCard label="Delivered MTD"  value={deliveredMTD}  color="green"  />
             <MetricCard label="Open Contracts" value={openContracts} color="yellow" />
@@ -121,27 +118,27 @@ export default function Dashboard() {
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Recent Runs</h2>
-            <button onClick={() => navigate('/runs')} className="text-xs text-brand-600 font-medium">View all →</button>
+            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Recent Runs</h2>
+            <button onClick={() => navigate('/runs')} className="text-xs text-brand-400 font-medium">View all →</button>
           </div>
           <div className="space-y-2">
-              {!runsLoading && runs.length === 0 && (
-                <p className="text-sm text-gray-400 text-center py-4">No runs yet</p>
-              )}
-              {runs.map(run => (
-                <div
-                  key={run.id}
-                  onClick={() => navigate(`/runs/${run.id}`)}
-                  className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex items-center gap-3 active:bg-gray-50"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{run.dropoff_address}</p>
-                    <p className="text-xs text-gray-400 truncate">{run.profiles?.full_name ?? 'Unassigned'}</p>
-                  </div>
-                  <StatusPill status={run.status} />
+            {!runsLoading && runs.length === 0 && (
+              <p className="text-sm text-white/40 text-center py-4">No runs yet</p>
+            )}
+            {runs.map(run => (
+              <div
+                key={run.id}
+                onClick={() => navigate(`/runs/${run.id}`)}
+                className="bg-navy-700 rounded-xl p-3 border border-white/[0.07] flex items-center gap-3 active:bg-navy-600 cursor-pointer"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white truncate">{run.dropoff_address}</p>
+                  <p className="text-xs text-white/40 truncate">{run.profiles?.full_name ?? 'Unassigned'}</p>
                 </div>
-              ))}
-            </div>
+                <StatusPill status={run.status} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

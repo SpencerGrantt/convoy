@@ -7,11 +7,11 @@ export default function TopBar({ title }) {
   const { profile } = useAuth()
   const navigate = useNavigate()
   return (
-    <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-10 safe-top">
+    <header className="md:hidden bg-navy-900 border-b border-white/[0.08] px-4 py-3 flex items-center justify-between sticky top-0 z-10 safe-top">
       <div className="flex items-center gap-2">
-        <span className="text-brand-600 font-black text-lg tracking-tight">CONVOY</span>
-        {title && <span className="text-gray-300 text-lg">/</span>}
-        {title && <span className="text-gray-600 font-medium text-sm">{title}</span>}
+        <span className="text-white font-black text-lg tracking-tight">CONVOY</span>
+        {title && <span className="text-white/20 text-lg">/</span>}
+        {title && <span className="text-white/60 font-medium text-sm">{title}</span>}
       </div>
       <button
         onClick={() => navigate('/settings')}
@@ -19,10 +19,10 @@ export default function TopBar({ title }) {
       >
         {profile && (
           <div className="text-right">
-            <p className="text-gray-900 text-xs font-semibold leading-tight">
+            <p className="text-white text-xs font-semibold leading-tight">
               {profile.full_name || 'Account'}
             </p>
-            <p className="text-gray-400 text-[10px] leading-tight">
+            <p className="text-white/40 text-[10px] leading-tight">
               {roleLabel[profile.role] ?? profile.role}
             </p>
           </div>

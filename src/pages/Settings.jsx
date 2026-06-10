@@ -3,6 +3,8 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
 
+const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
+
 export default function Settings() {
   const { profile, signOut } = useAuth()
   const company = profile?.companies
@@ -59,19 +61,28 @@ export default function Settings() {
     setSaveErr('')
     try {
       const naicsCodes = naics.split(',').map(s => s.trim()).filter(Boolean)
-      await Promise.all([
+
+      const [profileRes, companyRes] = await Promise.all([
         supabase.from('profiles').update({ full_name: name }).eq('id', profile.id),
-        supabase.from('companies').update({
-          name: companyName,
-          cage_code: cageCode || null,
-          uei: uei || null,
-          naics_codes: naicsCodes,
-          sam_expiry: samExpiry || null,
-          sdvosb,
-        }).eq('id', company?.id),
+        company?.id
+          ? supabase.from('companies').update({
+              name: companyName,
+              cage_code: cageCode || null,
+              uei: uei || null,
+              naics_codes: naicsCodes,
+              sam_expiry: samExpiry || null,
+              sdvosb,
+            }).eq('id', company.id)
+          : Promise.resolve({ error: null }),
       ])
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
+
+      const err = profileRes.error || companyRes.error
+      if (err) {
+        setSaveErr(`Save failed: ${err.message}`)
+      } else {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2500)
+      }
     } catch (err) {
       setSaveErr(`Error: ${err.message}`)
     } finally {
@@ -83,11 +94,8 @@ export default function Settings() {
     if (!inviteEmail) return
     setInviting(true)
     setInviteMsg('')
-    // Send magic link — on first login AuthProvider creates profile
-    // We pre-insert a placeholder profile with the correct company + role
     const { data: { users } } = await supabase.auth.admin?.listUsers() ?? { data: { users: [] } }
 
-    // Use signInWithOtp to send invite email via Supabase
     const { error } = await supabase.auth.signInWithOtp({
       email: inviteEmail,
       options: {
@@ -101,65 +109,50 @@ export default function Settings() {
     setInviting(false)
   }
 
-  const field = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
   const tabs = ['account', 'company', 'team']
 
   return (
-    <div className="pb-24">
+    <div className="pb-24 md:pb-8">
       <TopBar title="Settings" />
 
-      {/* Tabs */}
-      <div className="flex border-b border-gray-100 bg-white px-4 gap-4">
+      <div className="flex border-b border-white/[0.08] bg-navy-900 px-4 gap-4 md:px-8">
         {tabs.map(t => (
           <button key={t} onClick={() => setActiveTab(t)}
-            className={`py-3 text-xs font-semibold capitalize transition-colors border-b-2 ${activeTab === t ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-400'}`}>
+            className={`py-3 text-xs font-semibold capitalize transition-colors border-b-2 ${activeTab === t ? 'border-white text-white' : 'border-transparent text-white/40'}`}>
             {t}
           </button>
         ))}
       </div>
 
-      <form onSubmit={save} className="px-4 pt-4 space-y-4">
+      <form onSubmit={save} className="px-4 pt-4 space-y-4 md:px-8 md:pt-6">
 
-        {/* Account tab */}
         {activeTab === 'account' && (
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Account</h2>
+          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
+            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Account</h2>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Your Name</label>
-              <input value={name} onChange={e => setName(e.target.value)} className={field} />
+              <label className="block text-xs text-white/50 mb-1">Your Name</label>
+              <input value={name} onChange={e => setName(e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Role</label>
-              <p className="text-sm text-gray-700 capitalize">{profile?.role}</p>
+              <label className="block text-xs text-white/50 mb-1">Role</label>
+              <p className="text-sm text-white/70 capitalize">{profile?.role}</p>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Email</label>
-              <p className="text-sm text-gray-500">{profile?.id ? 'Managed by Supabase Auth' : '—'}</p>
+              <label className="block text-xs text-white/50 mb-1">Email</label>
+              <p className="text-sm text-white/50">{profile?.id ? 'Managed by Supabase Auth' : '—'}</p>
             </div>
-            <div className="pt-2 border-t border-gray-100 space-y-3">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Change Password</h3>
+            <div className="pt-2 border-t border-white/[0.07] space-y-3">
+              <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Change Password</h3>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">New Password</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={e => setNewPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className={field}
-                />
+                <label className="block text-xs text-white/50 mb-1">New Password</label>
+                <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="••••••••" className={fieldClass} />
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Confirm Password</label>
-                <input
-                  type="password"
-                  value={confirmPw}
-                  onChange={e => setConfirmPw(e.target.value)}
-                  placeholder="••••••••"
-                  className={field}
-                />
+                <label className="block text-xs text-white/50 mb-1">Confirm Password</label>
+                <input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} placeholder="••••••••" className={fieldClass} />
               </div>
               {pwMsg && (
-                <p className={`text-xs font-medium ${pwMsg.startsWith('Error') || pwMsg.startsWith('Password') ? 'text-red-600' : 'text-green-600'}`}>
+                <p className={`text-xs font-medium ${pwMsg.startsWith('Error') || pwMsg.startsWith('Password') ? 'text-red-400' : 'text-green-400'}`}>
                   {pwMsg}
                 </p>
               )}
@@ -175,78 +168,65 @@ export default function Settings() {
           </div>
         )}
 
-        {/* Company tab */}
         {activeTab === 'company' && (
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Company Profile</h2>
+          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
+            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Company Profile</h2>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Company Name</label>
-              <input value={companyName} onChange={e => setCompanyName(e.target.value)} className={field} />
+              <label className="block text-xs text-white/50 mb-1">Company Name</label>
+              <input value={companyName} onChange={e => setCompanyName(e.target.value)} className={fieldClass} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">CAGE Code</label>
-                <input value={cageCode} onChange={e => setCageCode(e.target.value)} placeholder="8ABC1" className={field} />
+                <label className="block text-xs text-white/50 mb-1">CAGE Code</label>
+                <input value={cageCode} onChange={e => setCageCode(e.target.value)} placeholder="8ABC1" className={fieldClass} />
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">UEI</label>
-                <input value={uei} onChange={e => setUei(e.target.value)} placeholder="ABCDEF123456" className={field} />
+                <label className="block text-xs text-white/50 mb-1">UEI</label>
+                <input value={uei} onChange={e => setUei(e.target.value)} placeholder="ABCDEF123456" className={fieldClass} />
               </div>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">NAICS Codes (comma separated)</label>
-              <input value={naics} onChange={e => setNaics(e.target.value)} placeholder="492110, 621610" className={field} />
+              <label className="block text-xs text-white/50 mb-1">NAICS Codes (comma separated)</label>
+              <input value={naics} onChange={e => setNaics(e.target.value)} placeholder="492110, 621610" className={fieldClass} />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">SAM.gov Expiry Date</label>
-              <input type="date" value={samExpiry} onChange={e => setSamExpiry(e.target.value)} className={field} />
+              <label className="block text-xs text-white/50 mb-1">SAM.gov Expiry Date</label>
+              <input type="date" value={samExpiry} onChange={e => setSamExpiry(e.target.value)} className={fieldClass} />
             </div>
             <label className="flex items-center gap-3">
               <div
-                className={`w-12 h-6 rounded-full transition-colors ${sdvosb ? 'bg-brand-600' : 'bg-gray-200'} relative cursor-pointer`}
+                className={`w-12 h-6 rounded-full transition-colors ${sdvosb ? 'bg-brand-600' : 'bg-white/20'} relative cursor-pointer`}
                 onClick={() => setSdvosb(!sdvosb)}
               >
                 <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${sdvosb ? 'translate-x-6' : ''}`} />
               </div>
-              <span className="text-sm text-gray-700">SDVOSB Certified</span>
+              <span className="text-sm text-white/70">SDVOSB Certified</span>
             </label>
           </div>
         )}
 
-        {/* Team tab */}
         {activeTab === 'team' && (
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Invite Team Member</h2>
-            <p className="text-xs text-gray-400">They'll receive a magic link to set up their account.</p>
+          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
+            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Invite Team Member</h2>
+            <p className="text-xs text-white/40">They'll receive a magic link to set up their account.</p>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Email Address</label>
-              <input
-                type="email"
-                value={inviteEmail}
-                onChange={e => setInviteEmail(e.target.value)}
-                placeholder="driver@example.com"
-                className={field}
-              />
+              <label className="block text-xs text-white/50 mb-1">Email Address</label>
+              <input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="driver@example.com" className={fieldClass} />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Role</label>
-              <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className={field}>
+              <label className="block text-xs text-white/50 mb-1">Role</label>
+              <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className={fieldClass}>
                 <option value="driver">Driver</option>
                 <option value="dispatcher">Dispatcher</option>
                 <option value="owner">Owner</option>
               </select>
             </div>
             {inviteMsg && (
-              <p className={`text-xs font-medium ${inviteMsg.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>
+              <p className={`text-xs font-medium ${inviteMsg.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>
                 {inviteMsg}
               </p>
             )}
-            <button
-              type="button"
-              onClick={inviteUser}
-              disabled={inviting || !inviteEmail}
-              className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50"
-            >
+            <button type="button" onClick={inviteUser} disabled={inviting || !inviteEmail} className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
               {inviting ? 'Sending…' : 'Send Invite'}
             </button>
           </div>
@@ -254,20 +234,16 @@ export default function Settings() {
 
         {activeTab !== 'team' && (
           <>
-            {saveErr && <p className="text-red-600 text-xs font-medium px-1">{saveErr}</p>}
-            <button
-              type="submit"
-              disabled={saving}
-              className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-brand-600 text-white'}`}
-            >
+            {saveErr && <p className="text-red-400 text-xs font-medium px-1">{saveErr}</p>}
+            <button type="submit" disabled={saving} className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-brand-600 text-white'}`}>
               {saving ? 'Saving…' : saved ? '✓ Changes Saved' : 'Save Changes'}
             </button>
           </>
         )}
       </form>
 
-      <div className="px-4 mt-4">
-        <button onClick={signOut} className="w-full bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl active:bg-gray-200">
+      <div className="px-4 mt-4 md:px-8">
+        <button onClick={signOut} className="w-full bg-white/10 text-white/70 font-semibold py-3 rounded-xl active:bg-white/20">
           Sign Out
         </button>
       </div>

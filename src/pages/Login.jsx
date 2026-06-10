@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
+const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-4 py-3 placeholder:text-white/30 text-base focus:outline-none focus:ring-2 focus:ring-brand-500'
+
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [mode, setMode] = useState('password') // 'password' | 'magic'
+  const [mode, setMode] = useState('password')
   const [step, setStep] = useState('form')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -31,43 +33,43 @@ export default function Login() {
 
   if (step === 'sent') {
     return (
-      <div className="bg-gray-50 min-h-screen flex flex-col items-center justify-center px-6">
+      <div className="bg-navy-900 min-h-screen flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-sm">
           <div className="text-center mb-10">
-            <h1 className="text-4xl font-black text-brand-600 tracking-tight">CONVOY</h1>
-            <p className="text-gray-400 text-sm mt-1">Medical Courier Platform</p>
+            <h1 className="text-4xl font-black text-white tracking-tight">CONVOY</h1>
+            <p className="text-white/40 text-sm mt-1">Medical Courier Platform</p>
           </div>
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center space-y-4 py-8">
+          <div className="bg-navy-700 rounded-2xl p-6 border border-white/[0.08] text-center space-y-4 py-8">
             <div className="text-4xl">📬</div>
-            <p className="font-semibold text-gray-900">Check your email</p>
-            <p className="text-sm text-gray-500">
-              We sent a magic link to <strong className="text-gray-900">{email}</strong>. Click it to sign in.
+            <p className="font-semibold text-white">Check your email</p>
+            <p className="text-sm text-white/50">
+              We sent a magic link to <strong className="text-white">{email}</strong>. Click it to sign in.
             </p>
             <button
               onClick={() => { setStep('form'); setError('') }}
-              className="text-gray-400 text-sm font-medium"
+              className="text-white/40 text-sm font-medium"
             >
               ← Back
             </button>
           </div>
-          <p className="text-center text-gray-400 text-xs mt-6">SDVOSB · SAM.gov Compliant</p>
+          <p className="text-center text-white/30 text-xs mt-6">SDVOSB · SAM.gov Compliant</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col items-center justify-center px-6">
+    <div className="bg-navy-900 min-h-screen flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-black text-brand-600 tracking-tight">CONVOY</h1>
-          <p className="text-gray-400 text-sm mt-1">Medical Courier Platform</p>
+          <h1 className="text-4xl font-black text-white tracking-tight">CONVOY</h1>
+          <p className="text-white/40 text-sm mt-1">Medical Courier Platform</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-navy-700 rounded-2xl p-6 border border-white/[0.08]">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
+              <label className="block text-xs font-semibold text-white/40 mb-1 uppercase tracking-wide">
                 Email Address
               </label>
               <input
@@ -75,7 +77,7 @@ export default function Login() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className={fieldClass}
                 required
                 autoFocus
               />
@@ -83,7 +85,7 @@ export default function Login() {
 
             {mode === 'password' && (
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
+                <label className="block text-xs font-semibold text-white/40 mb-1 uppercase tracking-wide">
                   Password
                 </label>
                 <input
@@ -91,13 +93,13 @@ export default function Login() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className={fieldClass}
                   required
                 />
               </div>
             )}
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && <p className="text-red-400 text-sm">{error}</p>}
 
             <button
               type="submit"
@@ -113,7 +115,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => { setMode('magic'); setError('') }}
-                className="text-gray-400 text-sm"
+                className="text-white/40 text-sm"
               >
                 Sign in with magic link instead
               </button>
@@ -121,7 +123,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => { setMode('password'); setError('') }}
-                className="text-gray-400 text-sm"
+                className="text-white/40 text-sm"
               >
                 Sign in with password instead
               </button>
@@ -129,7 +131,7 @@ export default function Login() {
           </div>
         </div>
 
-        <p className="text-center text-gray-400 text-xs mt-6">
+        <p className="text-center text-white/30 text-xs mt-6">
           SDVOSB · SAM.gov Compliant
         </p>
       </div>

@@ -81,52 +81,44 @@ export default function PhotoCapture({ runId, companyId, photoType, existingPath
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 flex items-center gap-2 border-b border-gray-50">
+    <div className="bg-navy-700 rounded-2xl border border-white/[0.07] overflow-hidden">
+      <div className="px-4 py-3 flex items-center gap-2 border-b border-white/[0.06]">
         <span className="text-lg">{label.icon}</span>
-        <span className="text-sm font-semibold text-gray-800">{label.title}</span>
-        {mode === 'done' && <span className="ml-auto text-xs text-green-600 font-medium">✓ Captured</span>}
+        <span className="text-sm font-semibold text-white">{label.title}</span>
+        {mode === 'done' && <span className="ml-auto text-xs text-green-400 font-medium">✓ Captured</span>}
       </div>
 
-      {/* Preview */}
       {mode === 'preview' && previewUrl && (
         <div className="aspect-video bg-black">
           <img src={previewUrl} className="w-full h-full object-cover" alt="Preview" />
         </div>
       )}
 
-      {/* Done */}
       {mode === 'done' && (
-        <div className="aspect-video bg-brand-50 flex items-center justify-center">
+        <div className="aspect-video bg-navy-800 flex items-center justify-center">
           <span className="text-4xl">✅</span>
         </div>
       )}
 
-      {/* Idle placeholder */}
       {mode === 'idle' && (
-        <div className="aspect-video bg-gray-50 flex items-center justify-center">
+        <div className="aspect-video bg-navy-800 flex items-center justify-center">
           <span className="text-5xl opacity-10">📷</span>
         </div>
       )}
 
       <div className="px-4 py-3">
-        {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
+        {error && <p className="text-red-400 text-xs mb-2">{error}</p>}
 
         {mode === 'idle' && (
           <label className="block w-full bg-brand-600 text-white font-semibold py-2.5 rounded-xl text-sm text-center cursor-pointer active:bg-brand-700">
             Take Photo
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
+            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
           </label>
         )}
 
         {mode === 'preview' && (
           <div className="flex gap-2">
-            <button onClick={retake} className="flex-1 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-xl text-sm">
+            <button onClick={retake} className="flex-1 bg-white/10 text-white/70 font-semibold py-2.5 rounded-xl text-sm">
               Retake
             </button>
             <button onClick={confirm} disabled={uploading} className="flex-1 bg-brand-600 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50">
@@ -136,7 +128,7 @@ export default function PhotoCapture({ runId, companyId, photoType, existingPath
         )}
 
         {mode === 'done' && (
-          <button onClick={retake} className="w-full bg-gray-100 text-gray-500 font-medium py-2 rounded-xl text-xs">
+          <button onClick={retake} className="w-full bg-white/10 text-white/50 font-medium py-2 rounded-xl text-xs">
             Retake
           </button>
         )}

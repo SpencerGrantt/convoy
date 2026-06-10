@@ -1,13 +1,14 @@
 import { NavLink } from 'react-router-dom'
+import { Home, Truck, FileText, DollarSign, Users, Bot } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 
 const allTabs = [
-  { to: '/',          icon: '🏠', label: 'Home',      roles: ['owner','dispatcher','driver'] },
-  { to: '/runs',      icon: '🚗', label: 'Runs',      roles: ['owner','dispatcher','driver'] },
-  { to: '/contracts', icon: '📋', label: 'Contracts', roles: ['owner','dispatcher'] },
-  { to: '/finances',  icon: '💰', label: 'Finances',  roles: ['owner'] },
-  { to: '/drivers',   icon: '👤', label: 'Drivers',   roles: ['owner','dispatcher'] },
-  { to: '/ai',        icon: '🤖', label: 'AI',        roles: ['owner','dispatcher'] },
+  { to: '/',          icon: Home,       label: 'Home',      roles: ['owner', 'dispatcher', 'driver'] },
+  { to: '/runs',      icon: Truck,      label: 'Runs',      roles: ['owner', 'dispatcher', 'driver'] },
+  { to: '/contracts', icon: FileText,   label: 'Contracts', roles: ['owner', 'dispatcher'] },
+  { to: '/finances',  icon: DollarSign, label: 'Finances',  roles: ['owner'] },
+  { to: '/drivers',   icon: Users,      label: 'Drivers',   roles: ['owner', 'dispatcher'] },
+  { to: '/ai',        icon: Bot,        label: 'AI',        roles: ['owner', 'dispatcher'] },
 ]
 
 export default function MobileNav() {
@@ -16,21 +17,21 @@ export default function MobileNav() {
   const tabs = allTabs.filter(t => t.roles.includes(role))
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-bottom z-20">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-navy-900 border-t border-white/[0.08] safe-bottom z-20">
       <div className="flex items-center justify-around px-1 py-1">
-        {tabs.map(tab => (
+        {tabs.map(({ to, icon: Icon, label }) => (
           <NavLink
-            key={tab.to}
-            to={tab.to}
-            end={tab.to === '/'}
+            key={to}
+            to={to}
+            end={to === '/'}
             className={({ isActive }) =>
               `flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl min-w-0 transition-colors ${
-                isActive ? 'text-brand-600' : 'text-gray-400'
+                isActive ? 'text-white' : 'text-white/40'
               }`
             }
           >
-            <span className="text-xl">{tab.icon}</span>
-            <span className="text-[10px] font-medium leading-none">{tab.label}</span>
+            <Icon size={20} />
+            <span className="text-[10px] font-medium leading-none">{label}</span>
           </NavLink>
         ))}
       </div>

@@ -39,9 +39,9 @@ export default function Contracts() {
   })
 
   return (
-    <div className="pb-24">
+    <div className="pb-24 md:pb-8">
       <TopBar title="Contracts" />
-      <div className="px-4 pt-4 space-y-4">
+      <div className="px-4 pt-4 space-y-4 md:px-8 md:pt-6">
         {expiring.map(c => (
           <AlertBanner
             key={c.id}
@@ -68,12 +68,11 @@ export default function Contracts() {
           </div>
         )}
 
-        {/* SAM.gov opportunity matcher */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+        <div className="bg-navy-700 rounded-2xl border border-white/[0.07] p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-900">Contract Opportunities</p>
-              <p className="text-xs text-gray-400">AI-scored SAM.gov matches for your NAICS codes</p>
+              <p className="text-sm font-semibold text-white">Contract Opportunities</p>
+              <p className="text-xs text-white/40">AI-scored SAM.gov matches for your NAICS codes</p>
             </div>
             <button
               onClick={findOpportunities}
@@ -84,50 +83,50 @@ export default function Contracts() {
             </button>
           </div>
           {matched && opportunities.length === 0 && (
-            <p className="text-xs text-gray-400">No matches found. Try updating your NAICS codes in Settings.</p>
+            <p className="text-xs text-white/40">No matches found. Try updating your NAICS codes in Settings.</p>
           )}
           {opportunities.map((opp, i) => (
-            <div key={i} className="bg-brand-50 rounded-xl p-3 space-y-1">
+            <div key={i} className="bg-navy-800 rounded-xl p-3 space-y-1">
               <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${opp.score >= 7 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${opp.score >= 7 ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'}`}>
                   {opp.score}/10
                 </span>
-                <p className="text-xs font-semibold text-gray-900 flex-1 truncate">{opp.title}</p>
+                <p className="text-xs font-semibold text-white flex-1 truncate">{opp.title}</p>
               </div>
-              <p className="text-xs text-gray-500">{opp.reason}</p>
-              {opp.deadline && <p className="text-xs text-gray-400">Deadline: {opp.deadline}</p>}
+              <p className="text-xs text-white/50">{opp.reason}</p>
+              {opp.deadline && <p className="text-xs text-white/40">Deadline: {opp.deadline}</p>}
             </div>
           ))}
         </div>
 
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Contracts</h2>
+        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Contracts</h2>
         <div className="space-y-2">
-            {!loading && contracts.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No contracts yet</p>}
-            {contracts.map(c => (
-              <div key={c.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-semibold text-gray-900 text-sm">{c.name}</p>
-                      <StatusPill status={c.status} />
-                    </div>
-                    <p className="text-xs text-gray-500">{c.agency} · #{c.contract_number}</p>
-                    {c.annual_value && (
-                      <p className="text-xs text-green-700 font-semibold mt-1">
-                        ${Number(c.annual_value).toLocaleString()} / yr
-                      </p>
-                    )}
+          {!loading && contracts.length === 0 && <p className="text-sm text-white/40 text-center py-4">No contracts yet</p>}
+          {contracts.map(c => (
+            <div key={c.id} className="bg-navy-700 rounded-xl p-4 border border-white/[0.07]">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-semibold text-white text-sm">{c.name}</p>
+                    <StatusPill status={c.status} />
                   </div>
-                  {c.end_date && (
-                    <div className="text-right text-xs text-gray-400 shrink-0">
-                      <p>Ends</p>
-                      <p className="font-medium text-gray-600">{format(parseISO(c.end_date), 'MMM d, yy')}</p>
-                    </div>
+                  <p className="text-xs text-white/50">{c.agency} · #{c.contract_number}</p>
+                  {c.annual_value && (
+                    <p className="text-xs text-green-400 font-semibold mt-1">
+                      ${Number(c.annual_value).toLocaleString()} / yr
+                    </p>
                   )}
                 </div>
+                {c.end_date && (
+                  <div className="text-right text-xs text-white/40 shrink-0">
+                    <p>Ends</p>
+                    <p className="font-medium text-white/60">{format(parseISO(c.end_date), 'MMM d, yy')}</p>
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

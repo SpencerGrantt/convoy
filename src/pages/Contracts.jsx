@@ -21,20 +21,27 @@ export default function Contracts() {
     setMatching(true)
     setScanError('')
     try {
-      const { data, error } = await supabase.functions.invoke('sam-gov-sync', {
-        body: {
-          naicsCodes: company?.naics_codes ?? [],
-          companyName: company?.name ?? 'My Company',
-          samExpiry: company?.sam_expiry,
-        },
-      })
-      if (error) throw new Error(error.message ?? JSON.stringify(error))
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out after 20s')), 20000)
+      )
+      const { data, error } = await Promise.race([
+        supabase.functions.invoke('sam-gov-sync', {
+          body: {
+            naicsCodes: company?.naics_codes ?? [],
+            companyName: company?.name ?? 'My Company',
+            samExpiry: company?.sam_expiry ?? null,
+          },
+        }),
+        timeout,
+      ])
+      if (error) throw error
       setOpportunities(data?.opportunities ?? [])
     } catch (err) {
       setScanError(err?.message ?? 'Scan failed')
+    } finally {
+      setMatching(false)
+      setMatched(true)
     }
-    setMatching(false)
-    setMatched(true)
   }
 
   const expiring = contracts.filter(c => {

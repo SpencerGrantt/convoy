@@ -27,7 +27,7 @@ function AuthGate({ children }) {
 }
 
 function AppRoutes() {
-  const { session } = useAuth()
+  const { session, profile } = useAuth()
   return (
     <div className="min-h-screen bg-navy-900">
       {session && <Sidebar />}
@@ -51,7 +51,7 @@ function AppRoutes() {
         </main>
       </div>
       {session && <MobileNav />}
-      {session && <AiFloatingWidget />}
+      {session && profile && <AiFloatingWidget />}
     </div>
   )
 }

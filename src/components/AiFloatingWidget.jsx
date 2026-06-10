@@ -1,27 +1,27 @@
 import { useState, useRef, useEffect } from 'react'
-import { Bot, X, Send } from 'lucide-react'
+import { Bot, X, SendHorizontal } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
-import { useContracts } from '../hooks/useContracts'
-import { useRuns } from '../hooks/useRuns'
-import { buildSystemPrompt, askAI } from '../lib/ai'
+import { askAI } from '../lib/ai'
 
 const SUGGESTIONS = [
-  'Any compliance risks?',
+  'Any compliance risks I should know about?',
   'What contracts should I bid on?',
-  'Summarize today\'s runs',
+  'Summarize our SDVOSB status',
 ]
+
+function buildPrompt(company) {
+  return `You are an AI assistant for ${company?.name ?? 'a medical courier company'}, a ${company?.sdvosb ? 'Service-Disabled Veteran-Owned (SDVOSB)' : 'veteran-owned'} medical courier company.
+CAGE: ${company?.cage_code ?? 'N/A'} | UEI: ${company?.uei ?? 'N/A'} | NAICS: ${company?.naics_codes?.join(', ') ?? 'N/A'} | SAM expiry: ${company?.sam_expiry ?? 'N/A'}.
+Answer questions about the business, compliance, and government contracting. Be concise and practical.`
+}
 
 export default function AiFloatingWidget() {
   const { profile } = useAuth()
-  const { contracts } = useContracts()
-  const { runs } = useRuns({ limit: 20 })
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
-
-  const systemPrompt = buildSystemPrompt(profile?.companies, runs, contracts)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -34,7 +34,7 @@ export default function AiFloatingWidget() {
     setMessages(prev => [...prev, { role: 'user', text: userMsg }])
     setLoading(true)
     try {
-      const reply = await askAI(userMsg, systemPrompt)
+      const reply = await askAI(userMsg, buildPrompt(profile?.companies))
       setMessages(prev => [...prev, { role: 'assistant', text: reply }])
     } catch (err) {
       setMessages(prev => [...prev, { role: 'assistant', text: `Error: ${err?.message ?? 'Something went wrong'}` }])
@@ -44,14 +44,21 @@ export default function AiFloatingWidget() {
 
   return (
     <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 flex flex-col items-end gap-2">
+
       {open && (
-        <div className="w-[320px] md:w-[360px] flex flex-col bg-navy-800 border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden" style={{ height: 440 }}>
+        <div
+          className="flex flex-col bg-navy-800 border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden w-[320px] md:w-[360px]"
+          style={{ height: 440 }}
+        >
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-navy-900 shrink-0">
             <div className="flex items-center gap-2">
               <Bot size={15} className="text-brand-400" />
               <span className="text-sm font-semibold text-white">AI Assistant</span>
             </div>
-            <button onClick={() => setOpen(false)} className="text-white/30 hover:text-white transition-colors">
+            <button
+              onClick={() => setOpen(false)}
+              className="text-white/30 hover:text-white transition-colors"
+            >
               <X size={15} />
             </button>
           </div>
@@ -111,7 +118,7 @@ export default function AiFloatingWidget() {
               disabled={!input.trim() || loading}
               className="bg-brand-600 text-white rounded-xl px-3 disabled:opacity-40 active:bg-brand-700 transition-colors"
             >
-              <Send size={13} />
+              <SendHorizontal size={13} />
             </button>
           </div>
         </div>

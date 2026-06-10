@@ -88,7 +88,15 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+    } catch {
+      // ignore — clear state regardless
+    } finally {
+      setSession(null)
+      setProfile(null)
+      setLoading(false)
+    }
   }
 
   return (

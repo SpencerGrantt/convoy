@@ -237,11 +237,6 @@ export default function Settings() {
         {activeTab !== 'team' && (
           <>
             {saveErr && <p className="text-red-400 text-xs font-medium px-1">{saveErr}</p>}
-            {!profile && !authLoading && (
-              <p className="text-yellow-400 text-xs font-medium px-1">
-                Profile not loaded — try signing out and back in.
-              </p>
-            )}
             <button type="submit" disabled={saving || authLoading} className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-brand-600 text-white'}`}>
               {authLoading ? 'Loading…' : saving ? 'Saving…' : saved ? '✓ Changes Saved' : 'Save Changes'}
             </button>

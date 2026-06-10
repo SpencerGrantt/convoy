@@ -10,11 +10,6 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true
 
-    // Hard timeout: loading can never stay true beyond 5 seconds
-    const fallback = setTimeout(() => {
-      if (mounted) setLoading(false)
-    }, 5000)
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (!mounted) return
@@ -25,9 +20,14 @@ export function AuthProvider({ children }) {
           setProfile(null)
           setLoading(false)
         }
-        clearTimeout(fallback)
       }
     )
+
+    // Safety net: if onAuthStateChange never fires (e.g. no session),
+    // stop loading after 8 seconds so the UI doesn't spin forever.
+    const fallback = setTimeout(() => {
+      if (mounted) setLoading(false)
+    }, 8000)
 
     return () => {
       mounted = false
@@ -49,14 +49,13 @@ export function AuthProvider({ children }) {
         return
       }
 
-      // Check for invite metadata (company_id + role set during invite)
-      const { data: { user } } = await supabase.auth.getUser()
-      const meta = user?.user_metadata ?? {}
+      // New user — check for invite metadata
+      const { data: authData } = await supabase.auth.getUser()
+      const meta = authData?.user?.user_metadata ?? {}
       let companyId = meta.company_id
       const role = meta.role ?? 'owner'
 
       if (!companyId) {
-        // New owner — create a fresh company
         const { data: company, error: companyError } = await supabase
           .from('companies')
           .insert({ name: 'My Company', sdvosb: true })
@@ -68,9 +67,10 @@ export function AuthProvider({ children }) {
 
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert({ id: userId, company_id: companyId, full_name: '', role },
-          { onConflict: 'id', ignoreDuplicates: true })
-
+        .upsert(
+          { id: userId, company_id: companyId, full_name: '', role },
+          { onConflict: 'id', ignoreDuplicates: true }
+        )
       if (profileError) throw profileError
 
       const { data: fresh } = await supabase
@@ -79,7 +79,7 @@ export function AuthProvider({ children }) {
         .eq('id', userId)
         .single()
 
-      setProfile(fresh)
+      setProfile(fresh ?? null)
     } catch (err) {
       console.error('fetchOrCreateProfile failed:', err)
     } finally {

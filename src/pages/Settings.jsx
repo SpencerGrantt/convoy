@@ -6,7 +6,7 @@ import TopBar from '../components/layout/TopBar'
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
 
 export default function Settings() {
-  const { profile, signOut } = useAuth()
+  const { profile, loading: authLoading, signOut } = useAuth()
   const company = profile?.companies
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
@@ -57,14 +57,15 @@ export default function Settings() {
 
   async function save(e) {
     e.preventDefault()
-    if (!profile?.id) { setSaveErr('Not authenticated. Please refresh.'); return }
     setSaving(true)
     setSaveErr('')
     try {
       const naicsCodes = naics.split(',').map(s => s.trim()).filter(Boolean)
 
       const [profileRes, companyRes] = await Promise.all([
-        supabase.from('profiles').update({ full_name: name }).eq('id', profile.id),
+        profile?.id
+          ? supabase.from('profiles').update({ full_name: name }).eq('id', profile.id)
+          : Promise.resolve({ error: null }),
         company?.id
           ? supabase.from('companies').update({
               name: companyName,
@@ -236,8 +237,13 @@ export default function Settings() {
         {activeTab !== 'team' && (
           <>
             {saveErr && <p className="text-red-400 text-xs font-medium px-1">{saveErr}</p>}
-            <button type="submit" disabled={saving} className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-brand-600 text-white'}`}>
-              {saving ? 'Saving…' : saved ? '✓ Changes Saved' : 'Save Changes'}
+            {!profile && !authLoading && (
+              <p className="text-yellow-400 text-xs font-medium px-1">
+                Profile not loaded — try signing out and back in.
+              </p>
+            )}
+            <button type="submit" disabled={saving || authLoading} className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-brand-600 text-white'}`}>
+              {authLoading ? 'Loading…' : saving ? 'Saving…' : saved ? '✓ Changes Saved' : 'Save Changes'}
             </button>
           </>
         )}

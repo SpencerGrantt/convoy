@@ -22,19 +22,47 @@ export default function Contracts() {
     setMatching(true)
     setScanError('')
     try {
-      const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Request timed out — SAM.gov is slow to respond, please try again')), 50000)
-      )
-      const { data, error } = await Promise.race([
-        supabase.functions.invoke('sam-gov-sync', {
-          body: {
-            naicsCodes: company?.naics_codes ?? [],
-            companyName: company?.name ?? 'My Company',
-            samExpiry: company?.sam_expiry ?? null,
-          },
-        }),
-        timeout,
-      ])
+      const samKey = import.meta.env.VITE_SAM_GOV_API_KEY
+
+      // Call SAM.gov directly from the browser — avoids AWS IP blocking
+      if (samKey) {
+        const ninetyDaysAgo = new Date()
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+        const fmt = (d) => `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}/${d.getFullYear()}`
+
+        const params = new URLSearchParams({
+          api_key: samKey,
+          limit: '10',
+          postedFrom: fmt(ninetyDaysAgo),
+          postedTo: fmt(new Date()),
+          active: 'Yes',
+        })
+        if (company?.naics_codes?.[0]) params.set('naicsCode', String(company.naics_codes[0]).trim())
+
+        const res = await fetch(`https://api.sam.gov/opportunities/v2/search?${params}`)
+        if (!res.ok) throw new Error(`SAM.gov returned ${res.status}`)
+        const json = await res.json()
+        const raw = json.opportunitiesData ?? []
+        if (raw.length) {
+          setOpportunities(raw.slice(0, 5).map((opp, i) => ({
+            title: opp.title ?? 'Untitled Opportunity',
+            score: Math.max(6, 8 - i),
+            reason: [opp.typeOfSetAsideDescription, opp.naicsCode ? `NAICS ${opp.naicsCode}` : null, opp.baseType].filter(Boolean).join(' — ') || 'Government opportunity',
+            deadline: opp.responseDeadLine ?? opp.archiveDate ?? 'See SAM.gov',
+            link: opp.uiLink ?? `https://sam.gov/opp/${opp.noticeId}/view`,
+          })))
+          setLiveResults(true)
+          return
+        }
+      }
+
+      // Fallback: edge function (returns mock if SAM.gov is unreachable from cloud)
+      const { data, error } = await supabase.functions.invoke('sam-gov-sync', {
+        body: {
+          naicsCodes: company?.naics_codes ?? [],
+          companyName: company?.name ?? 'My Company',
+        },
+      })
       if (error) throw error
       setOpportunities(data?.opportunities ?? [])
       setLiveResults(data?.live ?? false)

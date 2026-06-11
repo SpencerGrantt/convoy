@@ -87,6 +87,11 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function refreshProfile() {
+    const { data: { session: current } } = await supabase.auth.getSession()
+    if (current?.user?.id) await fetchOrCreateProfile(current.user.id)
+  }
+
   async function signOut() {
     try {
       await supabase.auth.signOut()
@@ -100,7 +105,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, profile, loading, signOut }}>
+    <AuthContext.Provider value={{ session, profile, loading, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

@@ -7,7 +7,7 @@ import { format, parseISO } from 'date-fns'
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
 
 export default function Settings() {
-  const { profile, loading: authLoading, signOut } = useAuth()
+  const { profile, loading: authLoading, signOut, refreshProfile } = useAuth()
   const company = profile?.companies
   const [teamSize, setTeamSize] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -72,7 +72,6 @@ export default function Settings() {
     setSaveErr('')
     try {
       const naicsCodes = naics.split(',').map(s => s.trim()).filter(Boolean)
-
       const companyPayload = {
         name: companyName,
         cage_code: cageCode || null,
@@ -82,34 +81,28 @@ export default function Settings() {
         sdvosb,
       }
 
-      const companyOp = company?.id
-        ? supabase.from('companies').update(companyPayload).eq('id', company.id)
-        : supabase.from('companies').insert(companyPayload).select().single().then(
-            async ({ data: newCo, error }) => {
-              if (error) return { error }
-              if (newCo?.id && profile?.id) {
-                await supabase.from('profiles').update({ company_id: newCo.id }).eq('id', profile.id)
-              }
-              return { error: null }
-            }
-          )
-
-      const [profileRes, companyRes] = await Promise.all([
-        profile?.id
-          ? supabase.from('profiles').update({ full_name: name }).eq('id', profile.id)
-          : Promise.resolve({ error: null }),
-        companyOp,
-      ])
-
-      const err = profileRes.error || companyRes.error
-      if (err) {
-        setSaveErr(`Save failed: ${err.message}`)
-      } else {
-        setSaved(true)
-        setTimeout(() => setSaved(false), 2500)
+      if (profile?.id) {
+        const { error } = await supabase.from('profiles').update({ full_name: name }).eq('id', profile.id)
+        if (error) throw new Error(error.message)
       }
+
+      if (company?.id) {
+        const { error } = await supabase.from('companies').update(companyPayload).eq('id', company.id)
+        if (error) throw new Error(error.message)
+      } else {
+        const { data: newCo, error: createErr } = await supabase
+          .from('companies').insert(companyPayload).select().single()
+        if (createErr) throw new Error(createErr.message)
+        const { error: linkErr } = await supabase
+          .from('profiles').update({ company_id: newCo.id }).eq('id', profile.id)
+        if (linkErr) throw new Error(linkErr.message)
+        await refreshProfile()
+      }
+
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
     } catch (err) {
-      setSaveErr(`Error: ${err.message}`)
+      setSaveErr(err.message)
     } finally {
       setSaving(false)
     }

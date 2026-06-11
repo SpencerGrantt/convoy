@@ -44,19 +44,13 @@ export default defineConfig({
     minify: 'esbuild',
     rollupOptions: {
       output: {
-        manualChunks: {
-          // React core — changes rarely, long cache
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          // Supabase — large, isolated
-          'vendor-supabase': ['@supabase/supabase-js'],
-          // Heavy chart lib — only used in Finances
-          'vendor-recharts': ['recharts'],
-          // PDF — only used in invoice/report generation
-          'vendor-jspdf': ['jspdf'],
-          // Icons — large, frequently imported
-          'vendor-lucide': ['lucide-react'],
-          // Misc utils
-          'vendor-utils': ['date-fns', 'idb'],
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) return 'vendor-react'
+          if (id.includes('node_modules/@supabase')) return 'vendor-supabase'
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3')) return 'vendor-recharts'
+          if (id.includes('node_modules/jspdf')) return 'vendor-jspdf'
+          if (id.includes('node_modules/lucide-react')) return 'vendor-lucide'
+          if (id.includes('node_modules/date-fns') || id.includes('node_modules/idb')) return 'vendor-utils'
         },
       },
     },

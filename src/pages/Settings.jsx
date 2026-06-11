@@ -233,7 +233,7 @@ export default function Settings() {
 
         {activeTab === 'company' && (
           <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Company Profile</h2>
+            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">{company?.id ? 'Edit Company' : 'Create Company'}</h2>
             <div>
               <label className="block text-xs text-white/50 mb-1">Company Name</label>
               <input value={companyName} onChange={e => setCompanyName(e.target.value)} className={fieldClass} />
@@ -299,7 +299,7 @@ export default function Settings() {
           <>
             {saveErr && <p className="text-red-400 text-xs font-medium px-1">{saveErr}</p>}
             <button type="submit" disabled={saving || authLoading} className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${saved ? 'bg-green-600 text-white' : 'bg-brand-600 text-white'}`}>
-              {authLoading ? 'Loading…' : saving ? 'Saving…' : saved ? '✓ Changes Saved' : 'Save Changes'}
+              {authLoading ? 'Loading…' : saving ? 'Saving…' : saved ? '✓ Saved' : activeTab === 'company' && !company?.id ? 'Create Company' : 'Save Changes'}
             </button>
           </>
         )}

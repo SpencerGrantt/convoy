@@ -102,12 +102,13 @@ export default function Settings() {
         if (error) throw new Error(error.message)
       } else {
         // Edge function uses service role key — bypasses all RLS
-        const { data, error: fnErr } = await dbCall(
-          supabase.functions.invoke('create-company', { body: companyPayload })
-        )
+        // 20s timeout to allow for cold start
+        const { data, error: fnErr } = await Promise.race([
+          supabase.functions.invoke('create-company', { body: companyPayload }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out — please try again')), 20000)),
+        ])
         if (fnErr) throw new Error(fnErr.message)
         if (data?.error) throw new Error(data.error)
-        // Apply returned profile directly so card appears immediately
         if (data?.profile) setProfileDirect(data.profile)
       }
 

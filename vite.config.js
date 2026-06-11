@@ -12,8 +12,8 @@ export default defineConfig({
         name: 'Convoy — Medical Courier',
         short_name: 'Convoy',
         description: 'Mobile logistics platform for veteran-owned medical courier operations',
-        theme_color: '#1a2332',
-        background_color: '#1a2332',
+        theme_color: '#131313',
+        background_color: '#131313',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
@@ -39,4 +39,26 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core — changes rarely, long cache
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Supabase — large, isolated
+          'vendor-supabase': ['@supabase/supabase-js'],
+          // Heavy chart lib — only used in Finances
+          'vendor-recharts': ['recharts'],
+          // PDF — only used in invoice/report generation
+          'vendor-jspdf': ['jspdf'],
+          // Icons — large, frequently imported
+          'vendor-lucide': ['lucide-react'],
+          // Misc utils
+          'vendor-utils': ['date-fns', 'idb'],
+        },
+      },
+    },
+  },
 })

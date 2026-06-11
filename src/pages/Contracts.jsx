@@ -41,22 +41,20 @@ export default function Contracts() {
         if (company?.naics_codes?.[0]) params.set('naicsCode', String(company.naics_codes[0]).trim())
 
         const res = await fetch(`https://api.sam.gov/opportunities/v2/search?${params}`)
-        if (res.ok) {
-          const json = await res.json()
-          const raw = json.opportunitiesData ?? []
-          if (raw.length) {
-            setOpportunities(raw.slice(0, 5).map((opp, i) => ({
-              title: opp.title ?? 'Untitled Opportunity',
-              score: Math.max(6, 8 - i),
-              reason: [opp.typeOfSetAsideDescription, opp.naicsCode ? `NAICS ${opp.naicsCode}` : null, opp.baseType].filter(Boolean).join(' — ') || 'Government opportunity',
-              deadline: opp.responseDeadLine ?? opp.archiveDate ?? 'See SAM.gov',
-              link: opp.uiLink ?? `https://sam.gov/opp/${opp.noticeId}/view`,
-            })))
-            setLiveResults(true)
-            return
-          }
+        if (!res.ok) throw new Error(`SAM.gov returned ${res.status}`)
+        const json = await res.json()
+        const raw = json.opportunitiesData ?? []
+        if (raw.length) {
+          setOpportunities(raw.slice(0, 5).map((opp, i) => ({
+            title: opp.title ?? 'Untitled Opportunity',
+            score: Math.max(6, 8 - i),
+            reason: [opp.typeOfSetAsideDescription, opp.naicsCode ? `NAICS ${opp.naicsCode}` : null, opp.baseType].filter(Boolean).join(' — ') || 'Government opportunity',
+            deadline: opp.responseDeadLine ?? opp.archiveDate ?? 'See SAM.gov',
+            link: opp.uiLink ?? `https://sam.gov/opp/${opp.noticeId}/view`,
+          })))
+          setLiveResults(true)
+          return
         }
-        // Non-ok (429, 403, etc.) or empty — fall through to edge function
       }
 
       // Fallback: edge function (returns mock if SAM.gov is unreachable from cloud)

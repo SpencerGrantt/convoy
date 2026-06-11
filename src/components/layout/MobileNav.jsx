@@ -29,7 +29,7 @@ export default function MobileNav() {
             }
           >
             <Icon size={20} />
-            <span className="text-xs font-medium leading-none">{label}</span>
+            <span className="text-[10px] font-medium leading-none">{label}</span>
           </NavLink>
         ))}
       </div>

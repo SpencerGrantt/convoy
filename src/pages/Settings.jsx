@@ -101,14 +101,19 @@ export default function Settings() {
         )
         if (error) throw new Error(error.message)
       } else {
+        // RPC bypasses RLS catch-22: SELECT policy uses my_company_id() which
+        // returns null until profile.company_id is set, so plain insert+select fails.
         const { data: newCo, error: createErr } = await dbCall(
-          supabase.from('companies').insert(companyPayload).select().single()
+          supabase.rpc('create_company_for_user', {
+            p_name:        companyPayload.name,
+            p_cage_code:   companyPayload.cage_code,
+            p_uei:         companyPayload.uei,
+            p_naics_codes: companyPayload.naics_codes,
+            p_sam_expiry:  companyPayload.sam_expiry,
+            p_sdvosb:      companyPayload.sdvosb,
+          })
         )
         if (createErr) throw new Error(createErr.message)
-        const { error: linkErr } = await dbCall(
-          supabase.from('profiles').update({ company_id: newCo.id }).eq('id', profile.id)
-        )
-        if (linkErr) throw new Error(linkErr.message)
         refreshProfile().catch(() => {})
       }
 

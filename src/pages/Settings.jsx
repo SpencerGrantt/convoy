@@ -66,13 +66,6 @@ export default function Settings() {
   const [inviting, setInviting]       = useState(false)
   const [inviteMsg, setInviteMsg]     = useState('')
 
-  function dbCall(query) {
-    return Promise.race([
-      query,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Database did not respond — check RLS policies or connection')), 8000)),
-    ])
-  }
-
   async function save(e) {
     e.preventDefault()
     setSaving(true)
@@ -88,27 +81,13 @@ export default function Settings() {
         sdvosb,
       }
 
-      if (company?.id) {
-        // Editing existing company — client-side updates
-        const { error: profErr } = await dbCall(
-          supabase.from('profiles').update({ full_name: name }).eq('id', profile.id)
-        )
-        if (profErr) throw new Error(profErr.message)
-
-        const { error: coErr } = await dbCall(
-          supabase.from('companies').update(companyPayload).eq('id', company.id)
-        )
-        if (coErr) throw new Error(coErr.message)
-      } else {
-        // Creating company — edge function handles everything server-side,
-        // no client DB calls that can cold-timeout before the operation runs
-        const { data, error: fnErr } = await supabase.functions.invoke('create-company', {
-          body: { ...companyPayload, full_name: name },
-        })
-        if (fnErr) throw new Error(fnErr.message)
-        if (data?.error) throw new Error(data.error)
-        if (data?.profile) setProfileDirect(data.profile)
-      }
+      // Route both edit and create through the edge function (service role — no RLS, no cold-start issues)
+      const { data, error: fnErr } = await supabase.functions.invoke('upsert-company', {
+        body: { ...companyPayload, full_name: name, company_id: company?.id ?? null },
+      })
+      if (fnErr) throw new Error(fnErr.message)
+      if (data?.error) throw new Error(data.error)
+      if (data?.profile) setProfileDirect(data.profile)
 
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)

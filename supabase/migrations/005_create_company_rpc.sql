@@ -29,3 +29,5 @@ begin
   return v_company;
 end;
 $$;
+
+grant execute on function create_company_for_user(text, text, text, text[], date, boolean) to authenticated;

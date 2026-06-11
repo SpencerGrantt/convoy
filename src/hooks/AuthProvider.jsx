@@ -104,8 +104,10 @@ export function AuthProvider({ children }) {
     }
   }
 
+  function setProfileDirect(p) { setProfile(p) }
+
   return (
-    <AuthContext.Provider value={{ session, profile, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ session, profile, loading, signOut, refreshProfile, setProfileDirect }}>
       {children}
     </AuthContext.Provider>
   )

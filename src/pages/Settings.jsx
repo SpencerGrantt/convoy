@@ -7,7 +7,7 @@ import { format, parseISO } from 'date-fns'
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
 
 export default function Settings() {
-  const { profile, loading: authLoading, signOut, refreshProfile } = useAuth()
+  const { profile, loading: authLoading, signOut, refreshProfile, setProfileDirect } = useAuth()
   const company = profile?.companies
   const [teamSize, setTeamSize] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -101,20 +101,14 @@ export default function Settings() {
         )
         if (error) throw new Error(error.message)
       } else {
-        // RPC bypasses RLS catch-22: SELECT policy uses my_company_id() which
-        // returns null until profile.company_id is set, so plain insert+select fails.
-        const { data: newCo, error: createErr } = await dbCall(
-          supabase.rpc('create_company_for_user', {
-            p_name:        companyPayload.name,
-            p_cage_code:   companyPayload.cage_code,
-            p_uei:         companyPayload.uei,
-            p_naics_codes: companyPayload.naics_codes,
-            p_sam_expiry:  companyPayload.sam_expiry,
-            p_sdvosb:      companyPayload.sdvosb,
-          })
+        // Edge function uses service role key — bypasses all RLS
+        const { data, error: fnErr } = await dbCall(
+          supabase.functions.invoke('create-company', { body: companyPayload })
         )
-        if (createErr) throw new Error(createErr.message)
-        refreshProfile().catch(() => {})
+        if (fnErr) throw new Error(fnErr.message)
+        if (data?.error) throw new Error(data.error)
+        // Apply returned profile directly so card appears immediately
+        if (data?.profile) setProfileDirect(data.profile)
       }
 
       setSaved(true)

@@ -46,14 +46,12 @@ serve(async (req) => {
     let companyId = body.company_id ?? null
 
     if (companyId) {
-      // Update existing company
       const { error: updateErr } = await admin
         .from('companies')
         .update(companyFields)
         .eq('id', companyId)
       if (updateErr) throw new Error(updateErr.message)
     } else {
-      // Create new company
       const { data: newCompany, error: insertErr } = await admin
         .from('companies')
         .insert(companyFields)
@@ -63,10 +61,10 @@ serve(async (req) => {
       companyId = newCompany.id
     }
 
-    // Update profile (name + link company if new)
     const profileUpdate: Record<string, unknown> = {}
     if (body.full_name !== undefined) profileUpdate.full_name = body.full_name
     if (!body.company_id) profileUpdate.company_id = companyId
+    if (body.onboarding_complete === true) profileUpdate.onboarding_complete = true
 
     if (Object.keys(profileUpdate).length > 0) {
       const { error: profileErr } = await admin

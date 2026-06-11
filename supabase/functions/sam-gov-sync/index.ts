@@ -73,13 +73,20 @@ serve(async (req) => {
         }
 
         const samUrl = `https://api.sam.gov/opportunities/v2/search?${params}`
+        console.log('[sam-gov-sync] fetching:', samUrl.replace(samApiKey, '***'))
 
         // 12s timeout — SAM.gov is slow; fail fast to mock rather than hang
         const samRes = await withTimeout(fetch(samUrl), 12000)
 
-        if (samRes && samRes.ok) {
+        if (!samRes) {
+          console.log('[sam-gov-sync] timed out after 12s — likely AWS IP blocked by SAM.gov/Akamai')
+        } else if (!samRes.ok) {
+          const body = await samRes.text().catch(() => '')
+          console.log('[sam-gov-sync] HTTP', samRes.status, body.slice(0, 200))
+        } else {
           const samData = await samRes.json()
           const raw: any[] = samData.opportunitiesData ?? []
+          console.log('[sam-gov-sync] got', raw.length, 'results')
           if (raw.length) {
             live = true
             opportunities = raw.slice(0, 5).map((opp, i) => ({
@@ -95,8 +102,8 @@ serve(async (req) => {
             }))
           }
         }
-      } catch {
-        // SAM.gov unavailable — fall through to mock
+      } catch (fetchErr: any) {
+        console.log('[sam-gov-sync] fetch error:', fetchErr.message)
       }
     }
 

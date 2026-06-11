@@ -1,13 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
+import { format, parseISO } from 'date-fns'
 
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
 
 export default function Settings() {
   const { profile, loading: authLoading, signOut } = useAuth()
   const company = profile?.companies
+  const [teamSize, setTeamSize] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
   const [saveErr, setSaveErr] = useState('')
@@ -26,6 +28,15 @@ export default function Settings() {
   const [pwSaving, setPwSaving]       = useState(false)
   const [pwSaved, setPwSaved]         = useState(false)
   const [pwMsg, setPwMsg]             = useState('')
+
+  useEffect(() => {
+    if (!profile?.company_id) return
+    supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('company_id', profile.company_id)
+      .then(({ count }) => setTeamSize(count ?? 1))
+  }, [profile?.company_id])
 
   async function changePassword() {
     if (newPassword.length < 6) { setPwMsg('Password must be at least 6 characters.'); return }
@@ -62,20 +73,32 @@ export default function Settings() {
     try {
       const naicsCodes = naics.split(',').map(s => s.trim()).filter(Boolean)
 
+      const companyPayload = {
+        name: companyName,
+        cage_code: cageCode || null,
+        uei: uei || null,
+        naics_codes: naicsCodes,
+        sam_expiry: samExpiry || null,
+        sdvosb,
+      }
+
+      const companyOp = company?.id
+        ? supabase.from('companies').update(companyPayload).eq('id', company.id)
+        : supabase.from('companies').insert(companyPayload).select().single().then(
+            async ({ data: newCo, error }) => {
+              if (error) return { error }
+              if (newCo?.id && profile?.id) {
+                await supabase.from('profiles').update({ company_id: newCo.id }).eq('id', profile.id)
+              }
+              return { error: null }
+            }
+          )
+
       const [profileRes, companyRes] = await Promise.all([
         profile?.id
           ? supabase.from('profiles').update({ full_name: name }).eq('id', profile.id)
           : Promise.resolve({ error: null }),
-        company?.id
-          ? supabase.from('companies').update({
-              name: companyName,
-              cage_code: cageCode || null,
-              uei: uei || null,
-              naics_codes: naicsCodes,
-              sam_expiry: samExpiry || null,
-              sdvosb,
-            }).eq('id', company.id)
-          : Promise.resolve({ error: null }),
+        companyOp,
       ])
 
       const err = profileRes.error || companyRes.error
@@ -166,6 +189,44 @@ export default function Settings() {
               >
                 {pwSaving ? 'Updating…' : pwSaved ? '✓ Password Updated' : 'Set Password'}
               </button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'company' && company && (
+          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3 mb-1">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-white font-bold text-base leading-tight">{company.name || 'My Company'}</p>
+                {teamSize != null && (
+                  <p className="text-xs text-white/40 mt-0.5">{teamSize} team member{teamSize !== 1 ? 's' : ''}</p>
+                )}
+              </div>
+              {company.sdvosb && (
+                <span className="shrink-0 bg-brand-600/20 text-brand-300 border border-brand-600/30 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">
+                  SDVOSB Certified
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 pt-1 border-t border-white/[0.07]">
+              <div>
+                <p className="text-[10px] text-white/35 uppercase tracking-wide mb-0.5">CAGE</p>
+                <p className="text-sm text-white font-medium">{company.cage_code || '—'}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-white/35 uppercase tracking-wide mb-0.5">UEI</p>
+                <p className="text-sm text-white font-medium">{company.uei || '—'}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-[10px] text-white/35 uppercase tracking-wide mb-0.5">NAICS Codes</p>
+                <p className="text-sm text-white font-medium">{company.naics_codes?.join(', ') || '—'}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-white/35 uppercase tracking-wide mb-0.5">SAM Expiry</p>
+                <p className="text-sm text-white font-medium">
+                  {company.sam_expiry ? format(parseISO(company.sam_expiry), 'MMM d, yyyy') : '—'}
+                </p>
+              </div>
             </div>
           </div>
         )}

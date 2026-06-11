@@ -36,6 +36,7 @@ export default function Contracts() {
           postedFrom: fmt(ninetyDaysAgo),
           postedTo: fmt(new Date()),
           active: 'Yes',
+          keywords: 'medical courier transportation specimen delivery',
         })
         if (company?.naics_codes?.[0]) params.set('naicsCode', String(company.naics_codes[0]).trim())
 

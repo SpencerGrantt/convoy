@@ -52,10 +52,13 @@ serve(async (req) => {
 
     if (companyErr) throw new Error(companyErr.message)
 
-    // Link profile to new company
+    // Link profile to new company and update name in one call
+    const profileUpdate: Record<string, unknown> = { company_id: company.id }
+    if (body.full_name !== undefined) profileUpdate.full_name = body.full_name
+
     const { error: profileErr } = await admin
       .from('profiles')
-      .update({ company_id: company.id })
+      .update(profileUpdate)
       .eq('id', user.id)
 
     if (profileErr) throw new Error(profileErr.message)

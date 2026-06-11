@@ -88,25 +88,23 @@ export default function Settings() {
         sdvosb,
       }
 
-      if (profile?.id) {
-        const { error } = await dbCall(
+      if (company?.id) {
+        // Editing existing company — client-side updates
+        const { error: profErr } = await dbCall(
           supabase.from('profiles').update({ full_name: name }).eq('id', profile.id)
         )
-        if (error) throw new Error(error.message)
-      }
+        if (profErr) throw new Error(profErr.message)
 
-      if (company?.id) {
-        const { error } = await dbCall(
+        const { error: coErr } = await dbCall(
           supabase.from('companies').update(companyPayload).eq('id', company.id)
         )
-        if (error) throw new Error(error.message)
+        if (coErr) throw new Error(coErr.message)
       } else {
-        // Edge function uses service role key — bypasses all RLS
-        // 20s timeout to allow for cold start
-        const { data, error: fnErr } = await Promise.race([
-          supabase.functions.invoke('create-company', { body: companyPayload }),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out — please try again')), 20000)),
-        ])
+        // Creating company — edge function handles everything server-side,
+        // no client DB calls that can cold-timeout before the operation runs
+        const { data, error: fnErr } = await supabase.functions.invoke('create-company', {
+          body: { ...companyPayload, full_name: name },
+        })
         if (fnErr) throw new Error(fnErr.message)
         if (data?.error) throw new Error(data.error)
         if (data?.profile) setProfileDirect(data.profile)

@@ -48,7 +48,7 @@ function Home() {
 
 function AppRoutes() {
   const { session, profile } = useAuth()
-  const showChrome = session && profile?.onboarding_complete
+  const showChrome = session && profile && profile.onboarding_complete !== false
 
   return (
     <div className="min-h-screen bg-navy-900">

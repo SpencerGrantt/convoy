@@ -66,6 +66,13 @@ export default function Settings() {
   const [inviting, setInviting]       = useState(false)
   const [inviteMsg, setInviteMsg]     = useState('')
 
+  function dbCall(query) {
+    return Promise.race([
+      query,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Database did not respond — check RLS policies or connection')), 8000)),
+    ])
+  }
+
   async function save(e) {
     e.preventDefault()
     setSaving(true)
@@ -82,21 +89,27 @@ export default function Settings() {
       }
 
       if (profile?.id) {
-        const { error } = await supabase.from('profiles').update({ full_name: name }).eq('id', profile.id)
+        const { error } = await dbCall(
+          supabase.from('profiles').update({ full_name: name }).eq('id', profile.id)
+        )
         if (error) throw new Error(error.message)
       }
 
       if (company?.id) {
-        const { error } = await supabase.from('companies').update(companyPayload).eq('id', company.id)
+        const { error } = await dbCall(
+          supabase.from('companies').update(companyPayload).eq('id', company.id)
+        )
         if (error) throw new Error(error.message)
       } else {
-        const { data: newCo, error: createErr } = await supabase
-          .from('companies').insert(companyPayload).select().single()
+        const { data: newCo, error: createErr } = await dbCall(
+          supabase.from('companies').insert(companyPayload).select().single()
+        )
         if (createErr) throw new Error(createErr.message)
-        const { error: linkErr } = await supabase
-          .from('profiles').update({ company_id: newCo.id }).eq('id', profile.id)
+        const { error: linkErr } = await dbCall(
+          supabase.from('profiles').update({ company_id: newCo.id }).eq('id', profile.id)
+        )
         if (linkErr) throw new Error(linkErr.message)
-        await refreshProfile()
+        refreshProfile().catch(() => {})
       }
 
       setSaved(true)

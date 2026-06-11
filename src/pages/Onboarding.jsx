@@ -207,7 +207,7 @@ export default function Onboarding() {
             <h2 className="text-2xl font-bold text-white">About you</h2>
             <p className="text-white/45 text-sm">
               {path === 'team'
-                ? 'Your admin's invite email will link you to the team automatically.'
+                ? "Your admin's invite email will link you to the team automatically."
                 : 'Quick intro before setting up your company.'}
             </p>
           </div>

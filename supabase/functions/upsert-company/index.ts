@@ -34,31 +34,34 @@ serve(async (req) => {
 
     const body = await req.json()
 
-    const companyFields = {
-      name: body.name || 'My Company',
-      cage_code: body.cage_code || null,
-      uei: body.uei || null,
-      naics_codes: body.naics_codes ?? [],
-      sam_expiry: body.sam_expiry || null,
-      sdvosb: body.sdvosb ?? false,
-    }
-
     let companyId = body.company_id ?? null
 
-    if (companyId) {
-      const { error: updateErr } = await admin
-        .from('companies')
-        .update(companyFields)
-        .eq('id', companyId)
-      if (updateErr) throw new Error(updateErr.message)
-    } else {
-      const { data: newCompany, error: insertErr } = await admin
-        .from('companies')
-        .insert(companyFields)
-        .select()
-        .single()
-      if (insertErr) throw new Error(insertErr.message)
-      companyId = newCompany.id
+    // skip_company: true → only update the profile (used by team-member onboarding path)
+    if (!body.skip_company) {
+      const companyFields = {
+        name: body.name || 'My Company',
+        cage_code: body.cage_code || null,
+        uei: body.uei || null,
+        naics_codes: body.naics_codes ?? [],
+        sam_expiry: body.sam_expiry || null,
+        sdvosb: body.sdvosb ?? false,
+      }
+
+      if (companyId) {
+        const { error: updateErr } = await admin
+          .from('companies')
+          .update(companyFields)
+          .eq('id', companyId)
+        if (updateErr) throw new Error(updateErr.message)
+      } else {
+        const { data: newCompany, error: insertErr } = await admin
+          .from('companies')
+          .insert(companyFields)
+          .select()
+          .single()
+        if (insertErr) throw new Error(insertErr.message)
+        companyId = newCompany.id
+      }
     }
 
     const profileUpdate: Record<string, unknown> = {}

@@ -1,0 +1,161 @@
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+import { generateCustodyPDF } from '../lib/pdf'
+import StatusPill from '../components/ui/StatusPill'
+import TopBar from '../components/layout/TopBar'
+import LoadingSpinner from '../components/ui/LoadingSpinner'
+import { format } from 'date-fns'
+
+const STATUS_FLOW = ['pending', 'assigned', 'in_transit', 'delivered']
+
+export default function RunDetailPage() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const [run, setRun] = useState(null)
+  const [custody, setCustody] = useState([])
+  const [photos, setPhotos] = useState([])
+  const [signatures, setSignatures] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [updating, setUpdating] = useState(false)
+  const [updateErr, setUpdateErr] = useState('')
+  const [advanced, setAdvanced] = useState(false)
+  const [pdfMsg, setPdfMsg] = useState('')
+
+  useEffect(() => {
+    async function load() {
+      const [{ data: run }, { data: events }, { data: ph }, { data: sigs }] = await Promise.all([
+        supabase
+          .from('runs')
+          .select('*, profiles!driver_id(full_name), vehicles(name, plate), contracts(name)')
+          .eq('id', id)
+          .single(),
+        supabase
+          .from('custody_events')
+          .select('*, profiles!actor_id(full_name)')
+          .eq('run_id', id)
+          .order('created_at', { ascending: true }),
+        supabase.from('photos').select('*').eq('run_id', id),
+        supabase.from('signatures').select('*').eq('run_id', id),
+      ])
+      setRun(run)
+      setPhotos(ph ?? [])
+      setSignatures(sigs ?? [])
+      setCustody(events ?? [])
+      setLoading(false)
+    }
+    load()
+  }, [id])
+
+  async function advanceStatus() {
+    const idx = STATUS_FLOW.indexOf(run.status)
+    if (idx === -1 || idx >= STATUS_FLOW.length - 1) return
+    const nextStatus = STATUS_FLOW[idx + 1]
+    setUpdating(true)
+    setUpdateErr('')
+    try {
+      const update = { status: nextStatus }
+      if (nextStatus === 'in_transit') update.picked_up_at = new Date().toISOString()
+      if (nextStatus === 'delivered')  update.delivered_at  = new Date().toISOString()
+      const { error } = await supabase.from('runs').update(update).eq('id', id)
+      if (error) throw error
+      await supabase.from('custody_events').insert({ run_id: id, company_id: run.company_id, event_type: nextStatus })
+      setRun(r => ({ ...r, ...update }))
+      setAdvanced(true)
+      setTimeout(() => setAdvanced(false), 2000)
+    } catch (err) {
+      setUpdateErr(err.message)
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  function downloadPDF() {
+    try {
+      const doc = generateCustodyPDF(run, photos, signatures, custody)
+      doc.save(`convoy-run-${id.slice(0, 8)}.pdf`)
+      setPdfMsg('success')
+    } catch (err) {
+      setPdfMsg(`Error: ${err.message}`)
+    } finally {
+      setTimeout(() => setPdfMsg(''), 3000)
+    }
+  }
+
+  if (loading) return <LoadingSpinner />
+
+  return (
+    <div className="pb-24 md:pb-8">
+      <TopBar title="Run Detail" />
+      <div className="px-4 pt-4 space-y-4 md:px-8 md:pt-6">
+        <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
+          <div className="flex items-center justify-between">
+            <StatusPill status={run?.status} />
+            {run?.temp_sensitive && <span className="text-xs bg-brand-500/20 text-brand-300 px-2 py-1 rounded-lg">❄️ Temp Sensitive</span>}
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-white/40">Pickup</p>
+            <p className="font-medium text-white">{run?.pickup_address}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-white/40">Dropoff</p>
+            <p className="font-medium text-white">{run?.dropoff_address}</p>
+          </div>
+          {run?.cargo_description && (
+            <div className="space-y-1">
+              <p className="text-xs text-white/40">Cargo</p>
+              <p className="text-sm text-white/70">{run.cargo_description}</p>
+            </div>
+          )}
+          <div className="flex gap-4 text-xs text-white/50 pt-1 border-t border-white/[0.06]">
+            <span>Driver: <strong className="text-white/80">{run?.profiles?.full_name ?? '—'}</strong></span>
+            <span>Vehicle: <strong className="text-white/80">{run?.vehicles?.name ?? '—'}</strong></span>
+          </div>
+        </div>
+
+        {run?.status !== 'delivered' && run?.status !== 'cancelled' && (
+          <button
+            onClick={advanceStatus}
+            disabled={updating}
+            className={`w-full font-bold py-3 rounded-xl disabled:opacity-50 transition-colors ${advanced ? 'bg-green-600 text-white' : 'bg-brand-600 text-white active:bg-brand-700'}`}
+          >
+            {updating ? 'Updating…' : advanced ? '✓ Status Updated' : `Mark as ${STATUS_FLOW[STATUS_FLOW.indexOf(run?.status) + 1]?.replace('_', ' ')}`}
+          </button>
+        )}
+        {updateErr && <p className="text-red-400 text-xs font-medium text-center">{updateErr}</p>}
+
+        <button
+          onClick={() => navigate(`/photos?runId=${id}`)}
+          className="w-full bg-white/10 text-white/80 font-semibold py-3 rounded-xl active:bg-white/15 transition-colors"
+        >
+          📸 View / Add Photos
+        </button>
+
+        <button
+          onClick={downloadPDF}
+          className={`w-full font-semibold py-3 rounded-xl transition-colors ${pdfMsg === 'success' ? 'bg-green-500/20 text-green-300' : pdfMsg ? 'bg-red-500/20 text-red-300' : 'bg-white/10 text-white/80 active:bg-white/15'}`}
+        >
+          {pdfMsg === 'success' ? '✓ PDF Downloaded' : pdfMsg || '📄 Download Chain of Custody PDF'}
+        </button>
+
+        {custody.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Chain of Custody</h3>
+            <div className="space-y-2">
+              {custody.map(event => (
+                <div key={event.id} className="flex gap-3 items-start">
+                  <div className="w-2 h-2 rounded-full bg-brand-400 mt-1.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-white/80 capitalize">{event.event_type.replace('_', ' ')}</p>
+                    <p className="text-xs text-white/40">{format(new Date(event.created_at), 'MMM d, h:mm a')} · {event.profiles?.full_name ?? 'System'}</p>
+                    {event.note && <p className="text-xs text-white/50 mt-0.5">{event.note}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

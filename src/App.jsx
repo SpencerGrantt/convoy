@@ -47,13 +47,12 @@ function Home() {
 }
 
 function AppRoutes() {
-  const { session, profile } = useAuth()
-  const showChrome = session && profile?.onboarding_complete
+  const { session } = useAuth()
 
   return (
     <div className="min-h-screen bg-navy-900">
-      {showChrome && <Sidebar />}
-      <div className={showChrome ? 'md:ml-60' : ''}>
+      {session && <Sidebar />}
+      <div className={session ? 'md:ml-60' : ''}>
         <main role="main">
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
@@ -73,8 +72,8 @@ function AppRoutes() {
           </Suspense>
         </main>
       </div>
-      {showChrome && <MobileNav />}
-      {showChrome && <AiFloatingWidget />}
+      {session && <MobileNav />}
+      {session && <AiFloatingWidget />}
     </div>
   )
 }

@@ -47,24 +47,23 @@ export default function TopBar({ title }) {
         )}
       </div>
 
-      {/* Right — user name / role / avatar → settings */}
       <button
         onClick={() => navigate('/settings')}
         className="flex items-center gap-2.5 shrink-0 active:opacity-70 transition-opacity"
       >
+        <div className="h-8 w-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+          {profile?.full_name?.charAt(0)?.toUpperCase() ?? '⚙'}
+        </div>
         {profile && (
-          <div className="text-right">
-            <p className="text-white text-xs font-semibold leading-tight">
+          <div className="text-left">
+            <p className="text-white text-sm font-semibold leading-tight">
               {profile.full_name || 'Account'}
             </p>
-            <p className="text-white/40 text-[10px] leading-tight">
+            <p className="text-brand-300 text-[11px] font-medium leading-tight">
               {roleLabel[profile.role] ?? profile.role}
             </p>
           </div>
         )}
-        <div className="h-8 w-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-          {profile?.full_name?.charAt(0)?.toUpperCase() ?? '⚙'}
-        </div>
       </button>
     </header>
   )

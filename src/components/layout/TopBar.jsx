@@ -4,13 +4,38 @@ import { Building2 } from 'lucide-react'
 
 const roleLabel = { owner: 'Head Admin', dispatcher: 'Dispatcher', driver: 'Driver' }
 
+function ProfileButton({ profile, navigate }) {
+  const initial = profile?.full_name?.trim()?.charAt(0)?.toUpperCase() || '?'
+  const name = profile?.full_name?.trim() || 'Account'
+  const role = roleLabel[profile?.role] ?? profile?.role ?? 'Member'
+
+  return (
+    <button
+      onClick={() => navigate('/settings')}
+      className="flex items-center gap-2.5 shrink-0 min-w-0 active:opacity-70 transition-opacity"
+    >
+      <div className="h-8 w-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+        {initial}
+      </div>
+      <div className="text-left min-w-0">
+        <p className="text-white text-sm font-semibold leading-tight truncate max-w-32">
+          {name}
+        </p>
+        <p className="text-brand-300 text-[11px] font-medium leading-tight truncate">
+          {role}
+        </p>
+      </div>
+    </button>
+  )
+}
+
 export default function TopBar({ title }) {
   const { profile } = useAuth()
   const navigate = useNavigate()
   const company = profile?.companies
 
   return (
-    <header className="bg-navy-900 border-b border-white/[0.08] px-4 py-3 flex items-center justify-between sticky top-0 z-10 safe-top">
+    <header className="bg-navy-900 border-b border-white/[0.08] px-4 py-3 flex items-center justify-between gap-3 sticky top-0 z-10 safe-top">
 
       {/* Left — company info (desktop) / brand + title (mobile) */}
       <div className="flex items-center gap-2 min-w-0">
@@ -47,24 +72,8 @@ export default function TopBar({ title }) {
         )}
       </div>
 
-      <button
-        onClick={() => navigate('/settings')}
-        className="flex items-center gap-2.5 shrink-0 active:opacity-70 transition-opacity"
-      >
-        <div className="h-8 w-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-          {profile?.full_name?.charAt(0)?.toUpperCase() ?? '⚙'}
-        </div>
-        {profile && (
-          <div className="text-left">
-            <p className="text-white text-sm font-semibold leading-tight">
-              {profile.full_name || 'Account'}
-            </p>
-            <p className="text-brand-300 text-[11px] font-medium leading-tight">
-              {roleLabel[profile.role] ?? profile.role}
-            </p>
-          </div>
-        )}
-      </button>
+      {/* Right — always renders avatar + name + role together, never just the icon */}
+      <ProfileButton profile={profile} navigate={navigate} />
     </header>
   )
 }

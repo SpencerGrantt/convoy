@@ -12,6 +12,9 @@ const MOCK_OPPORTUNITIES = [
     reason: 'Direct match: VA medical logistics with SDVOSB set-aside',
     deadline: '2026-07-15',
     link: 'https://sam.gov',
+    noticeId: null,
+    naicsCode: '492110',
+    agency: 'Department of Veterans Affairs',
   },
   {
     title: 'Lab Courier Services — HHS Region 3',
@@ -19,6 +22,9 @@ const MOCK_OPPORTUNITIES = [
     reason: 'Strong fit: HHS lab courier aligns with NAICS 492110',
     deadline: '2026-07-30',
     link: 'https://sam.gov',
+    noticeId: null,
+    naicsCode: '492110',
+    agency: 'Department of Health and Human Services',
   },
   {
     title: 'DoD Medical Supply Delivery — SDVOSB Set-Aside',
@@ -26,6 +32,9 @@ const MOCK_OPPORTUNITIES = [
     reason: 'Good fit: SDVOSB set-aside for medical supply delivery',
     deadline: '2026-08-01',
     link: 'https://sam.gov',
+    noticeId: null,
+    naicsCode: '621610',
+    agency: 'Department of Defense',
   },
 ]
 
@@ -47,7 +56,7 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   try {
-    const { naicsCodes } = await req.json()
+    const { naicsCodes, title } = await req.json()
     const samApiKey = Deno.env.get('SAM_GOV_API_KEY')
 
     let opportunities = MOCK_OPPORTUNITIES
@@ -70,6 +79,10 @@ serve(async (req) => {
         // SAM.gov v2 accepts one naicsCode at a time
         if (naicsCodes?.[0]) {
           params.set('naicsCode', String(naicsCodes[0]).trim())
+        }
+        // Manual keyword search — matches against opportunity title
+        if (title?.trim()) {
+          params.set('title', title.trim())
         }
 
         const samUrl = `https://api.sam.gov/opportunities/v2/search?${params}`
@@ -99,6 +112,9 @@ serve(async (req) => {
               ].filter(Boolean).join(' — ') || 'Government opportunity',
               deadline: opp.responseDeadLine ?? opp.archiveDate ?? 'See SAM.gov',
               link: opp.uiLink ?? `https://sam.gov/opp/${opp.noticeId}/view`,
+              noticeId: opp.noticeId ?? null,
+              naicsCode: opp.naicsCode ?? null,
+              agency: opp.fullParentPathName?.split('.').pop()?.trim() ?? opp.department ?? null,
             }))
           }
         }

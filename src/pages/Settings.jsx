@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
@@ -12,6 +12,10 @@ export default function Settings() {
   const company = profile?.companies
 
   const [teamSize, setTeamSize] = useState(null)
+  const [teamMembers, setTeamMembers] = useState([])
+  const [teamLoading, setTeamLoading] = useState(true)
+  const [teamActionErr, setTeamActionErr] = useState('')
+  const [busyMemberId, setBusyMemberId] = useState(null)
   const [saving, setSaving]     = useState(false)
   const [saved, setSaved]       = useState(false)
   const [saveErr, setSaveErr]   = useState('')
@@ -44,6 +48,58 @@ export default function Settings() {
       .eq('company_id', profile.company_id)
       .then(({ count }) => setTeamSize(count ?? 1))
   }, [profile?.company_id])
+
+  const loadTeam = useCallback(() => {
+    if (!profile?.company_id) return
+    setTeamLoading(true)
+    supabase
+      .from('profiles')
+      .select('id, full_name, role, phone, created_at')
+      .eq('company_id', profile.company_id)
+      .order('created_at', { ascending: true })
+      .then(({ data }) => {
+        setTeamMembers(data ?? [])
+        setTeamLoading(false)
+      })
+  }, [profile?.company_id])
+
+  useEffect(() => { loadTeam() }, [loadTeam])
+
+  async function changeRole(memberId, role) {
+    setBusyMemberId(memberId)
+    setTeamActionErr('')
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-team', {
+        body: { action: 'update_role', target_id: memberId, role },
+      })
+      if (error) throw new Error(error.message)
+      if (data?.error) throw new Error(data.error)
+      loadTeam()
+    } catch (err) {
+      setTeamActionErr(err.message)
+    } finally {
+      setBusyMemberId(null)
+    }
+  }
+
+  async function removeMember(memberId) {
+    if (!window.confirm('Remove this team member? They will lose access to this company.')) return
+    setBusyMemberId(memberId)
+    setTeamActionErr('')
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-team', {
+        body: { action: 'remove', target_id: memberId },
+      })
+      if (error) throw new Error(error.message)
+      if (data?.error) throw new Error(data.error)
+      loadTeam()
+      setTeamSize(s => (s != null ? s - 1 : s))
+    } catch (err) {
+      setTeamActionErr(err.message)
+    } finally {
+      setBusyMemberId(null)
+    }
+  }
 
   // Sync form state if profile reloads
   useEffect(() => {
@@ -283,6 +339,59 @@ export default function Settings() {
 
         {/* ── Team tab ── */}
         {activeTab === 'team' && (
+          <>
+          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
+            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Team Members</h2>
+            {teamActionErr && <p className="text-red-400 text-xs font-medium">{teamActionErr}</p>}
+            {teamLoading && <p className="text-xs text-white/40">Loading…</p>}
+            {!teamLoading && teamMembers.length === 0 && (
+              <p className="text-xs text-white/40">No team members yet.</p>
+            )}
+            <div className="space-y-2">
+              {teamMembers.map(member => {
+                const isSelf = member.id === profile?.id
+                const initials = member.full_name?.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() ?? '?'
+                const busy = busyMemberId === member.id
+                return (
+                  <div key={member.id} className="flex items-center gap-3 bg-navy-800 rounded-xl px-3 py-2.5">
+                    <div className="h-8 w-8 rounded-full bg-brand-600/30 flex items-center justify-center text-brand-300 font-bold text-xs shrink-0">
+                      {initials}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white font-medium truncate">
+                        {member.full_name || 'Unnamed'} {isSelf && <span className="text-white/30 font-normal">(you)</span>}
+                      </p>
+                      <p className="text-xs text-white/40">{member.phone ?? 'No phone'}</p>
+                    </div>
+                    {profile?.role === 'owner' && !isSelf ? (
+                      <div className="flex items-center gap-2 shrink-0">
+                        <select
+                          value={member.role}
+                          disabled={busy}
+                          onChange={e => changeRole(member.id, e.target.value)}
+                          className="bg-navy-700 border border-white/10 text-white rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-50"
+                        >
+                          <option value="owner">Owner</option>
+                          <option value="dispatcher">Dispatcher</option>
+                          <option value="driver">Driver</option>
+                        </select>
+                        <button
+                          onClick={() => removeMember(member.id)}
+                          disabled={busy}
+                          className="text-xs text-red-400 font-medium bg-red-500/10 px-2 py-1.5 rounded-lg disabled:opacity-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-white/50 capitalize shrink-0 px-2 py-1">{member.role}</span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
           <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
             <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Invite Team Member</h2>
             <p className="text-xs text-white/40">They'll receive a magic link to set up their account.</p>
@@ -308,6 +417,7 @@ export default function Settings() {
               {inviting ? 'Sending…' : 'Send Invite'}
             </button>
           </div>
+          </>
         )}
 
         {activeTab !== 'team' && (

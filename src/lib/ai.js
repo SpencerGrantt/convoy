@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { invokeFn } from './supabase'
 
 export function buildSystemPrompt(company, runs = [], contracts = []) {
   return `You are an AI assistant built into Convoy, a logistics app for ${company?.name ?? 'your company'},
@@ -23,9 +23,9 @@ communications. Be concise and practical.`
 }
 
 export async function askAI(prompt, systemPrompt) {
-  const { data, error } = await supabase.functions.invoke('ai-proxy', {
+  const { data, error } = await invokeFn('ai-proxy', {
     body: { prompt, systemPrompt },
-  })
+  }, 30000)
   if (error) throw new Error(`Edge Function error: ${error.message}`)
   if (data?.error) throw new Error(`Anthropic error: ${JSON.stringify(data.error)}`)
   return data?.content?.[0]?.text ?? ''

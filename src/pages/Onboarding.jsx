@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { supabase } from '../lib/supabase'
+import { invokeFn } from '../lib/supabase'
 import {
   CheckCircle, ChevronRight, Building2, User, Shield,
   Users, Crown, Mail,
@@ -64,7 +64,7 @@ export default function Onboarding() {
   async function handleTeamFinish() {
     setSaving(true); setError('')
     try {
-      const { data, error: fnErr } = await supabase.functions.invoke('upsert-company', {
+      const { data, error: fnErr } = await invokeFn('upsert-company', {
         body: {
           full_name: fullName.trim(),
           company_id: company?.id ?? null,
@@ -88,7 +88,7 @@ export default function Onboarding() {
     setSaving(true); setError('')
     try {
       const naicsCodes = naics.split(',').map(s => s.trim()).filter(Boolean)
-      const { data, error: fnErr } = await supabase.functions.invoke('upsert-company', {
+      const { data, error: fnErr } = await invokeFn('upsert-company', {
         body: {
           name: companyName.trim() || 'My Company',
           cage_code: cageCode || null,

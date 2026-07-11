@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useContracts } from '../hooks/useContracts'
 import { useAuth } from '../hooks/useAuth'
-import { supabase } from '../lib/supabase'
+import { supabase, invokeFn } from '../lib/supabase'
 import StatusPill from '../components/ui/StatusPill'
 import AlertBanner from '../components/ui/AlertBanner'
 import TopBar from '../components/layout/TopBar'
@@ -64,7 +64,7 @@ async function samSearch({ naicsCode, title }) {
   }
 
   // Fallback: edge function (returns mock data if SAM.gov is unreachable from cloud)
-  const { data, error } = await supabase.functions.invoke('sam-gov-sync', {
+  const { data, error } = await invokeFn('sam-gov-sync', {
     body: { naicsCodes: naicsCode ? [naicsCode] : [], title },
   })
   if (error) throw error

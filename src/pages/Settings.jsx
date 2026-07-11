@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { supabase } from '../lib/supabase'
+import { supabase, invokeFn } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
 import { format, parseISO } from 'date-fns'
 import { Shield, Users, Calendar, Hash, Building2 } from 'lucide-react'
@@ -69,7 +69,7 @@ export default function Settings() {
     setBusyMemberId(memberId)
     setTeamActionErr('')
     try {
-      const { data, error } = await supabase.functions.invoke('manage-team', {
+      const { data, error } = await invokeFn('manage-team', {
         body: { action: 'update_role', target_id: memberId, role },
       })
       if (error) throw new Error(error.message)
@@ -87,7 +87,7 @@ export default function Settings() {
     setBusyMemberId(memberId)
     setTeamActionErr('')
     try {
-      const { data, error } = await supabase.functions.invoke('manage-team', {
+      const { data, error } = await invokeFn('manage-team', {
         body: { action: 'remove', target_id: memberId },
       })
       if (error) throw new Error(error.message)
@@ -138,7 +138,7 @@ export default function Settings() {
     setSaveErr('')
     try {
       const naicsCodes = naics.split(',').map(s => s.trim()).filter(Boolean)
-      const { data, error: fnErr } = await supabase.functions.invoke('upsert-company', {
+      const { data, error: fnErr } = await invokeFn('upsert-company', {
         body: {
           name: companyName,
           cage_code: cageCode || null,
@@ -376,6 +376,7 @@ export default function Settings() {
                           <option value="driver">Driver</option>
                         </select>
                         <button
+                          type="button"
                           onClick={() => removeMember(member.id)}
                           disabled={busy}
                           className="text-xs text-red-400 font-medium bg-red-500/10 px-2 py-1.5 rounded-lg disabled:opacity-50"

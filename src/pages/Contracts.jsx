@@ -14,44 +14,52 @@ function fmtSamDate(d) {
   return day
 }
 
-// Shared SAM.gov lookup — tries a direct browser call first (avoids AWS IP
-// blocking on Supabase's edge network), falls back to the sam-gov-sync
-// edge function which returns mock data if SAM.gov is unreachable.
+// Shared SAM.gov lookup — tries a direct browser call first, falls back to
+// the sam-gov-sync edge function (which itself falls back to mock data) if
+// the direct call fails for any reason. SAM.gov's API commonly rejects
+// direct browser requests via CORS, so the direct path failing is expected
+// and must not be treated as a hard error — always fall through instead.
 async function samSearch({ naicsCode, title }) {
   const samKey = import.meta.env.VITE_SAM_GOV_API_KEY
 
   if (samKey) {
-    const ninetyDaysAgo = new Date()
-    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+    try {
+      const ninetyDaysAgo = new Date()
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
 
-    const params = new URLSearchParams({
-      api_key: samKey,
-      limit: '10',
-      postedFrom: fmtSamDate(ninetyDaysAgo),
-      postedTo: fmtSamDate(new Date()),
-      active: 'Yes',
-    })
-    if (naicsCode) params.set('naicsCode', String(naicsCode).trim())
-    if (title?.trim()) params.set('title', title.trim())
+      const params = new URLSearchParams({
+        api_key: samKey,
+        limit: '10',
+        postedFrom: fmtSamDate(ninetyDaysAgo),
+        postedTo: fmtSamDate(new Date()),
+        active: 'Yes',
+      })
+      if (naicsCode) params.set('naicsCode', String(naicsCode).trim())
+      if (title?.trim()) params.set('title', title.trim())
 
-    const res = await fetch(`https://api.sam.gov/opportunities/v2/search?${params}`)
-    if (!res.ok) throw new Error(`SAM.gov returned ${res.status}`)
-    const json = await res.json()
-    const raw = json.opportunitiesData ?? []
-    if (raw.length) {
-      return {
-        live: true,
-        opportunities: raw.slice(0, 5).map((opp, i) => ({
-          title: opp.title ?? 'Untitled Opportunity',
-          score: Math.max(6, 8 - i),
-          reason: [opp.typeOfSetAsideDescription, opp.naicsCode ? `NAICS ${opp.naicsCode}` : null, opp.baseType].filter(Boolean).join(' — ') || 'Government opportunity',
-          deadline: opp.responseDeadLine ?? opp.archiveDate ?? 'See SAM.gov',
-          link: opp.uiLink ?? `https://sam.gov/opp/${opp.noticeId}/view`,
-          noticeId: opp.noticeId ?? null,
-          naicsCode: opp.naicsCode ?? null,
-          agency: opp.fullParentPathName?.split('.').pop()?.trim() ?? opp.department ?? null,
-        })),
+      const res = await fetch(`https://api.sam.gov/opportunities/v2/search?${params}`)
+      if (!res.ok) throw new Error(`SAM.gov returned ${res.status}`)
+      const json = await res.json()
+      const raw = json.opportunitiesData ?? []
+      if (raw.length) {
+        return {
+          live: true,
+          opportunities: raw.slice(0, 5).map((opp, i) => ({
+            title: opp.title ?? 'Untitled Opportunity',
+            score: Math.max(6, 8 - i),
+            reason: [opp.typeOfSetAsideDescription, opp.naicsCode ? `NAICS ${opp.naicsCode}` : null, opp.baseType].filter(Boolean).join(' — ') || 'Government opportunity',
+            deadline: opp.responseDeadLine ?? opp.archiveDate ?? 'See SAM.gov',
+            link: opp.uiLink ?? `https://sam.gov/opp/${opp.noticeId}/view`,
+            noticeId: opp.noticeId ?? null,
+            naicsCode: opp.naicsCode ?? null,
+            agency: opp.fullParentPathName?.split('.').pop()?.trim() ?? opp.department ?? null,
+          })),
+        }
       }
+      // Direct call succeeded but returned zero results — fall through to
+      // the edge function rather than reporting "no matches" prematurely.
+    } catch (directErr) {
+      console.warn('[samSearch] direct SAM.gov call failed, falling back to edge function:', directErr.message)
     }
   }
 

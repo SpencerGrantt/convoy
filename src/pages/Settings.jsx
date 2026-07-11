@@ -152,7 +152,8 @@ export default function Settings() {
       })
       if (fnErr) throw new Error(fnErr.message)
       if (data?.error) throw new Error(data.error)
-      if (data?.profile) setProfileDirect(data.profile)
+      if (!data?.profile) throw new Error('Save did not complete — please try again.')
+      setProfileDirect(data.profile)
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
     } catch (err) {

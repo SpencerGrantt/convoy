@@ -74,7 +74,8 @@ export default function Onboarding() {
       })
       if (fnErr) throw new Error(fnErr.message)
       if (data?.error) throw new Error(data.error)
-      if (data?.profile) setProfileDirect(data.profile)
+      if (!data?.profile) throw new Error('Save did not complete — please try again.')
+      setProfileDirect(data.profile)
       setStep(3)
     } catch (err) {
       setError(err.message)
@@ -103,7 +104,8 @@ export default function Onboarding() {
       })
       if (fnErr) throw new Error(fnErr.message)
       if (data?.error) throw new Error(data.error)
-      if (data?.profile) setProfileDirect(data.profile)
+      if (!data?.profile) throw new Error('Save did not complete — please try again.')
+      setProfileDirect(data.profile)
       setStep(3)
     } catch (err) {
       setError(err.message)

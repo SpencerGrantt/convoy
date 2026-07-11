@@ -70,18 +70,23 @@ serve(async (req) => {
     if (body.onboarding_complete === true) profileUpdate.onboarding_complete = true
 
     if (Object.keys(profileUpdate).length > 0) {
-      const { error: profileErr } = await admin
+      const { data: updatedRows, error: profileErr } = await admin
         .from('profiles')
         .update(profileUpdate)
         .eq('id', user.id)
+        .select('id')
       if (profileErr) throw new Error(profileErr.message)
+      if (!updatedRows || updatedRows.length === 0) {
+        throw new Error('No profile record found for this account — please sign out and back in, then try again.')
+      }
     }
 
-    const { data: profile } = await admin
+    const { data: profile, error: fetchErr } = await admin
       .from('profiles')
       .select('*, companies(*)')
       .eq('id', user.id)
       .single()
+    if (fetchErr) throw new Error(fetchErr.message)
 
     return new Response(JSON.stringify({ profile }), {
       headers: { 'Content-Type': 'application/json', ...CORS },

@@ -56,19 +56,24 @@ serve(async (req) => {
     const profileUpdate: Record<string, unknown> = { company_id: company.id }
     if (body.full_name !== undefined) profileUpdate.full_name = body.full_name
 
-    const { error: profileErr } = await admin
+    const { data: updatedRows, error: profileErr } = await admin
       .from('profiles')
       .update(profileUpdate)
       .eq('id', user.id)
+      .select('id')
 
     if (profileErr) throw new Error(profileErr.message)
+    if (!updatedRows || updatedRows.length === 0) {
+      throw new Error('No profile record found for this account — please sign out and back in, then try again.')
+    }
 
     // Return the full profile + company so the client can refresh
-    const { data: profile } = await admin
+    const { data: profile, error: fetchErr } = await admin
       .from('profiles')
       .select('*, companies(*)')
       .eq('id', user.id)
       .single()
+    if (fetchErr) throw new Error(fetchErr.message)
 
     return new Response(JSON.stringify({ company, profile }), {
       headers: { 'Content-Type': 'application/json', ...CORS },

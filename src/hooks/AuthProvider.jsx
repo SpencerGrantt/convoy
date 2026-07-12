@@ -15,6 +15,11 @@ export function AuthProvider({ children }) {
         if (!mounted) return
         setSession(session)
         if (session) {
+          // A new session (e.g. just signed in) means profile is stale/null
+          // until this resolves — without this, AuthGate briefly sees
+          // "logged in, no profile yet" and flashes the onboarding redirect
+          // before correcting itself once the real profile loads.
+          setLoading(true)
           await fetchOrCreateProfile(session.user.id)
         } else {
           setProfile(null)

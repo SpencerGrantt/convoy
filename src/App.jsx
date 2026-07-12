@@ -21,12 +21,15 @@ const Finances         = lazy(() => import('./pages/Finances'))
 const Drivers          = lazy(() => import('./pages/Drivers'))
 const Settings         = lazy(() => import('./pages/Settings'))
 
-// Redirect to onboarding until the user completes setup
+// Redirect to onboarding until the user completes setup — including the
+// case where profile is still null (e.g. first-login auto-provisioning
+// failed silently), which used to fall through and render a broken app
+// with no profile data instead of ever reaching onboarding.
 function AuthGate({ children }) {
   const { session, profile, loading } = useAuth()
   if (loading) return <LoadingSpinner />
   if (!session) return <Navigate to="/login" replace />
-  if (profile && profile.onboarding_complete === false) return <Navigate to="/onboarding" replace />
+  if (!profile || profile.onboarding_complete === false) return <Navigate to="/onboarding" replace />
   return children
 }
 

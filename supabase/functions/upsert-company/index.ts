@@ -76,8 +76,20 @@ serve(async (req) => {
         .eq('id', user.id)
         .select('id')
       if (profileErr) throw new Error(profileErr.message)
+
+      // No existing row to update — this account's profile was never
+      // provisioned (e.g. client-side auto-creation on first login failed
+      // silently). Create it now instead of erroring, so onboarding is
+      // always able to self-heal a broken account rather than dead-ending.
       if (!updatedRows || updatedRows.length === 0) {
-        throw new Error('No profile record found for this account — please sign out and back in, then try again.')
+        const { error: insertErr } = await admin.from('profiles').insert({
+          id: user.id,
+          company_id: (profileUpdate.company_id as string | undefined) ?? companyId,
+          full_name: (profileUpdate.full_name as string | undefined) ?? '',
+          role: 'owner',
+          onboarding_complete: (profileUpdate.onboarding_complete as boolean | undefined) ?? false,
+        })
+        if (insertErr) throw new Error(insertErr.message)
       }
     }
 

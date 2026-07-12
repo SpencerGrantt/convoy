@@ -63,8 +63,16 @@ serve(async (req) => {
       .select('id')
 
     if (profileErr) throw new Error(profileErr.message)
+
+    // No existing row to update — provision it now instead of erroring.
     if (!updatedRows || updatedRows.length === 0) {
-      throw new Error('No profile record found for this account — please sign out and back in, then try again.')
+      const { error: insertErr } = await admin.from('profiles').insert({
+        id: user.id,
+        company_id: company.id,
+        full_name: (profileUpdate.full_name as string | undefined) ?? '',
+        role: 'owner',
+      })
+      if (insertErr) throw new Error(insertErr.message)
     }
 
     // Return the full profile + company so the client can refresh

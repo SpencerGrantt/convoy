@@ -5,35 +5,13 @@ import { supabase, invokeFn } from '../lib/supabase'
 import StatusPill from '../components/ui/StatusPill'
 import AlertBanner from '../components/ui/AlertBanner'
 import TopBar from '../components/layout/TopBar'
-import { format, differenceInDays, parseISO, isValid } from 'date-fns'
+import { format, differenceInDays, parseISO } from 'date-fns'
 
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
 
 function fmtSamDate(d) {
   const day = String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0') + '/' + d.getFullYear()
   return day
-}
-
-// date-fns' format() throws on an invalid Date rather than degrading
-// gracefully — guard every date coming from the DB/SAM.gov so a malformed
-// value can't crash the whole page (see incident_2026-07-12).
-function safeFormatDate(value, fmt) {
-  if (!value) return null
-  const d = parseISO(value)
-  return isValid(d) ? format(d, fmt) : null
-}
-
-// Same validity guard used before persisting a SAM.gov date to the DB.
-function safeIsoDate(value) {
-  return value && !isNaN(Date.parse(value)) ? value : null
-}
-
-// Best-effort fallback for opportunities whose place-of-performance state
-// isn't populated in the SAM.gov response — a lot of listings put it in
-// the title instead (e.g. "... at DFSP Tampa, FL").
-function guessStateFromTitle(title) {
-  const m = /,\s*([A-Z]{2})\b/.exec(title || '')
-  return m ? m[1] : null
 }
 
 // Shared SAM.gov lookup — tries a direct browser call first, falls back to
@@ -73,19 +51,8 @@ async function samSearch({ naicsCode, title }) {
             deadline: opp.responseDeadLine ?? opp.archiveDate ?? 'See SAM.gov',
             link: opp.uiLink ?? `https://sam.gov/opp/${opp.noticeId}/view`,
             noticeId: opp.noticeId ?? null,
-            solicitationNumber: opp.solicitationNumber ?? null,
             naicsCode: opp.naicsCode ?? null,
             agency: opp.fullParentPathName?.split('.').pop()?.trim() ?? opp.department ?? null,
-            department: opp.department ?? null,
-            subtier: opp.subTier ?? null,
-            office: opp.office ?? null,
-            noticeType: opp.type ?? null,
-            offersDue: safeIsoDate(opp.responseDeadLine),
-            publishedDate: safeIsoDate(opp.postedDate),
-            state: opp.placeOfPerformance?.state?.code
-              ?? opp.officeAddress?.state?.code
-              ?? guessStateFromTitle(opp.title)
-              ?? null,
           })),
         }
       }
@@ -121,18 +88,10 @@ function OpportunityCard({ opp, companyId, defaultNaics, onSaved }) {
         name: opp.title,
         agency: opp.agency ?? null,
         contract_number: opp.noticeId ?? null,
-        solicitation_number: opp.solicitationNumber ?? null,
-        notice_type: opp.noticeType ?? null,
-        department: opp.department ?? null,
-        subtier: opp.subtier ?? null,
-        office: opp.office ?? null,
         naics_code: opp.naicsCode ?? defaultNaics ?? null,
         status: 'pending',
         sam_link: opp.link ?? null,
         end_date,
-        offers_due_at: opp.offersDue ?? null,
-        published_at: opp.publishedDate ?? null,
-        state: opp.state ?? null,
         notes: opp.reason ?? null,
       })
       if (error) throw error
@@ -154,18 +113,8 @@ function OpportunityCard({ opp, companyId, defaultNaics, onSaved }) {
         <p className="text-xs font-semibold text-white flex-1 truncate">{opp.title}</p>
       </div>
       <p className="text-xs text-white/50">{opp.reason}</p>
-      {(opp.department || opp.subtier || opp.office) && (
-        <p className="text-xs text-white/40">
-          {[opp.department, opp.subtier, opp.office].filter(Boolean).join(' › ')}
-        </p>
-      )}
-      <div className="flex items-center gap-2 flex-wrap">
-        {opp.solicitationNumber && <span className="text-xs text-white/40">#{opp.solicitationNumber}</span>}
-        {opp.noticeType && <span className="text-xs bg-white/[0.06] text-white/50 px-1.5 py-0.5 rounded font-medium">{opp.noticeType}</span>}
-        {opp.state && <span className="text-xs bg-white/[0.06] text-white/50 px-1.5 py-0.5 rounded font-medium">{opp.state}</span>}
-      </div>
       <div className="flex items-center justify-between gap-2">
-        {opp.deadline && <p className="text-xs text-white/40">Offers Due: {opp.deadline}</p>}
+        {opp.deadline && <p className="text-xs text-white/40">Deadline: {opp.deadline}</p>}
         <button
           onClick={saveAsContract}
           disabled={saving || saved}
@@ -197,10 +146,6 @@ export default function Contracts() {
   const [manualMatched, setManualMatched] = useState(false)
   const [manualError, setManualError] = useState('')
   const [manualLive, setManualLive] = useState(false)
-
-  const [stateFilter, setStateFilter] = useState('all')
-  const availableStates = [...new Set(contracts.map(c => c.state).filter(Boolean))].sort()
-  const visibleContracts = stateFilter === 'all' ? contracts : contracts.filter(c => c.state === stateFilter)
 
   async function findOpportunities() {
     setMatching(true)
@@ -263,8 +208,8 @@ export default function Contracts() {
               <span>CAGE: <strong className="text-white">{company.cage_code ?? '—'}</strong></span>
               <span>UEI: <strong className="text-white">{company.uei ?? '—'}</strong></span>
               <span className="col-span-2">NAICS: <strong className="text-white">{company.naics_codes?.join(', ') ?? '—'}</strong></span>
-              {safeFormatDate(company.sam_expiry, 'MMM d, yyyy') && (
-                <span className="col-span-2">SAM Expiry: <strong className="text-white">{safeFormatDate(company.sam_expiry, 'MMM d, yyyy')}</strong></span>
+              {company.sam_expiry && (
+                <span className="col-span-2">SAM Expiry: <strong className="text-white">{format(parseISO(company.sam_expiry), 'MMM d, yyyy')}</strong></span>
               )}
             </div>
           </div>
@@ -326,72 +271,33 @@ export default function Contracts() {
           ))}
         </div>
 
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Contracts</h2>
-          {availableStates.length > 0 && (
-            <select
-              value={stateFilter}
-              onChange={e => setStateFilter(e.target.value)}
-              className={fieldClass + ' w-auto text-xs py-1.5'}
-            >
-              <option value="all">All States</option>
-              {availableStates.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          )}
-        </div>
+        <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Contracts</h2>
         <div className="space-y-2">
-          {!loading && visibleContracts.length === 0 && (
-            <p className="text-sm text-white/40 text-center py-4">
-              {contracts.length === 0 ? 'No contracts yet' : `No contracts in ${stateFilter}`}
-            </p>
-          )}
-          {visibleContracts.map(c => {
-            const endLabel = safeFormatDate(c.end_date, 'MMM d, yy')
-            const dueLabel = safeFormatDate(c.offers_due_at, 'MMM d, yy')
-            return (
-              <div key={c.id} className="bg-navy-700 rounded-xl p-4 border border-white/[0.07]">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <p className="font-semibold text-white text-sm">{c.name}</p>
-                      <StatusPill status={c.status} />
-                      {c.notice_type && (
-                        <span className="text-xs bg-white/[0.06] text-white/50 px-1.5 py-0.5 rounded font-medium">{c.notice_type}</span>
-                      )}
-                      {c.state && (
-                        <span className="text-xs bg-white/[0.06] text-white/50 px-1.5 py-0.5 rounded font-medium">{c.state}</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-white/50">{c.agency} · #{c.solicitation_number || c.contract_number}</p>
-                    {(c.department || c.subtier || c.office) && (
-                      <p className="text-xs text-white/40 mt-0.5">
-                        {[c.department, c.subtier, c.office].filter(Boolean).join(' › ')}
-                      </p>
-                    )}
-                    {c.annual_value && (
-                      <p className="text-xs text-green-400 font-semibold mt-1">
-                        ${Number(c.annual_value).toLocaleString()} / yr
-                      </p>
-                    )}
+          {!loading && contracts.length === 0 && <p className="text-sm text-white/40 text-center py-4">No contracts yet</p>}
+          {contracts.map(c => (
+            <div key={c.id} className="bg-navy-700 rounded-xl p-4 border border-white/[0.07]">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-semibold text-white text-sm">{c.name}</p>
+                    <StatusPill status={c.status} />
                   </div>
-                  <div className="text-right text-xs text-white/40 shrink-0 space-y-1.5">
-                    {dueLabel && (
-                      <div>
-                        <p>Offers Due</p>
-                        <p className="font-medium text-white/60">{dueLabel}</p>
-                      </div>
-                    )}
-                    {endLabel && (
-                      <div>
-                        <p>Ends</p>
-                        <p className="font-medium text-white/60">{endLabel}</p>
-                      </div>
-                    )}
-                  </div>
+                  <p className="text-xs text-white/50">{c.agency} · #{c.contract_number}</p>
+                  {c.annual_value && (
+                    <p className="text-xs text-green-400 font-semibold mt-1">
+                      ${Number(c.annual_value).toLocaleString()} / yr
+                    </p>
+                  )}
                 </div>
+                {c.end_date && (
+                  <div className="text-right text-xs text-white/40 shrink-0">
+                    <p>Ends</p>
+                    <p className="font-medium text-white/60">{format(parseISO(c.end_date), 'MMM d, yy')}</p>
+                  </div>
+                )}
               </div>
-            )
-          })}
+            </div>
+          ))}
         </div>
       </div>
     </div>

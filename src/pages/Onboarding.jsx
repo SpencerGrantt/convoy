@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { invokeFn } from '../lib/supabase'
-import { roleLabel } from '../lib/roles'
 import {
   CheckCircle, ChevronRight, Building2, User, Shield,
   Users, Crown, Mail,
@@ -19,19 +18,12 @@ export default function Onboarding() {
   const navigate = useNavigate()
   const company = profile?.companies
 
-  // An invite link sets role/company_id on the auth user before this page
-  // ever mounts (see AuthProvider.fetchOrCreateProfile), so a non-owner
-  // role here means this account was provisioned by an invite — skip the
-  // "Admin vs Team" chooser and drop straight into the team flow for them.
-  const invited = !!(profile?.role && profile.role !== 'owner')
-
-  const [path, setPath]   = useState(invited ? 'team' : null)
-  const [step, setStep]   = useState(invited ? 1 : 0)
+  const [path, setPath]   = useState(null)
+  const [step, setStep]   = useState(0)
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState('')
 
   const [fullName, setFullName]       = useState(profile?.full_name ?? '')
-  const [phone, setPhone]             = useState(profile?.phone ?? '')
   const [companyName, setCompanyName] = useState(
     company?.name && company.name !== 'My Company' ? company.name : ''
   )
@@ -75,7 +67,6 @@ export default function Onboarding() {
       const { data, error: fnErr } = await invokeFn('upsert-company', {
         body: {
           full_name: fullName.trim(),
-          phone: phone.trim() || null,
           company_id: company?.id ?? null,
           skip_company: true,
           onboarding_complete: true,
@@ -225,11 +216,9 @@ export default function Onboarding() {
             </div>
             <h2 className="text-2xl font-bold text-white">About you</h2>
             <p className="text-white/45 text-sm">
-              {invited
-                ? `You're joining ${company?.name ?? 'your team'} as a ${roleLabel[profile?.role] ?? 'team member'}.`
-                : path === 'team'
-                  ? "Your admin's invite email will link you to the team automatically."
-                  : 'Quick intro before setting up your company.'}
+              {path === 'team'
+                ? "Your admin's invite email will link you to the team automatically."
+                : 'Quick intro before setting up your company.'}
             </p>
           </div>
 
@@ -246,22 +235,7 @@ export default function Onboarding() {
               />
             </div>
 
-            {invited && profile?.role === 'driver' && (
-              <div>
-                <label className="block text-xs text-white/50 mb-1.5 font-medium">
-                  Phone Number <span className="text-white/25">(optional)</span>
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  placeholder="(555) 123-4567"
-                  className={fieldClass}
-                />
-              </div>
-            )}
-
-            {path === 'team' && !invited && (
+            {path === 'team' && (
               <div className="flex items-start gap-3 bg-brand-600/10 border border-brand-600/20 rounded-xl p-3">
                 <Mail size={15} className="text-brand-400 shrink-0 mt-0.5" />
                 <p className="text-xs text-brand-200/80 leading-snug">
@@ -274,7 +248,7 @@ export default function Onboarding() {
               <label className="block text-xs text-white/50 mb-1.5 font-medium">Role</label>
               <div className="px-4 py-2.5 bg-white/[0.04] rounded-xl border border-white/[0.06]">
                 <span className="text-sm text-white/55 capitalize">
-                  {path === 'admin' ? 'Administrator' : roleLabel[profile?.role] ?? 'Driver'}
+                  {path === 'admin' ? 'Administrator' : profile?.role ?? 'Driver'}
                 </span>
               </div>
             </div>
@@ -283,12 +257,10 @@ export default function Onboarding() {
           {error && <p className="text-red-400 text-xs font-medium text-center">{error}</p>}
 
           <div className="flex gap-3">
-            {!invited && (
-              <button type="button" onClick={() => { setStep(0); setPath(null) }}
-                className="px-5 py-3.5 bg-white/8 hover:bg-white/12 text-white/60 font-semibold rounded-xl transition-colors">
-                Back
-              </button>
-            )}
+            <button type="button" onClick={() => { setStep(0); setPath(null) }}
+              className="px-5 py-3.5 bg-white/8 hover:bg-white/12 text-white/60 font-semibold rounded-xl transition-colors">
+              Back
+            </button>
             <button
               type="submit"
               disabled={saving || !fullName.trim()}
@@ -396,11 +368,7 @@ export default function Onboarding() {
             <p className="text-white/45 text-sm">
               {path === 'admin'
                 ? `${companyName || 'Your company'} is ready. Start creating runs, scanning contracts, or invite your team.`
-                : invited
-                  ? profile?.role === 'driver'
-                    ? `You're ready to start receiving runs from ${company?.name ?? 'your team'}.`
-                    : `You're ready to help manage runs for ${company?.name ?? 'your team'}.`
-                  : 'Your profile is set up.'}
+                : 'Your profile is set up. Check your email for your admin\'s invite to join the team.'}
             </p>
           </div>
 
@@ -414,10 +382,8 @@ export default function Onboarding() {
             ) : (
               <>
                 <CheckRow icon={<CheckCircle size={14} className="text-green-400" />} label="Profile created" />
-                <CheckRow icon={<CheckCircle size={14} className="text-green-400" />} label={invited ? `Added to ${company?.name ?? 'the team'}` : 'AI assistant activated'} />
-                {invited && (
-                  <CheckRow icon={<CheckCircle size={14} className="text-green-400" />} label={profile?.role === 'driver' ? 'Ready to receive run assignments' : 'Dispatch tools activated'} />
-                )}
+                <CheckRow icon={<Mail size={14} className="text-brand-400" />} label="Awaiting admin's invite email" />
+                <CheckRow icon={<CheckCircle size={14} className="text-green-400" />} label="AI assistant activated" />
               </>
             )}
           </div>

@@ -4,8 +4,7 @@ import { Home, Truck, FileText, DollarSign, Settings, Plus, X } from 'lucide-rea
 import { useAuth } from '../../hooks/useAuth'
 import { useDrivers } from '../../hooks/useDrivers'
 import { supabase } from '../../lib/supabase'
-
-const roleLabel = { owner: 'Head Admin', dispatcher: 'Dispatcher', driver: 'Driver' }
+import { roleLabel } from '../../lib/roles'
 
 const allNavItems = [
   { to: '/',          icon: Home,       label: 'Dashboard', roles: ['owner', 'dispatcher', 'driver'] },

@@ -66,6 +66,7 @@ serve(async (req) => {
 
     const profileUpdate: Record<string, unknown> = {}
     if (body.full_name !== undefined) profileUpdate.full_name = body.full_name
+    if (body.phone !== undefined) profileUpdate.phone = body.phone
     if (!body.company_id) profileUpdate.company_id = companyId
     if (body.onboarding_complete === true) profileUpdate.onboarding_complete = true
 
@@ -86,6 +87,7 @@ serve(async (req) => {
           id: user.id,
           company_id: (profileUpdate.company_id as string | undefined) ?? companyId,
           full_name: (profileUpdate.full_name as string | undefined) ?? '',
+          phone: (profileUpdate.phone as string | undefined) ?? null,
           role: 'owner',
           onboarding_complete: (profileUpdate.onboarding_complete as boolean | undefined) ?? false,
         })

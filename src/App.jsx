@@ -6,6 +6,7 @@ import Sidebar from './components/layout/Sidebar'
 import MobileNav from './components/layout/MobileNav'
 import AiFloatingWidget from './components/AiFloatingWidget'
 import LoadingSpinner from './components/ui/LoadingSpinner'
+import ErrorBoundary from './components/ui/ErrorBoundary'
 
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
@@ -30,7 +31,9 @@ function AuthGate({ children }) {
   if (loading) return <LoadingSpinner />
   if (!session) return <Navigate to="/login" replace />
   if (!profile || profile.onboarding_complete === false) return <Navigate to="/onboarding" replace />
-  return children
+  // Isolate render errors to the current route — a bug on one page
+  // shouldn't blank the whole app for every route.
+  return <ErrorBoundary>{children}</ErrorBoundary>
 }
 
 // Onboarding is only accessible while onboarding is incomplete
@@ -39,7 +42,7 @@ function OnboardingGate() {
   if (loading) return <LoadingSpinner />
   if (!session) return <Navigate to="/login" replace />
   if (profile?.onboarding_complete) return <Navigate to="/" replace />
-  return <Onboarding />
+  return <ErrorBoundary><Onboarding /></ErrorBoundary>
 }
 
 // Home renders the right dashboard based on role

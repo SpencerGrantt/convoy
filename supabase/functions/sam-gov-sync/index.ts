@@ -7,14 +7,40 @@ const CORS = {
 
 const MOCK_OPPORTUNITIES = [
   {
+    title: 'Government Owned Contractor Operated Fuel Storage Facility at DFSP Tampa, FL',
+    score: 8,
+    reason: 'Direct match: DLA Energy GOCO facility opportunity',
+    deadline: '2026-07-23',
+    link: 'https://sam.gov',
+    noticeId: null,
+    solicitationNumber: 'SPE60326R0518',
+    naicsCode: '492110',
+    agency: 'Defense Logistics Agency',
+    department: 'DEPT OF DEFENSE',
+    subtier: 'DEFENSE LOGISTICS AGENCY',
+    office: 'DLA ENERGY',
+    noticeType: 'Updated Solicitation',
+    offersDue: '2026-07-23T14:00:00-04:00',
+    publishedDate: '2026-07-01',
+    state: 'FL',
+  },
+  {
     title: 'Medical Specimen Transport — VA Medical Center',
     score: 8,
     reason: 'Direct match: VA medical logistics with SDVOSB set-aside',
     deadline: '2026-07-15',
     link: 'https://sam.gov',
     noticeId: null,
+    solicitationNumber: null,
     naicsCode: '492110',
     agency: 'Department of Veterans Affairs',
+    department: 'VETERANS AFFAIRS, DEPARTMENT OF',
+    subtier: null,
+    office: null,
+    noticeType: 'Solicitation',
+    offersDue: null,
+    publishedDate: null,
+    state: null,
   },
   {
     title: 'Lab Courier Services — HHS Region 3',
@@ -23,8 +49,16 @@ const MOCK_OPPORTUNITIES = [
     deadline: '2026-07-30',
     link: 'https://sam.gov',
     noticeId: null,
+    solicitationNumber: null,
     naicsCode: '492110',
     agency: 'Department of Health and Human Services',
+    department: 'HEALTH AND HUMAN SERVICES, DEPARTMENT OF',
+    subtier: null,
+    office: null,
+    noticeType: 'Solicitation',
+    offersDue: null,
+    publishedDate: null,
+    state: null,
   },
   {
     title: 'DoD Medical Supply Delivery — SDVOSB Set-Aside',
@@ -33,10 +67,26 @@ const MOCK_OPPORTUNITIES = [
     deadline: '2026-08-01',
     link: 'https://sam.gov',
     noticeId: null,
+    solicitationNumber: null,
     naicsCode: '621610',
     agency: 'Department of Defense',
+    department: 'DEPT OF DEFENSE',
+    subtier: null,
+    office: null,
+    noticeType: 'Solicitation',
+    offersDue: null,
+    publishedDate: null,
+    state: null,
   },
 ]
+
+// Best-effort fallback for opportunities whose place-of-performance state
+// isn't populated in the SAM.gov response — a lot of listings put it in
+// the title instead (e.g. "... at DFSP Tampa, FL").
+function guessStateFromTitle(title?: string | null): string | null {
+  const m = /,\s*([A-Z]{2})\b/.exec(title ?? '')
+  return m ? m[1] : null
+}
 
 function mmddyyyy(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, '0')
@@ -113,8 +163,19 @@ serve(async (req) => {
               deadline: opp.responseDeadLine ?? opp.archiveDate ?? 'See SAM.gov',
               link: opp.uiLink ?? `https://sam.gov/opp/${opp.noticeId}/view`,
               noticeId: opp.noticeId ?? null,
+              solicitationNumber: opp.solicitationNumber ?? null,
               naicsCode: opp.naicsCode ?? null,
               agency: opp.fullParentPathName?.split('.').pop()?.trim() ?? opp.department ?? null,
+              department: opp.department ?? null,
+              subtier: opp.subTier ?? null,
+              office: opp.office ?? null,
+              noticeType: opp.type ?? null,
+              offersDue: opp.responseDeadLine ?? null,
+              publishedDate: opp.postedDate ?? null,
+              state: opp.placeOfPerformance?.state?.code
+                ?? opp.officeAddress?.state?.code
+                ?? guessStateFromTitle(opp.title)
+                ?? null,
             }))
           }
         }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { invokeFn } from '../lib/supabase'
@@ -115,6 +115,14 @@ export default function Onboarding() {
   }
 
   const firstName = fullName.trim().split(' ')[0] || 'there'
+
+  // Auto-advance off the Done screen into the dashboard — the checkmarks
+  // are shown briefly for confirmation, then it just takes you in.
+  useEffect(() => {
+    if (step !== 3) return
+    const timer = setTimeout(() => navigate('/', { replace: true }), 2000)
+    return () => clearTimeout(timer)
+  }, [step, navigate])
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (

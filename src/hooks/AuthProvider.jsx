@@ -94,9 +94,14 @@ export function AuthProvider({ children }) {
 
   async function signOut() {
     try {
-      await supabase.auth.signOut()
+      // supabase.auth.signOut() has no built-in timeout — if that network
+      // call hangs, local state must still clear so the user isn't stuck.
+      await Promise.race([
+        supabase.auth.signOut(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Sign out timed out')), 8000)),
+      ])
     } catch {
-      // ignore — clear state regardless
+      // ignore — clear local state regardless of timeout or real error
     } finally {
       setSession(null)
       setProfile(null)

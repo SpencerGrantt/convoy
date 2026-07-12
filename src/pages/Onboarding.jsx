@@ -14,7 +14,7 @@ const fieldClass = 'w-full bg-white/[0.07] border border-white/10 text-white rou
 // path: 'team'   = joining existing team  → steps 1, 3
 
 export default function Onboarding() {
-  const { profile, setProfileDirect } = useAuth()
+  const { session, profile, setProfileDirect, signOut } = useAuth()
   const navigate = useNavigate()
   const company = profile?.companies
 
@@ -387,6 +387,15 @@ export default function Onboarding() {
             Go to Dashboard <ChevronRight size={18} />
           </button>
         </div>
+      )}
+
+      {session?.user?.email && (
+        <p className="text-center text-xs text-white/25 mt-8">
+          Signed in as {session.user.email} ·{' '}
+          <button type="button" onClick={signOut} className="text-white/40 hover:text-white/60 underline transition-colors">
+            Sign out
+          </button>
+        </p>
       )}
     </div>
   )

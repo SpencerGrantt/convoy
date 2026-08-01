@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, processLock } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -9,7 +9,19 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(
   supabaseUrl ?? 'https://placeholder.supabase.co',
-  supabaseAnonKey ?? 'placeholder-key'
+  supabaseAnonKey ?? 'placeholder-key',
+  {
+    auth: {
+      // Default auth uses navigator.locks (Web Locks API) to coordinate
+      // session refresh across tabs. If a tab dies/crashes mid-refresh, the
+      // browser can leave that lock permanently held for the whole profile —
+      // every future tab/reload then hangs forever waiting on it (only a full
+      // browser restart clears it), which silently strands the user with no
+      // profile loaded. processLock keeps the same coordination in-memory
+      // per tab instead, so a dead tab can never orphan a lock for others.
+      lock: processLock,
+    },
+  }
 )
 
 // supabase.functions.invoke() has no built-in timeout — if the target

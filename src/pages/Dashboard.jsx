@@ -72,9 +72,13 @@ export default function Dashboard() {
   const openContracts = contracts.filter(c => c.status === 'active').length
 
   const samDaysLeft = company?.sam_expiry ? safeDifferenceInDays(company.sam_expiry, today) : null
+  const expiredContracts = contracts.filter(c => {
+    const days = safeDifferenceInDays(c.end_date, today)
+    return days !== null && days < 0
+  })
   const expiringContracts = contracts.filter(c => {
     const days = safeDifferenceInDays(c.end_date, today)
-    return days !== null && days <= 30
+    return days !== null && days >= 0 && days <= 30
   })
 
   return (
@@ -87,6 +91,13 @@ export default function Dashboard() {
             message={`SAM.gov expires in ${samDaysLeft} day${samDaysLeft === 1 ? '' : 's'} — renew immediately to keep government contracts active.`}
           />
         )}
+        {expiredContracts.map(c => (
+          <AlertBanner
+            key={c.id}
+            type="error"
+            message={`Contract "${c.name}" expired ${safeFormatDate(c.end_date, 'MMM d')} — ${Math.abs(safeDifferenceInDays(c.end_date, today))} days ago.`}
+          />
+        ))}
         {expiringContracts.map(c => (
           <AlertBanner
             key={c.id}

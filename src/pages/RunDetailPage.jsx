@@ -5,7 +5,7 @@ import { generateCustodyPDF } from '../lib/pdf'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
-import { format } from 'date-fns'
+import { safeFormatDate } from '../lib/dates'
 
 const STATUS_FLOW = ['pending', 'assigned', 'in_transit', 'delivered']
 
@@ -147,7 +147,7 @@ export default function RunDetailPage() {
                   <div className="w-2 h-2 rounded-full bg-brand-400 mt-1.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-white/80 capitalize">{event.event_type.replace('_', ' ')}</p>
-                    <p className="text-xs text-white/40">{format(new Date(event.created_at), 'MMM d, h:mm a')} · {event.profiles?.full_name ?? 'System'}</p>
+                    <p className="text-xs text-white/40">{safeFormatDate(event.created_at, 'MMM d, h:mm a')} · {event.profiles?.full_name ?? 'System'}</p>
                     {event.note && <p className="text-xs text-white/50 mt-0.5">{event.note}</p>}
                   </div>
                 </div>

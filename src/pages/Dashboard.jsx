@@ -8,7 +8,8 @@ import MetricCard from '../components/ui/MetricCard'
 import AlertBanner from '../components/ui/AlertBanner'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
-import { format, differenceInDays, parseISO, differenceInMinutes } from 'date-fns'
+import { differenceInMinutes } from 'date-fns'
+import { safeFormatDate, safeDifferenceInDays } from '../lib/dates'
 import { useNavigate } from 'react-router-dom'
 
 export default function Dashboard() {
@@ -70,10 +71,10 @@ export default function Dashboard() {
   const deliveredMTD  = runs.filter(r => r.status === 'delivered').length
   const openContracts = contracts.filter(c => c.status === 'active').length
 
-  const samDaysLeft = company?.sam_expiry ? differenceInDays(parseISO(company.sam_expiry), today) : null
+  const samDaysLeft = company?.sam_expiry ? safeDifferenceInDays(company.sam_expiry, today) : null
   const expiringContracts = contracts.filter(c => {
-    if (!c.end_date) return false
-    return differenceInDays(parseISO(c.end_date), today) <= 30
+    const days = safeDifferenceInDays(c.end_date, today)
+    return days !== null && days <= 30
   })
 
   return (
@@ -90,7 +91,7 @@ export default function Dashboard() {
           <AlertBanner
             key={c.id}
             type="warning"
-            message={`Contract "${c.name}" expires ${format(parseISO(c.end_date), 'MMM d')} — ${differenceInDays(parseISO(c.end_date), today)} days remaining.`}
+            message={`Contract "${c.name}" expires ${safeFormatDate(c.end_date, 'MMM d')} — ${safeDifferenceInDays(c.end_date, today)} days remaining.`}
           />
         ))}
         {anomalies.map(r => (
@@ -110,7 +111,7 @@ export default function Dashboard() {
             <MetricCard
               label="SAM Expiry"
               value={samDaysLeft !== null ? `${samDaysLeft}d` : '—'}
-              sub={company?.sam_expiry ? format(parseISO(company.sam_expiry), 'MMM d, yyyy') : 'Not set'}
+              sub={company?.sam_expiry ? safeFormatDate(company.sam_expiry, 'MMM d, yyyy') : 'Not set'}
               color={samDaysLeft !== null && samDaysLeft <= 30 ? 'red' : 'navy'}
             />
           </div>

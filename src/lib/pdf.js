@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf'
 import { format } from 'date-fns'
+import { safeFormatDate } from './dates'
 
 export function generateCustodyPDF(run, photos, signatures, custody) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
@@ -57,9 +58,9 @@ export function generateCustodyPDF(run, photos, signatures, custody) {
   kv('Dropoff', run.dropoff_address)
   if (run.cargo_description) kv('Cargo', run.cargo_description)
   kv('Temp Sensitive', run.temp_sensitive ? 'Yes' : 'No')
-  if (run.scheduled_at) kv('Scheduled', format(new Date(run.scheduled_at), 'MMM d, yyyy h:mm a'))
-  if (run.picked_up_at)  kv('Picked Up',  format(new Date(run.picked_up_at),  'MMM d, yyyy h:mm a'))
-  if (run.delivered_at)  kv('Delivered',  format(new Date(run.delivered_at),  'MMM d, yyyy h:mm a'))
+  if (run.scheduled_at) kv('Scheduled', safeFormatDate(run.scheduled_at, 'MMM d, yyyy h:mm a'))
+  if (run.picked_up_at)  kv('Picked Up',  safeFormatDate(run.picked_up_at,  'MMM d, yyyy h:mm a'))
+  if (run.delivered_at)  kv('Delivered',  safeFormatDate(run.delivered_at,  'MMM d, yyyy h:mm a'))
   y += 4
 
   // Photos
@@ -97,7 +98,7 @@ export function generateCustodyPDF(run, photos, signatures, custody) {
   } else {
     signatures.forEach(s => {
       kv('Signer', s.signer_name || 'Unknown')
-      kv('Time', format(new Date(s.signed_at), 'MMM d, yyyy h:mm a'))
+      kv('Time', safeFormatDate(s.signed_at, 'MMM d, yyyy h:mm a'))
     })
   }
   y += 4
@@ -115,7 +116,7 @@ export function generateCustodyPDF(run, photos, signatures, custody) {
       doc.text(e.event_type.replace(/_/g, ' ').toUpperCase(), 15, y)
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(120, 120, 120)
-      doc.text(format(new Date(e.created_at), 'MMM d, h:mm a'), 80, y)
+      doc.text(safeFormatDate(e.created_at, 'MMM d, h:mm a'), 80, y)
       y += 4
       if (e.note) { body(e.note, 4); y -= 1 }
       if (e.lat)  { body(`GPS: ${Number(e.lat).toFixed(5)}, ${Number(e.lng).toFixed(5)}`, 4); y -= 1 }

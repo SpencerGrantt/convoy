@@ -6,7 +6,7 @@ import MetricCard from '../components/ui/MetricCard'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { format } from 'date-fns'
+import { safeFormatDate } from '../lib/dates'
 
 const EXPENSE_CATEGORIES = ['fuel','driver_pay','insurance','maintenance','tolls','supplies','other']
 
@@ -314,7 +314,7 @@ export default function Finances() {
                 <p className="text-sm font-semibold text-white">#{inv.invoice_number ?? inv.id.slice(0, 8)}</p>
                 <p className="text-xs text-white/50">{inv.contracts?.name ?? '—'}</p>
                 {inv.period_start && (
-                  <p className="text-xs text-white/40">{format(new Date(inv.period_start), 'MMM d')} – {format(new Date(inv.period_end), 'MMM d, yyyy')}</p>
+                  <p className="text-xs text-white/40">{safeFormatDate(inv.period_start, 'MMM d')} – {safeFormatDate(inv.period_end, 'MMM d, yyyy')}</p>
                 )}
               </div>
               <div className="text-right">

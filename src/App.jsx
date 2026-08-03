@@ -1,11 +1,12 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider } from './hooks/AuthProvider'
 import { useAuth } from './hooks/useAuth'
 import Sidebar from './components/layout/Sidebar'
 import MobileNav from './components/layout/MobileNav'
 import AiFloatingWidget from './components/AiFloatingWidget'
 import LoadingSpinner from './components/ui/LoadingSpinner'
+import ErrorBoundary from './components/ui/ErrorBoundary'
 
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
@@ -51,6 +52,7 @@ function Home() {
 
 function AppRoutes() {
   const { session, profile } = useAuth()
+  const location = useLocation()
   // Nav chrome only once onboarding is actually complete — not just logged
   // in, since a mid-onboarding user has no company/runs/etc. to navigate to.
   const showNav = !!(session && profile?.onboarding_complete)
@@ -60,22 +62,26 @@ function AppRoutes() {
       {showNav && <Sidebar />}
       <div className={showNav ? 'md:ml-60' : ''}>
         <main role="main">
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              <Route path="/login"      element={session ? <Navigate to="/" replace /> : <Login />} />
-              <Route path="/onboarding" element={<OnboardingGate />} />
-              <Route path="/"           element={<AuthGate><Home /></AuthGate>} />
-              <Route path="/runs"       element={<AuthGate><Runs /></AuthGate>} />
-              <Route path="/runs/new"   element={<AuthGate><NewRunForm /></AuthGate>} />
-              <Route path="/runs/:id"   element={<AuthGate><RunDetailPage /></AuthGate>} />
-              <Route path="/photos"     element={<AuthGate><Photos /></AuthGate>} />
-              <Route path="/contracts"  element={<AuthGate><Contracts /></AuthGate>} />
-              <Route path="/finances"   element={<AuthGate><Finances /></AuthGate>} />
-              <Route path="/drivers"    element={<AuthGate><Drivers /></AuthGate>} />
-              <Route path="/settings"   element={<AuthGate><Settings /></AuthGate>} />
-              <Route path="*"           element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
+          {/* Keyed by pathname so navigating away from a crashed route resets
+              the boundary — otherwise its tripped state persists forever. */}
+          <ErrorBoundary key={location.pathname}>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                <Route path="/login"      element={session ? <Navigate to="/" replace /> : <Login />} />
+                <Route path="/onboarding" element={<OnboardingGate />} />
+                <Route path="/"           element={<AuthGate><Home /></AuthGate>} />
+                <Route path="/runs"       element={<AuthGate><Runs /></AuthGate>} />
+                <Route path="/runs/new"   element={<AuthGate><NewRunForm /></AuthGate>} />
+                <Route path="/runs/:id"   element={<AuthGate><RunDetailPage /></AuthGate>} />
+                <Route path="/photos"     element={<AuthGate><Photos /></AuthGate>} />
+                <Route path="/contracts"  element={<AuthGate><Contracts /></AuthGate>} />
+                <Route path="/finances"   element={<AuthGate><Finances /></AuthGate>} />
+                <Route path="/drivers"    element={<AuthGate><Drivers /></AuthGate>} />
+                <Route path="/settings"   element={<AuthGate><Settings /></AuthGate>} />
+                <Route path="*"           element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </main>
       </div>
       {showNav && <MobileNav />}

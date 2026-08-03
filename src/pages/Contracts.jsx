@@ -5,7 +5,7 @@ import { supabase, invokeFn } from '../lib/supabase'
 import StatusPill from '../components/ui/StatusPill'
 import AlertBanner from '../components/ui/AlertBanner'
 import TopBar from '../components/layout/TopBar'
-import { format, differenceInDays, parseISO } from 'date-fns'
+import { safeFormatDate, safeDifferenceInDays } from '../lib/dates'
 
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
 
@@ -180,9 +180,8 @@ export default function Contracts() {
   }
 
   const expiring = contracts.filter(c => {
-    if (!c.end_date) return false
-    const d = differenceInDays(parseISO(c.end_date), today)
-    return d >= 0 && d <= 30
+    const d = safeDifferenceInDays(c.end_date, today)
+    return d !== null && d >= 0 && d <= 30
   })
 
   return (
@@ -193,7 +192,7 @@ export default function Contracts() {
           <AlertBanner
             key={c.id}
             type="warning"
-            message={`"${c.name}" renews in ${differenceInDays(parseISO(c.end_date), today)} days`}
+            message={`"${c.name}" renews in ${safeDifferenceInDays(c.end_date, today)} days`}
           />
         ))}
 
@@ -209,7 +208,7 @@ export default function Contracts() {
               <span>UEI: <strong className="text-white">{company.uei ?? '—'}</strong></span>
               <span className="col-span-2">NAICS: <strong className="text-white">{company.naics_codes?.join(', ') ?? '—'}</strong></span>
               {company.sam_expiry && (
-                <span className="col-span-2">SAM Expiry: <strong className="text-white">{format(parseISO(company.sam_expiry), 'MMM d, yyyy')}</strong></span>
+                <span className="col-span-2">SAM Expiry: <strong className="text-white">{safeFormatDate(company.sam_expiry, 'MMM d, yyyy')}</strong></span>
               )}
             </div>
           </div>
@@ -292,7 +291,7 @@ export default function Contracts() {
                 {c.end_date && (
                   <div className="text-right text-xs text-white/40 shrink-0">
                     <p>Ends</p>
-                    <p className="font-medium text-white/60">{format(parseISO(c.end_date), 'MMM d, yy')}</p>
+                    <p className="font-medium text-white/60">{safeFormatDate(c.end_date, 'MMM d, yy')}</p>
                   </div>
                 )}
               </div>

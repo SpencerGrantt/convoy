@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { safeFormatDate } from '../../lib/dates'
 
 export default function CustodyLog({ events = [] }) {
   if (!events.length) return null
@@ -18,7 +18,7 @@ export default function CustodyLog({ events = [] }) {
                 {e.event_type.replace(/_/g, ' ')}
               </p>
               <p className="text-xs text-white/40">
-                {format(new Date(e.created_at), 'MMM d, h:mm a')}
+                {safeFormatDate(e.created_at, 'MMM d, h:mm a')}
                 {e.profiles?.full_name ? ` · ${e.profiles.full_name}` : ''}
               </p>
               {e.note && <p className="text-xs text-white/50 mt-0.5">{e.note}</p>}

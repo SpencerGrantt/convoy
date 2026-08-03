@@ -3,7 +3,7 @@ import { useDrivers } from '../hooks/useDrivers'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
-import { differenceInDays, parseISO } from 'date-fns'
+import { safeDifferenceInDays } from '../lib/dates'
 
 const DOC_TYPES = [
   { key: 'cdl',              label: 'CDL' },
@@ -13,8 +13,8 @@ const DOC_TYPES = [
 ]
 
 function ExpiryBadge({ date }) {
-  if (!date) return <span className="text-white/20 text-xs">—</span>
-  const d = differenceInDays(parseISO(date), new Date())
+  const d = safeDifferenceInDays(date, new Date())
+  if (d === null) return <span className="text-white/20 text-xs">—</span>
   const color = d <= 30 ? 'text-red-400 bg-red-500/20' : d <= 60 ? 'text-yellow-400 bg-yellow-500/20' : 'text-green-400 bg-green-500/20'
   return (
     <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${color}`}>
@@ -76,9 +76,8 @@ export default function Drivers() {
   const expiring = []
   drivers.forEach(d => {
     (d.compliance_docs ?? []).forEach(doc => {
-      if (!doc.expiry_date) return
-      const days = differenceInDays(parseISO(doc.expiry_date), new Date())
-      if (days <= 60) expiring.push({ driver: d.full_name, doc: doc.doc_type, days })
+      const days = safeDifferenceInDays(doc.expiry_date, new Date())
+      if (days !== null && days <= 60) expiring.push({ driver: d.full_name, doc: doc.doc_type, days })
     })
   })
 

@@ -5,7 +5,7 @@ import TopBar from '../components/layout/TopBar'
 import StatusPill from '../components/ui/StatusPill'
 import { useNavigate } from 'react-router-dom'
 import { MapPin, Clock, Package, CheckCircle2, ChevronRight, Truck, AlertCircle } from 'lucide-react'
-import { format, isToday, parseISO } from 'date-fns'
+import { safeFormatDate, safeIsToday } from '../lib/dates'
 
 const STATUS_ACTIONS = {
   assigned:   { label: 'Start Run',     next: 'in_transit' },
@@ -52,8 +52,8 @@ export default function DriverDashboard() {
     setUpdating(null)
   }
 
-  const todayRuns     = runs.filter(r => r.scheduled_at && isToday(parseISO(r.scheduled_at)))
-  const upcomingRuns  = runs.filter(r => !r.scheduled_at || !isToday(parseISO(r.scheduled_at)))
+  const todayRuns     = runs.filter(r => r.scheduled_at && safeIsToday(r.scheduled_at))
+  const upcomingRuns  = runs.filter(r => !r.scheduled_at || !safeIsToday(r.scheduled_at))
   const activeRun     = runs.find(r => r.status === 'in_transit')
 
   return (
@@ -167,7 +167,7 @@ function RunCard({ run, onAdvance, updating, navigate }) {
           {run.scheduled_at && (
             <p className="text-xs text-white/40 flex items-center gap-1">
               <Clock size={10} />
-              {format(parseISO(run.scheduled_at), 'h:mm a')}
+              {safeFormatDate(run.scheduled_at, 'h:mm a')}
             </p>
           )}
         </div>

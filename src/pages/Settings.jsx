@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase, invokeFn } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
-import { format, parseISO } from 'date-fns'
+import { safeFormatDate } from '../lib/dates'
 import { Shield, Users, Calendar, Hash, Building2 } from 'lucide-react'
 
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
@@ -292,7 +292,7 @@ export default function Settings() {
                     </p>
                     <p className="text-sm text-white font-medium">
                       {company.sam_expiry
-                        ? format(parseISO(company.sam_expiry), 'MMMM d, yyyy')
+                        ? safeFormatDate(company.sam_expiry, 'MMMM d, yyyy')
                         : <span className="text-white/25">Not set</span>}
                     </p>
                   </div>

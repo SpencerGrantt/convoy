@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useRuns } from '../hooks/useRuns'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
-import { format } from 'date-fns'
+import { safeFormatDate } from '../lib/dates'
 
 const TABS = ['all', 'pending', 'in_transit', 'delivered']
 
@@ -66,7 +66,7 @@ export default function Runs() {
               </div>
               <div className="text-right shrink-0">
                 <p className="text-xs text-white/40">
-                  {run.scheduled_at ? format(new Date(run.scheduled_at), 'MMM d h:mm a') : format(new Date(run.created_at), 'MMM d')}
+                  {run.scheduled_at ? safeFormatDate(run.scheduled_at, 'MMM d h:mm a') : safeFormatDate(run.created_at, 'MMM d')}
                 </p>
               </div>
             </div>

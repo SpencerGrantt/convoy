@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { AuthContext } from './AuthContext'
 
@@ -6,6 +6,13 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  // supabase-js re-validates the session (and re-fires this listener with a
+  // SIGNED_IN event) every time the tab regains focus, not just on an actual
+  // sign-in — see GoTrueClient's visibilitychange -> _recoverAndRefresh().
+  // Tracking which user we already have a loaded profile for lets us tell a
+  // real sign-in apart from that refire, so tab-switching doesn't blank the
+  // whole app into the loading spinner and needlessly re-fetch every time.
+  const loadedUserId = useRef(null)
 
   useEffect(() => {
     let mounted = true
@@ -14,17 +21,19 @@ export function AuthProvider({ children }) {
       async (_event, session) => {
         if (!mounted) return
         setSession(session)
-        if (session) {
-          // A new session (e.g. just signed in) means profile is stale/null
-          // until this resolves — without this, AuthGate briefly sees
-          // "logged in, no profile yet" and flashes the onboarding redirect
-          // before correcting itself once the real profile loads.
-          setLoading(true)
-          await fetchOrCreateProfile(session.user.id)
-        } else {
+        if (!session) {
           setProfile(null)
+          loadedUserId.current = null
           setLoading(false)
+          return
         }
+        if (loadedUserId.current === session.user.id) return
+        // A new session (e.g. just signed in) means profile is stale/null
+        // until this resolves — without this, AuthGate briefly sees
+        // "logged in, no profile yet" and flashes the onboarding redirect
+        // before correcting itself once the real profile loads.
+        setLoading(true)
+        await fetchOrCreateProfile(session.user.id)
       }
     )
 
@@ -51,6 +60,7 @@ export function AuthProvider({ children }) {
 
       if (existing) {
         setProfile(existing)
+        loadedUserId.current = userId
         return
       }
 
@@ -85,6 +95,7 @@ export function AuthProvider({ children }) {
         .single()
 
       setProfile(fresh ?? null)
+      if (fresh) loadedUserId.current = userId
     } catch (err) {
       console.error('fetchOrCreateProfile failed:', err)
     } finally {
@@ -110,6 +121,7 @@ export function AuthProvider({ children }) {
     } finally {
       setSession(null)
       setProfile(null)
+      loadedUserId.current = null
       setLoading(false)
     }
   }

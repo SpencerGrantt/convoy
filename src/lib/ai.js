@@ -1,9 +1,23 @@
 import { invokeFn } from './supabase'
+import { format } from 'date-fns'
+
+// Claude has no built-in clock — without this, "this month"/"last week"/
+// "today" are pure guesswork against training data, not the actual current
+// date. That's exactly what caused a real bug: asked for "this month"'s
+// fuel expenses, it silently computed some other month as the date range
+// and passed THAT to query_finances, which correctly filtered on the wrong
+// dates it was given and (correctly) found nothing.
+export function todayContext() {
+  const now = new Date()
+  return `Today's date is ${format(now, 'yyyy-MM-dd')} (${format(now, 'EEEE, MMMM d, yyyy')}). When the user asks about a relative time range (this month, last week, this quarter, year to date, etc.), compute the actual start/end dates from today's date above and pass them to the query tools as ISO dates (yyyy-MM-dd) — never guess or fall back to a training-data date.`
+}
 
 export function buildSystemPrompt(company, runs = [], contracts = []) {
   return `You are an AI assistant built into Convoy, a logistics app for ${company?.name ?? 'your company'},
 a ${company?.sdvosb ? 'Service-Disabled Veteran-Owned (SDVOSB)' : 'veteran-owned'}
 medical courier company.
+
+${todayContext()}
 
 Company details:
 - CAGE code: ${company?.cage_code ?? 'N/A'}

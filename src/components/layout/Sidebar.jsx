@@ -3,9 +3,9 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { Home, Truck, FileText, DollarSign, MessageCircle, Settings, Plus, X } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useDrivers } from '../../hooks/useDrivers'
+import { useUnreadMessageCount } from '../../hooks/useUnreadCounts'
 import { invokeFn } from '../../lib/supabase'
-
-const roleLabel = { owner: 'Head Admin', dispatcher: 'Dispatcher', driver: 'Driver' }
+import { roleLabel } from '../../lib/roles'
 
 const allNavItems = [
   { to: '/',          icon: Home,          label: 'Dashboard', roles: ['owner', 'dispatcher', 'driver'] },
@@ -15,7 +15,7 @@ const allNavItems = [
   { to: '/finances',  icon: DollarSign,    label: 'Finances',  roles: ['owner'] },
 ]
 
-function NavItem({ to, icon: Icon, label, end }) {
+function NavItem({ to, icon: Icon, label, end, showDot }) {
   return (
     <NavLink
       to={to}
@@ -29,7 +29,8 @@ function NavItem({ to, icon: Icon, label, end }) {
       }
     >
       <Icon size={18} />
-      {label}
+      <span className="flex-1">{label}</span>
+      {showDot && <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0" />}
     </NavLink>
   )
 }
@@ -60,6 +61,7 @@ function DriverItem({ driver, onClick }) {
 export default function Sidebar() {
   const { profile } = useAuth()
   const { drivers } = useDrivers()
+  const unreadMessages = useUnreadMessageCount()
   const navigate = useNavigate()
   const role = profile?.role ?? 'owner'
   const items = allNavItems.filter(item => item.roles.includes(role))
@@ -100,13 +102,13 @@ export default function Sidebar() {
       {/* Scrollable middle: nav + drivers */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
         {items.map(({ to, icon, label }) => (
-          <NavItem key={to} to={to} icon={icon} label={label} end={to === '/'} />
+          <NavItem key={to} to={to} icon={icon} label={label} end={to === '/'} showDot={to === '/messages' && unreadMessages > 0} />
         ))}
 
         {showDrivers && (
           <div className="pt-4 mt-4 border-t border-white/[0.08]">
             <div className="flex items-center justify-between px-2 mb-2">
-              <span className="text-xs font-semibold text-white/40 uppercase tracking-widest">Drivers</span>
+              <span className="text-xs font-semibold text-white/40 uppercase tracking-widest">Crew</span>
               <button
                 onClick={() => { setAddingDriver(v => !v); setInviteMsg('') }}
                 className="text-white/30 hover:text-white transition-colors"
@@ -161,7 +163,7 @@ export default function Sidebar() {
             </div>
             <div className="min-w-0">
               <p className="text-white text-xs font-semibold truncate">{profile.full_name || 'Account'}</p>
-              <p className="text-white/40 text-[10px] leading-tight">{roleLabel[profile.role] ?? profile.role}</p>
+              <p className="text-white/40 text-[10px] leading-tight">{roleLabel(profile.role)}</p>
             </div>
           </div>
         )}

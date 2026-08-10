@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase, invokeFn } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
 import { safeFormatDate } from '../lib/dates'
+import { roleLabel } from '../lib/roles'
 import { Shield, Users, Calendar, Hash, Building2 } from 'lucide-react'
 
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
@@ -256,7 +257,7 @@ export default function Settings() {
             </div>
             <div>
               <label className="block text-xs text-white/50 mb-1">Role</label>
-              <p className="text-sm text-white/70 capitalize">{profile?.role}</p>
+              <p className="text-sm text-white/70">{roleLabel(profile?.role)}</p>
             </div>
             <div>
               <label className="block text-xs text-white/50 mb-1">Email</label>
@@ -424,7 +425,7 @@ export default function Settings() {
                           >
                             <option value="owner">Owner</option>
                             <option value="dispatcher">Dispatcher</option>
-                            <option value="driver">Driver</option>
+                            <option value="driver">Crew</option>
                           </select>
                           <button
                             type="button"
@@ -436,7 +437,7 @@ export default function Settings() {
                           </button>
                         </div>
                       ) : (
-                        <span className="text-xs text-white/50 capitalize shrink-0 px-2 py-1">{member.role}</span>
+                        <span className="text-xs text-white/50 shrink-0 px-2 py-1">{roleLabel(member.role)}</span>
                       )}
                     </div>
                     {canEditPay && (
@@ -477,7 +478,7 @@ export default function Settings() {
               <div>
                 <label className="block text-xs text-white/50 mb-1">Role</label>
                 <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className={fieldClass}>
-                  <option value="driver">Driver</option>
+                  <option value="driver">Crew</option>
                   <option value="dispatcher">Dispatcher</option>
                   <option value="owner">Owner</option>
                 </select>

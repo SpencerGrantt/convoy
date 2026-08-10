@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase, invokeFn } from '../lib/supabase'
+import { roleLabel } from '../lib/roles'
 import {
   CheckCircle, ChevronRight, Building2, User, Shield,
   Users, Crown, Mail,
@@ -341,8 +342,8 @@ export default function Onboarding() {
             <div>
               <label className="block text-xs text-white/50 mb-1.5 font-medium">Role</label>
               <div className="px-4 py-2.5 bg-white/[0.04] rounded-xl border border-white/[0.06]">
-                <span className="text-sm text-white/55 capitalize">
-                  {path === 'admin' ? 'Administrator' : profile?.role ?? 'Driver'}
+                <span className="text-sm text-white/55">
+                  {path === 'admin' ? 'Administrator' : roleLabel(profile?.role) || 'Crew'}
                 </span>
               </div>
             </div>

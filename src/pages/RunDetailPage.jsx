@@ -108,7 +108,7 @@ export default function RunDetailPage() {
             </div>
           )}
           <div className="flex gap-4 text-xs text-white/50 pt-1 border-t border-white/[0.06]">
-            <span>Driver: <strong className="text-white/80">{run?.profiles?.full_name ?? '—'}</strong></span>
+            <span>Crew: <strong className="text-white/80">{run?.profiles?.full_name ?? '—'}</strong></span>
             <span>Vehicle: <strong className="text-white/80">{run?.vehicles?.name ?? '—'}</strong></span>
           </div>
         </div>

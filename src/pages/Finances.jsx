@@ -542,7 +542,7 @@ function AnalyticsTab() {
           )}
 
           <div className="bg-navy-700 rounded-2xl border border-white/[0.07] overflow-hidden">
-            <p className="text-xs font-semibold text-white/40 uppercase tracking-wide px-4 pt-4 pb-3">Driver Utilization</p>
+            <p className="text-xs font-semibold text-white/40 uppercase tracking-wide px-4 pt-4 pb-3">Crew Utilization</p>
             {driverRows.length === 0 ? (
               <p className="text-sm text-white/40 text-center py-6">No completed runs in this range</p>
             ) : (
@@ -550,7 +550,7 @@ function AnalyticsTab() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-[10px] text-white/35 uppercase tracking-wide border-t border-white/[0.06]">
-                      <th className="text-left font-semibold px-4 py-2">Driver</th>
+                      <th className="text-left font-semibold px-4 py-2">Crew</th>
                       <th className="text-right font-semibold px-4 py-2">Completed Runs</th>
                       <th className="text-right font-semibold px-4 py-2">Avg Turnaround</th>
                     </tr>

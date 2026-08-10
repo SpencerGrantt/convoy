@@ -24,6 +24,16 @@ registerSW({
   onRegisteredSW(_swUrl, registration) {
     if (!registration) return
     setInterval(() => registration.update(), SW_UPDATE_CHECK_INTERVAL_MS)
+    // The interval above is not enough on its own — Chrome (and others)
+    // throttle or fully suspend setInterval in a tab that isn't focused, so
+    // a tab backgrounded for a while (extremely normal: this app lives in
+    // one tab among many all day) can miss every tick until it happens to
+    // land on a moment the tab's active. Checking again the instant the tab
+    // *becomes* visible catches exactly the case the interval alone misses:
+    // someone switching back after the tab sat idle through a deploy.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') registration.update()
+    })
   },
 })
 

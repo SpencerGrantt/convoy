@@ -95,7 +95,7 @@ export default function NewRunForm() {
         <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
           <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Assignment</h2>
           <div>
-            <label className="block text-xs text-white/50 mb-1">Driver</label>
+            <label className="block text-xs text-white/50 mb-1">Crew</label>
             <select value={form.driver_id} onChange={e => set('driver_id', e.target.value)} className={fieldClass}>
               <option value="">Unassigned</option>
               {drivers.map(d => <option key={d.id} value={d.id}>{d.full_name}</option>)}

@@ -9,7 +9,7 @@ import { safeFormatDate } from '../lib/dates'
 import { ChevronLeft, Send, MessageCircle } from 'lucide-react'
 
 function Bubble({ message, isOwn }) {
-  const senderName = message.sender?.full_name || (message.sender?.role === 'driver' ? 'Driver' : 'Management')
+  const senderName = message.sender?.full_name || (message.sender?.role === 'driver' ? 'Crew' : 'Management')
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
       <div className={`max-w-[80%] rounded-xl px-3 py-2 ${
@@ -105,8 +105,8 @@ function ChatThread({ driverId, onBack, headerLabel }) {
 }
 
 function DriverListItem({ driver, unreadCount, onClick }) {
-  const name = driver.full_name || 'Unnamed driver'
-  const initials = name !== 'Unnamed driver'
+  const name = driver.full_name || 'Unnamed crew member'
+  const initials = name !== 'Unnamed crew member'
     ? name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
     : '?'
 
@@ -142,7 +142,7 @@ function ManagementView() {
       <ChatThread
         driverId={selectedDriver.id}
         onBack={() => setSelectedDriver(null)}
-        headerLabel={selectedDriver.full_name || 'Unnamed driver'}
+        headerLabel={selectedDriver.full_name || 'Unnamed crew member'}
       />
     )
   }

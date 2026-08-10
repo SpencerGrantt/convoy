@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { Home, Truck, FileText, DollarSign, MessageCircle } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { useUnreadMessageCount } from '../../hooks/useUnreadCounts'
 
 const allTabs = [
   { to: '/',          icon: Home,          label: 'Home',      roles: ['owner', 'dispatcher', 'driver'] },
@@ -12,6 +13,7 @@ const allTabs = [
 
 export default function MobileNav() {
   const { profile } = useAuth()
+  const unreadMessages = useUnreadMessageCount()
   const role = profile?.role ?? 'owner'
   const tabs = allTabs.filter(t => t.roles.includes(role))
 
@@ -29,7 +31,12 @@ export default function MobileNav() {
               }`
             }
           >
-            <Icon size={20} />
+            <span className="relative">
+              <Icon size={20} />
+              {to === '/messages' && unreadMessages > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-brand-500" />
+              )}
+            </span>
             <span className="text-[10px] font-medium leading-none">{label}</span>
           </NavLink>
         ))}

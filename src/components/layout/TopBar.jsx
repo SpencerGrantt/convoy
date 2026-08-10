@@ -1,13 +1,31 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
-import { Building2 } from 'lucide-react'
+import { useUnreadMessageCount } from '../../hooks/useUnreadCounts'
+import { roleLabel } from '../../lib/roles'
+import { Building2, Bell } from 'lucide-react'
 
-const roleLabel = { owner: 'Head Admin', dispatcher: 'Dispatcher', driver: 'Driver' }
+function NotificationBell({ navigate }) {
+  const unread = useUnreadMessageCount()
+  return (
+    <button
+      onClick={() => navigate('/messages')}
+      className="relative shrink-0 w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.1] flex items-center justify-center transition-colors"
+      aria-label={unread > 0 ? `${unread} unread messages` : 'Messages'}
+    >
+      <Bell size={15} className="text-white/60" />
+      {unread > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-brand-500 text-white text-[9px] font-bold flex items-center justify-center">
+          {unread > 9 ? '9+' : unread}
+        </span>
+      )}
+    </button>
+  )
+}
 
 function ProfileButton({ profile, navigate }) {
   const initial = profile?.full_name?.trim()?.charAt(0)?.toUpperCase() || '?'
   const name = profile?.full_name?.trim() || 'Account'
-  const role = roleLabel[profile?.role] ?? profile?.role ?? 'Member'
+  const role = roleLabel(profile?.role) || 'Member'
 
   return (
     <button
@@ -72,8 +90,12 @@ export default function TopBar({ title }) {
         )}
       </div>
 
-      {/* Right — always renders avatar + name + role together, never just the icon */}
-      <ProfileButton profile={profile} navigate={navigate} />
+      {/* Right — bell for recent message activity, then avatar + name + role
+          together (never just the icon) */}
+      <div className="flex items-center gap-2.5 shrink-0">
+        <NotificationBell navigate={navigate} />
+        <ProfileButton profile={profile} navigate={navigate} />
+      </div>
     </header>
   )
 }

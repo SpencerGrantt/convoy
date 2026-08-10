@@ -52,7 +52,14 @@ function NotificationDropdown({ navigate }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-navy-700 border border-white/[0.1] rounded-2xl shadow-xl z-30 overflow-hidden">
+        // Mobile: fixed + viewport-relative insets, since the bell sits well
+        // right of center (ProfileButton is further right still) — a w-80
+        // panel anchored via `absolute right-0` to the bell's own small
+        // wrapper extends left from THAT point, not from the screen edge,
+        // and on a narrow phone that pushed its left edge off-screen.
+        // Desktop: back to the original bell-anchored absolute panel, which
+        // has room to spare there.
+        <div className="fixed left-4 right-4 top-16 md:absolute md:left-auto md:right-0 md:top-auto md:mt-2 md:w-80 md:max-w-[calc(100vw-2rem)] bg-navy-700 border border-white/[0.1] rounded-2xl shadow-xl z-30 overflow-hidden">
           <div className="px-4 py-3 border-b border-white/[0.08]">
             <p className="text-xs font-semibold text-white/40 uppercase tracking-wide">Recent Activity</p>
           </div>

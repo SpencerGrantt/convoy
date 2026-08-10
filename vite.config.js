@@ -24,6 +24,18 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // registerType: 'autoUpdate' only controls the CLIENT's registration
+        // behavior — it does nothing to make the generated service worker
+        // itself skip the waiting phase. Without these, a newly-installed
+        // worker sits in "waiting" forever (visible via
+        // navigator.serviceWorker.getRegistrations()) since nothing ever
+        // sends it the SKIP_WAITING message, so autoUpdate's own "reload on
+        // activate" listener never fires — the tab silently stays on the old
+        // bundle indefinitely, no matter how many times it checks for
+        // updates. This is what caused this session's whole string of
+        // "the fix is deployed but I still see the old behavior" reports.
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {

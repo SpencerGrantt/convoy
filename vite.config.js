@@ -57,7 +57,17 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) return 'vendor-react'
+          // Bare substring checks (id.includes('node_modules/react')) also
+          // match any OTHER package whose npm name starts with "react-" —
+          // e.g. node_modules/react-signature-canvas — silently merging an
+          // unrelated UMD/CJS package into this chunk. Require a trailing
+          // slash so only the exact package directory matches.
+          if (
+            id.includes('node_modules/react/') ||
+            id.includes('node_modules/react-dom/') ||
+            id.includes('node_modules/react-router-dom/') ||
+            id.includes('node_modules/react-router/')
+          ) return 'vendor-react'
           if (id.includes('node_modules/@supabase')) return 'vendor-supabase'
           if (id.includes('node_modules/recharts') || id.includes('node_modules/d3')) return 'vendor-recharts'
           if (id.includes('node_modules/jspdf')) return 'vendor-jspdf'

@@ -38,10 +38,13 @@ function Sheet({ title, onClose, children }) {
   )
 }
 
+const PAYMENT_METHODS = ['cash', 'check', 'ach', 'credit_card', 'other']
+
 function RevenueForm({ companyId, contracts, onSave, onClose }) {
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [contractId, setContractId] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('')
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
 
@@ -55,6 +58,7 @@ function RevenueForm({ companyId, contracts, onSave, onClose }) {
         amount: parseFloat(amount),
         description,
         contract_id: contractId || null,
+        payment_method: paymentMethod || null,
         entry_date: new Date().toISOString().slice(0, 10),
       })
       if (error) throw error
@@ -82,6 +86,13 @@ function RevenueForm({ companyId, contracts, onSave, onClose }) {
         <select value={contractId} onChange={e => setContractId(e.target.value)} className={fieldClass}>
           <option value="">None</option>
           {contracts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className="block text-xs text-white/50 mb-1">Payment Method</label>
+        <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className={fieldClass}>
+          <option value="">Unspecified</option>
+          {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m.replace('_', ' ')}</option>)}
         </select>
       </div>
       {err && <p className="text-red-400 text-xs font-medium">{err}</p>}
@@ -355,7 +366,7 @@ function useAnalyticsData(range) {
     async function load() {
       setState(s => ({ ...s, loading: true }))
       const [rev, exp, runs] = await Promise.all([
-        supabase.from('revenue_entries').select('amount, entry_date')
+        supabase.from('revenue_entries').select('amount, entry_date, description, payment_method')
           .gte('entry_date', range.startStr).lte('entry_date', range.endStr),
         supabase.from('expense_entries').select('amount, category, entry_date')
           .gte('entry_date', range.startStr).lte('entry_date', range.endStr),
@@ -620,7 +631,10 @@ export default function Finances() {
               {revenue.length === 0 && <p className="text-sm text-white/40 text-center py-2">No entries this month</p>}
               {revenue.slice(0, 5).map(r => (
                 <div key={r.id} className="bg-navy-700 rounded-xl px-4 py-3 border border-white/[0.07] flex items-center justify-between mb-2">
-                  <p className="text-sm text-white/80 truncate flex-1">{r.description || 'Revenue entry'}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white/80 truncate">{r.description || 'Revenue entry'}</p>
+                    {r.payment_method && <p className="text-[10px] text-white/30 capitalize">{r.payment_method.replace('_', ' ')}</p>}
+                  </div>
                   <p className="text-sm font-bold text-green-400 ml-3">{fmt(r.amount)}</p>
                 </div>
               ))}

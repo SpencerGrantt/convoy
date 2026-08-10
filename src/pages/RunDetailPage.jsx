@@ -113,6 +113,29 @@ export default function RunDetailPage() {
           </div>
         </div>
 
+        {(run?.contracts?.name || run?.broker_name || run?.bol_number || run?.rate_per_mile || run?.loaded_miles || run?.deadhead_miles) && (
+          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-2">
+            <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Load Details</h3>
+            {run?.contracts?.name ? (
+              <div className="flex justify-between text-sm"><span className="text-white/40">Contract</span><span className="text-white font-medium">{run.contracts.name}</span></div>
+            ) : run?.broker_name ? (
+              <div className="flex justify-between text-sm"><span className="text-white/40">Broker/Customer</span><span className="text-white font-medium">{run.broker_name}</span></div>
+            ) : null}
+            {run?.bol_number && (
+              <div className="flex justify-between text-sm"><span className="text-white/40">BOL #</span><span className="text-white font-medium">{run.bol_number}</span></div>
+            )}
+            {run?.rate_per_mile != null && (
+              <div className="flex justify-between text-sm"><span className="text-white/40">Rate/mile</span><span className="text-white font-medium">${Number(run.rate_per_mile).toFixed(2)}</span></div>
+            )}
+            {(run?.loaded_miles != null || run?.deadhead_miles != null) && (
+              <div className="flex justify-between text-sm">
+                <span className="text-white/40">Miles (loaded / deadhead)</span>
+                <span className="text-white font-medium">{run?.loaded_miles ?? 0} / {run?.deadhead_miles ?? 0}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         {run?.status !== 'delivered' && run?.status !== 'cancelled' && (
           <button
             onClick={advanceStatus}

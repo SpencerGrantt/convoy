@@ -12,6 +12,7 @@ export default function NewRunForm() {
   const [form, setForm] = useState({
     pickup_address: '', dropoff_address: '', cargo_description: '',
     temp_sensitive: false, driver_id: '', vehicle_id: '', contract_id: '', scheduled_at: '',
+    broker_name: '', bol_number: '', rate_per_mile: '', loaded_miles: '', deadhead_miles: '',
   })
   const [drivers, setDrivers] = useState([])
   const [vehicles, setVehicles] = useState([])
@@ -46,6 +47,11 @@ export default function NewRunForm() {
         vehicle_id: form.vehicle_id || null,
         contract_id: form.contract_id || null,
         scheduled_at: form.scheduled_at || null,
+        broker_name: form.broker_name || null,
+        bol_number: form.bol_number || null,
+        rate_per_mile: form.rate_per_mile ? parseFloat(form.rate_per_mile) : null,
+        loaded_miles: form.loaded_miles ? parseFloat(form.loaded_miles) : null,
+        deadhead_miles: form.deadhead_miles ? parseFloat(form.deadhead_miles) : null,
       }).select().single()
 
       if (insertError) throw insertError
@@ -111,13 +117,41 @@ export default function NewRunForm() {
           <div>
             <label className="block text-xs text-white/50 mb-1">Contract</label>
             <select value={form.contract_id} onChange={e => set('contract_id', e.target.value)} className={fieldClass}>
-              <option value="">None</option>
+              <option value="">None — commercial/broker run</option>
               {contracts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-xs text-white/50 mb-1">Scheduled Time</label>
             <input type="datetime-local" value={form.scheduled_at} onChange={e => set('scheduled_at', e.target.value)} className={fieldClass} />
+          </div>
+        </div>
+
+        <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
+          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Load Details</h2>
+          {!form.contract_id && (
+            <div>
+              <label className="block text-xs text-white/50 mb-1">Broker / Customer</label>
+              <input value={form.broker_name} onChange={e => set('broker_name', e.target.value)} className={fieldClass} placeholder="e.g. ABC Logistics" />
+            </div>
+          )}
+          <div>
+            <label className="block text-xs text-white/50 mb-1">BOL #</label>
+            <input value={form.bol_number} onChange={e => set('bol_number', e.target.value)} className={fieldClass} placeholder="Bill of lading number" />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs text-white/50 mb-1">Rate/mile</label>
+              <input type="number" step="0.01" min="0" value={form.rate_per_mile} onChange={e => set('rate_per_mile', e.target.value)} className={fieldClass} placeholder="$" />
+            </div>
+            <div>
+              <label className="block text-xs text-white/50 mb-1">Loaded mi</label>
+              <input type="number" step="0.1" min="0" value={form.loaded_miles} onChange={e => set('loaded_miles', e.target.value)} className={fieldClass} placeholder="0" />
+            </div>
+            <div>
+              <label className="block text-xs text-white/50 mb-1">Deadhead mi</label>
+              <input type="number" step="0.1" min="0" value={form.deadhead_miles} onChange={e => set('deadhead_miles', e.target.value)} className={fieldClass} placeholder="0" />
+            </div>
           </div>
         </div>
 

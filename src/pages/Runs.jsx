@@ -6,11 +6,23 @@ import TopBar from '../components/layout/TopBar'
 import { safeFormatDate } from '../lib/dates'
 
 const TABS = ['all', 'pending', 'in_transit', 'delivered']
+const TYPE_FILTERS = ['all', 'contract', 'commercial']
 
 export default function Runs() {
   const [activeTab, setActiveTab] = useState('all')
-  const { runs, loading } = useRuns({ status: activeTab })
+  const [typeFilter, setTypeFilter] = useState('all')
+  const { runs: allRuns, loading } = useRuns({ status: activeTab })
   const navigate = useNavigate()
+
+  // contract_id is optional on every run — a null value means a commercial/
+  // broker-booked haul with no SAM contract behind it. Filtering client-side
+  // here (not a new useRuns param) since the full set is already fetched and
+  // company-sized data volumes make that fine.
+  const runs = allRuns.filter(r => {
+    if (typeFilter === 'contract') return !!r.contract_id
+    if (typeFilter === 'commercial') return !r.contract_id
+    return true
+  })
 
   return (
     <div className="pb-24 md:pb-8">
@@ -40,6 +52,20 @@ export default function Runs() {
           + New Run
         </button>
 
+        <div className="flex gap-1 bg-navy-800 rounded-xl p-1 mb-4">
+          {TYPE_FILTERS.map(t => (
+            <button
+              key={t}
+              onClick={() => setTypeFilter(t)}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-lg capitalize transition-colors ${
+                typeFilter === t ? 'bg-brand-600 text-white' : 'text-white/40'
+              }`}
+            >
+              {t === 'all' ? 'All Types' : t}
+            </button>
+          ))}
+        </div>
+
         {!loading && runs.length === 0 && (
           <p className="text-sm text-white/40 text-center py-8">No runs found</p>
         )}
@@ -62,6 +88,14 @@ export default function Runs() {
                 <div className="flex items-center gap-3 mt-1.5">
                   <p className="text-xs text-white/40">{run.profiles?.full_name ?? 'Unassigned'}</p>
                   {run.vehicles?.name && <p className="text-xs text-white/40">{run.vehicles.name}</p>}
+                </div>
+                <div className="flex items-center gap-2 mt-1.5">
+                  {run.contracts?.name ? (
+                    <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-medium">{run.contracts.name}</span>
+                  ) : run.broker_name ? (
+                    <span className="text-[10px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded font-medium">{run.broker_name}</span>
+                  ) : null}
+                  {run.bol_number && <span className="text-[10px] text-white/30">BOL {run.bol_number}</span>}
                 </div>
               </div>
               <div className="text-right shrink-0">

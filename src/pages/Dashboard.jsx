@@ -8,7 +8,7 @@ import MetricCard from '../components/ui/MetricCard'
 import AlertBanner from '../components/ui/AlertBanner'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
-import { differenceInMinutes } from 'date-fns'
+import { differenceInMinutes, startOfMonth } from 'date-fns'
 import { safeFormatDate, safeDifferenceInDays } from '../lib/dates'
 import { useNavigate } from 'react-router-dom'
 
@@ -18,6 +18,7 @@ export default function Dashboard() {
   const { contracts } = useContracts()
   const navigate = useNavigate()
   const [anomalies, setAnomalies] = useState([])
+  const [mtdStats, setMtdStats] = useState({ totalMiles: 0, deadheadMiles: 0, contractRuns: 0, commercialRuns: 0 })
 
   useEffect(() => {
     requestNotificationPermission().then(granted => {
@@ -62,6 +63,28 @@ export default function Dashboard() {
       setAnomalies(flagged)
     }
     detectAnomalies()
+  }, [profile?.company_id])
+
+  useEffect(() => {
+    if (!profile?.company_id) return
+    // useRuns({ limit: 5 }) above is only for the "Recent Runs" list — miles
+    // and contract/commercial counts need every run this month, so this
+    // queries directly rather than widening that hook's limit for everyone.
+    async function loadMtdStats() {
+      const { data } = await supabase
+        .from('runs')
+        .select('contract_id, loaded_miles, deadhead_miles')
+        .eq('company_id', profile.company_id)
+        .gte('created_at', startOfMonth(new Date()).toISOString())
+      const rows = data ?? []
+      setMtdStats({
+        totalMiles: rows.reduce((s, r) => s + Number(r.loaded_miles ?? 0) + Number(r.deadhead_miles ?? 0), 0),
+        deadheadMiles: rows.reduce((s, r) => s + Number(r.deadhead_miles ?? 0), 0),
+        contractRuns: rows.filter(r => r.contract_id).length,
+        commercialRuns: rows.filter(r => !r.contract_id).length,
+      })
+    }
+    loadMtdStats()
   }, [profile?.company_id])
 
   const company = profile?.companies
@@ -125,6 +148,16 @@ export default function Dashboard() {
               sub={company?.sam_expiry ? safeFormatDate(company.sam_expiry, 'MMM d, yyyy') : 'Not set'}
               color={samDaysLeft !== null && samDaysLeft <= 30 ? 'red' : 'navy'}
             />
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Miles &amp; Run Type (MTD)</h2>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <MetricCard label="Total Miles"    value={mtdStats.totalMiles.toLocaleString()} color="navy" />
+            <MetricCard label="Deadhead Miles" value={mtdStats.deadheadMiles.toLocaleString()} sub={mtdStats.totalMiles ? `${Math.round(mtdStats.deadheadMiles / mtdStats.totalMiles * 100)}% of total` : undefined} color="red" />
+            <MetricCard label="Contract Runs"  value={mtdStats.contractRuns}  color="blue" />
+            <MetricCard label="Commercial Runs" value={mtdStats.commercialRuns} color="yellow" />
           </div>
         </div>
 

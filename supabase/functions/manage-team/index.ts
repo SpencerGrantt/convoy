@@ -33,7 +33,7 @@ serve(async (req) => {
       })
     }
 
-    const { action, target_id, role, email } = await req.json()
+    const { action, target_id, role, email, pay_percent } = await req.json()
 
     const { data: caller, error: callerErr } = await admin
       .from('profiles')
@@ -111,6 +111,17 @@ serve(async (req) => {
         })
       }
       const { error } = await admin.from('profiles').update({ role }).eq('id', target_id)
+      if (error) throw new Error(error.message)
+    } else if (action === 'update_pay_percent') {
+      // Compensation data — owner-only, same as update_role/remove above
+      // (the caller.role !== 'owner' check already ran before this branch).
+      const pct = Number(pay_percent)
+      if (!Number.isFinite(pct) || pct < 0 || pct > 100) {
+        return new Response(JSON.stringify({ error: 'pay_percent must be a number between 0 and 100' }), {
+          status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
+        })
+      }
+      const { error } = await admin.from('profiles').update({ pay_percent: pct }).eq('id', target_id)
       if (error) throw new Error(error.message)
     } else if (action === 'remove') {
       // Unlink from the company rather than deleting the auth user — preserves

@@ -53,16 +53,23 @@ export default function Settings() {
   const loadTeam = useCallback(() => {
     if (!profile?.company_id) return
     setTeamLoading(true)
+    // pay_percent is compensation data — only pull it into a non-owner's
+    // client state when they'd actually be allowed to see it (nobody but
+    // the owner here; a driver views their own rate on a separate,
+    // self-scoped earnings page instead).
+    const columns = profile.role === 'owner'
+      ? 'id, full_name, role, phone, pay_percent, created_at'
+      : 'id, full_name, role, phone, created_at'
     supabase
       .from('profiles')
-      .select('id, full_name, role, phone, created_at')
+      .select(columns)
       .eq('company_id', profile.company_id)
       .order('created_at', { ascending: true })
       .then(({ data }) => {
         setTeamMembers(data ?? [])
         setTeamLoading(false)
       })
-  }, [profile?.company_id])
+  }, [profile?.company_id, profile?.role])
 
   useEffect(() => { loadTeam() }, [loadTeam])
 
@@ -72,6 +79,23 @@ export default function Settings() {
     try {
       const { data, error } = await invokeFn('manage-team', {
         body: { action: 'update_role', target_id: memberId, role },
+      })
+      if (error) throw new Error(error.message)
+      if (data?.error) throw new Error(data.error)
+      loadTeam()
+    } catch (err) {
+      setTeamActionErr(err.message)
+    } finally {
+      setBusyMemberId(null)
+    }
+  }
+
+  async function updatePayPercent(memberId, payPercent) {
+    setBusyMemberId(memberId)
+    setTeamActionErr('')
+    try {
+      const { data, error } = await invokeFn('manage-team', {
+        body: { action: 'update_pay_percent', target_id: memberId, pay_percent: payPercent },
       })
       if (error) throw new Error(error.message)
       if (data?.error) throw new Error(data.error)
@@ -377,40 +401,64 @@ export default function Settings() {
                 const isSelf = member.id === profile?.id
                 const initials = member.full_name?.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() ?? '?'
                 const busy = busyMemberId === member.id
+                const canEditPay = profile?.role === 'owner' && member.role === 'driver'
                 return (
-                  <div key={member.id} className="flex items-center gap-3 bg-navy-800 rounded-xl px-3 py-2.5">
-                    <div className="h-8 w-8 rounded-full bg-brand-600/30 flex items-center justify-center text-brand-300 font-bold text-xs shrink-0">
-                      {initials}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white font-medium truncate">
-                        {member.full_name || 'Unnamed'} {isSelf && <span className="text-white/30 font-normal">(you)</span>}
-                      </p>
-                      <p className="text-xs text-white/40">{member.phone ?? 'No phone'}</p>
-                    </div>
-                    {profile?.role === 'owner' && !isSelf ? (
-                      <div className="flex items-center gap-2 shrink-0">
-                        <select
-                          value={member.role}
-                          disabled={busy}
-                          onChange={e => changeRole(member.id, e.target.value)}
-                          className="bg-navy-700 border border-white/10 text-white rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-50"
-                        >
-                          <option value="owner">Owner</option>
-                          <option value="dispatcher">Dispatcher</option>
-                          <option value="driver">Driver</option>
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => removeMember(member.id)}
-                          disabled={busy}
-                          className="text-xs text-red-400 font-medium bg-red-500/10 px-2 py-1.5 rounded-lg disabled:opacity-50"
-                        >
-                          Remove
-                        </button>
+                  <div key={member.id} className="bg-navy-800 rounded-xl px-3 py-2.5 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-brand-600/30 flex items-center justify-center text-brand-300 font-bold text-xs shrink-0">
+                        {initials}
                       </div>
-                    ) : (
-                      <span className="text-xs text-white/50 capitalize shrink-0 px-2 py-1">{member.role}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-white font-medium truncate">
+                          {member.full_name || 'Unnamed'} {isSelf && <span className="text-white/30 font-normal">(you)</span>}
+                        </p>
+                        <p className="text-xs text-white/40">{member.phone ?? 'No phone'}</p>
+                      </div>
+                      {profile?.role === 'owner' && !isSelf ? (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <select
+                            value={member.role}
+                            disabled={busy}
+                            onChange={e => changeRole(member.id, e.target.value)}
+                            className="bg-navy-700 border border-white/10 text-white rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-50"
+                          >
+                            <option value="owner">Owner</option>
+                            <option value="dispatcher">Dispatcher</option>
+                            <option value="driver">Driver</option>
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => removeMember(member.id)}
+                            disabled={busy}
+                            className="text-xs text-red-400 font-medium bg-red-500/10 px-2 py-1.5 rounded-lg disabled:opacity-50"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-white/50 capitalize shrink-0 px-2 py-1">{member.role}</span>
+                      )}
+                    </div>
+                    {canEditPay && (
+                      <div className="flex items-center gap-2 pl-11">
+                        <label className="text-xs text-white/40 shrink-0">Pay % of run revenue</label>
+                        <input
+                          key={member.pay_percent ?? 'unset'}
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.5"
+                          defaultValue={member.pay_percent ?? ''}
+                          disabled={busy}
+                          onBlur={e => {
+                            const v = e.target.value
+                            if (v === '' || Number(v) === Number(member.pay_percent)) return
+                            updatePayPercent(member.id, Number(v))
+                          }}
+                          placeholder="e.g. 30"
+                          className="w-20 bg-navy-700 border border-white/10 text-white rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-50"
+                        />
+                      </div>
                     )}
                   </div>
                 )

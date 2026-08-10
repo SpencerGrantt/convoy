@@ -29,11 +29,19 @@ const MyTeam           = lazy(() => import('./pages/MyTeam'))
 // case where profile is still null (e.g. first-login auto-provisioning
 // failed silently), which used to fall through and render a broken app
 // with no profile data instead of ever reaching onboarding.
-function AuthGate({ children }) {
+// `roles`, when given, enforces the same restriction server-side navigation
+// hides in Sidebar/MobileNav (e.g. Finances is owner-only there) — those
+// nav arrays only ever controlled link *visibility*, not whether the route
+// itself would render for someone who typed the URL directly. Every role
+// still passes through the session/onboarding checks first so a
+// role-restricted deep link redirects to onboarding or login exactly like
+// any other route, rather than leaking a "not allowed" state pre-auth.
+function AuthGate({ children, roles }) {
   const { session, profile, loading } = useAuth()
   if (loading) return <LoadingSpinner />
   if (!session) return <Navigate to="/login" replace />
   if (!profile || profile.onboarding_complete === false) return <Navigate to="/onboarding" replace />
+  if (roles && !roles.includes(profile.role)) return <Navigate to="/" replace />
   return children
 }
 
@@ -77,9 +85,9 @@ function AppRoutes() {
                 <Route path="/runs/new"   element={<AuthGate><NewRunForm /></AuthGate>} />
                 <Route path="/runs/:id"   element={<AuthGate><RunDetailPage /></AuthGate>} />
                 <Route path="/photos"     element={<AuthGate><Photos /></AuthGate>} />
-                <Route path="/contracts"  element={<AuthGate><Contracts /></AuthGate>} />
-                <Route path="/finances"   element={<AuthGate><Finances /></AuthGate>} />
-                <Route path="/drivers"    element={<AuthGate><Drivers /></AuthGate>} />
+                <Route path="/contracts"  element={<AuthGate roles={['owner', 'dispatcher']}><Contracts /></AuthGate>} />
+                <Route path="/finances"   element={<AuthGate roles={['owner']}><Finances /></AuthGate>} />
+                <Route path="/drivers"    element={<AuthGate roles={['owner', 'dispatcher']}><Drivers /></AuthGate>} />
                 <Route path="/settings"   element={<AuthGate><Settings /></AuthGate>} />
                 <Route path="/inspections/new" element={<AuthGate><VehicleInspection /></AuthGate>} />
                 <Route path="/my-compliance"   element={<AuthGate><MyCompliance /></AuthGate>} />

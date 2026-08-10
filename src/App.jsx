@@ -24,6 +24,7 @@ const Settings         = lazy(() => import('./pages/Settings'))
 const VehicleInspection = lazy(() => import('./pages/VehicleInspection'))
 const MyCompliance     = lazy(() => import('./pages/MyCompliance'))
 const MyTeam           = lazy(() => import('./pages/MyTeam'))
+const MyEarnings       = lazy(() => import('./pages/MyEarnings'))
 const Messages         = lazy(() => import('./pages/Messages'))
 
 // Redirect to onboarding until the user completes setup — including the
@@ -93,6 +94,7 @@ function AppRoutes() {
                 <Route path="/inspections/new" element={<AuthGate><VehicleInspection /></AuthGate>} />
                 <Route path="/my-compliance"   element={<AuthGate><MyCompliance /></AuthGate>} />
                 <Route path="/my-team"         element={<AuthGate><MyTeam /></AuthGate>} />
+                <Route path="/my-earnings"     element={<AuthGate><MyEarnings /></AuthGate>} />
                 <Route path="/messages"        element={<AuthGate><Messages /></AuthGate>} />
                 <Route path="*"           element={<Navigate to="/" replace />} />
               </Routes>

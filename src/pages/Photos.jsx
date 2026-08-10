@@ -7,7 +7,16 @@ import TopBar from '../components/layout/TopBar'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import StatusPill from '../components/ui/StatusPill'
 import CustodyLog from '../components/photos/CustodyLog'
-import ReactSignatureCanvas from 'react-signature-canvas'
+// react-signature-canvas ships a UMD build (module.exports = { __esModule:
+// true, default: Component }) rather than a real ES module. A plain default
+// import trusts the bundler's CJS interop to unwrap `.default` — which
+// broke specifically in the production build here (confirmed live: React
+// error #130, "element type is invalid... got: object", exactly where this
+// component renders), even though the same import worked fine locally.
+// Importing the whole namespace and unwrapping it manually works
+// regardless of how any given bundler's interop resolves it.
+import * as SignaturePadModule from 'react-signature-canvas'
+const ReactSignatureCanvas = SignaturePadModule.default ?? SignaturePadModule
 
 const SLOTS = [
   { type: 'pickup_before',    icon: '📦', title: 'Pickup — Before Loading' },

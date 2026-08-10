@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useId } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
@@ -12,6 +12,13 @@ export function useMessages(driverId) {
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  // Only one ChatThread is ever mounted at a time today, but a shared
+  // channel name is a landmine for whoever changes that later — see
+  // useUnreadCounts.js for the actual crash this exact pattern caused
+  // elsewhere (two simultaneously-mounted instances sharing one channel
+  // name → the second .on() call after the first .subscribe() throws
+  // synchronously and takes down the whole app). Cheap to close off now.
+  const instanceId = useId()
 
   const fetchMessages = useCallback(async () => {
     if (!driverId) {
@@ -37,7 +44,7 @@ export function useMessages(driverId) {
     if (!driverId) return
 
     const channel = supabase
-      .channel(`messages-${driverId}`)
+      .channel(`messages-${driverId}-${instanceId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'messages', filter: `driver_id=eq.${driverId}` },
@@ -46,7 +53,7 @@ export function useMessages(driverId) {
       .subscribe()
 
     return () => supabase.removeChannel(channel)
-  }, [driverId, fetchMessages])
+  }, [driverId, fetchMessages, instanceId])
 
   async function sendMessage(body) {
     const trimmed = body?.trim()

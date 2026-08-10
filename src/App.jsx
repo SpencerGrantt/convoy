@@ -74,7 +74,16 @@ function AppRoutes() {
 
   return (
     <div className="min-h-screen bg-navy-900">
-      {showNav && <Sidebar />}
+      {/* Sidebar/MobileNav get their own boundaries, separate from the
+          route content's — previously a crash in either (e.g. a Realtime
+          channel-name collision between the two, since both are always
+          mounted at once regardless of viewport) had no boundary above it
+          at all and blanked the entire app instead of just that one region. */}
+      {showNav && (
+        <ErrorBoundary>
+          <Sidebar />
+        </ErrorBoundary>
+      )}
       <div className={showNav ? 'md:ml-60' : ''}>
         <main role="main">
           {/* Keyed by pathname so navigating away from a crashed route resets
@@ -106,7 +115,11 @@ function AppRoutes() {
           </ErrorBoundary>
         </main>
       </div>
-      {showNav && <MobileNav />}
+      {showNav && (
+        <ErrorBoundary>
+          <MobileNav />
+        </ErrorBoundary>
+      )}
       {showNav && <AiFloatingWidget />}
     </div>
   )

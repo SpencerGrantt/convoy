@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useId } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
@@ -8,6 +8,18 @@ import { useAuth } from './useAuth'
 // here on purpose.
 export function useUnreadCounts() {
   const [counts, setCounts] = useState({})
+  // supabase.channel(name) returns the SAME channel object if a channel with
+  // that name already exists rather than creating a new one — so two
+  // mounted instances of this hook sharing one hardcoded name would both
+  // grab the same channel, and calling .on() on it a second time after the
+  // first instance already called .subscribe() throws synchronously
+  // ("cannot add postgres_changes callbacks... after subscribe()"). That
+  // crash previously escaped every error boundary and blanked the whole
+  // app, because it happened inside Sidebar/MobileNav which render outside
+  // App.jsx's ErrorBoundary. useId() guarantees a distinct topic per
+  // mounted instance so this can never collide, no matter how many places
+  // end up using this hook.
+  const instanceId = useId()
 
   const fetchCounts = useCallback(async () => {
     const { data } = await supabase
@@ -27,12 +39,12 @@ export function useUnreadCounts() {
     fetchCounts()
 
     const channel = supabase
-      .channel('messages-unread-counts')
+      .channel(`messages-unread-counts-${instanceId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchCounts)
       .subscribe()
 
     return () => supabase.removeChannel(channel)
-  }, [fetchCounts])
+  }, [fetchCounts, instanceId])
 
   return counts
 }
@@ -45,6 +57,11 @@ export function useUnreadCounts() {
 export function useUnreadMessageCount() {
   const { profile } = useAuth()
   const [count, setCount] = useState(0)
+  // See the comment in useUnreadCounts above — this hook is mounted from
+  // BOTH Sidebar.jsx and MobileNav.jsx simultaneously (both are always in
+  // the DOM at once, CSS just hides whichever doesn't match the viewport),
+  // so a shared hardcoded channel name here was a guaranteed crash.
+  const instanceId = useId()
 
   const fetchCount = useCallback(async () => {
     if (!profile?.id) return
@@ -69,12 +86,12 @@ export function useUnreadMessageCount() {
     fetchCount()
 
     const channel = supabase
-      .channel('unread-message-count')
+      .channel(`unread-message-count-${instanceId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchCount)
       .subscribe()
 
     return () => supabase.removeChannel(channel)
-  }, [fetchCount])
+  }, [fetchCount, instanceId])
 
   return count
 }

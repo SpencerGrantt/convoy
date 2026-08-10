@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
 import StatusPill from '../components/ui/StatusPill'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Clock, Package, CheckCircle2, ChevronRight, Truck, AlertCircle } from 'lucide-react'
+import { MapPin, Clock, Package, CheckCircle2, ChevronRight, Truck, AlertCircle, Navigation, ClipboardCheck, ShieldCheck } from 'lucide-react'
 import { safeFormatDate, safeIsToday } from '../lib/dates'
 
 const STATUS_ACTIONS = {
@@ -12,12 +12,22 @@ const STATUS_ACTIONS = {
   in_transit: { label: 'Mark Delivered', next: 'delivered'  },
 }
 
+// History tab covers completed/cancelled runs from the last 60 days — the
+// fetchMyRuns() query below only ever pulls open work, so without this a
+// driver has no way to see anything they already delivered.
+const HISTORY_WINDOW_DAYS = 60
+
 export default function DriverDashboard() {
   const { profile } = useAuth()
   const navigate = useNavigate()
   const [runs, setRuns] = useState([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(null)
+
+  const [tab, setTab] = useState('active')
+  const [history, setHistory] = useState([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
 
   const firstName = profile?.full_name?.split(' ')[0] || 'Driver'
   const hour = new Date().getHours()
@@ -27,6 +37,15 @@ export default function DriverDashboard() {
     if (!profile?.id) return
     fetchMyRuns()
   }, [profile?.id])
+
+  // fetchHistory/historyLoaded are intentionally left out of the deps array
+  // (same convention as the fetchMyRuns effect above) — historyLoaded is the
+  // guard that stops this from refetching, not a trigger, and fetchHistory
+  // is redefined every render so including it would refetch on every render.
+  useEffect(() => {
+    if (tab === 'history' && !historyLoaded && profile?.id) fetchHistory()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, profile?.id])
 
   async function fetchMyRuns() {
     setLoading(true)
@@ -38,6 +57,22 @@ export default function DriverDashboard() {
       .order('scheduled_at', { ascending: true })
     setRuns(data ?? [])
     setLoading(false)
+  }
+
+  async function fetchHistory() {
+    setHistoryLoading(true)
+    const cutoff = new Date(Date.now() - HISTORY_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString()
+    const { data } = await supabase
+      .from('runs')
+      .select('*, vehicles(name, make, model)')
+      .eq('driver_id', profile.id)
+      .in('status', ['delivered', 'cancelled'])
+      .gte('created_at', cutoff)
+      .order('created_at', { ascending: false })
+      .limit(60)
+    setHistory(data ?? [])
+    setHistoryLoading(false)
+    setHistoryLoaded(true)
   }
 
   async function advanceStatus(run) {
@@ -80,6 +115,28 @@ export default function DriverDashboard() {
           )}
         </div>
 
+        {/* Quick actions */}
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => navigate('/inspections/new')}
+            className="bg-navy-700 rounded-2xl p-3 border border-white/[0.07] flex items-center gap-2.5 active:bg-navy-800 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-xl bg-brand-600/20 border border-brand-600/25 flex items-center justify-center shrink-0">
+              <ClipboardCheck size={16} className="text-brand-300" />
+            </div>
+            <span className="text-xs font-semibold text-white/80 text-left leading-tight">Vehicle Inspection</span>
+          </button>
+          <button
+            onClick={() => navigate('/my-compliance')}
+            className="bg-navy-700 rounded-2xl p-3 border border-white/[0.07] flex items-center gap-2.5 active:bg-navy-800 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-xl bg-brand-600/20 border border-brand-600/25 flex items-center justify-center shrink-0">
+              <ShieldCheck size={16} className="text-brand-300" />
+            </div>
+            <span className="text-xs font-semibold text-white/80 text-left leading-tight">My Documents</span>
+          </button>
+        </div>
+
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3">
           {[
@@ -94,57 +151,128 @@ export default function DriverDashboard() {
           ))}
         </div>
 
-        {/* Active run — prominent */}
-        {activeRun && (
-          <div className="bg-navy-700 rounded-2xl border border-brand-600/30 overflow-hidden">
-            <div className="bg-brand-600/10 px-4 py-2 border-b border-brand-600/20 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-brand-400 animate-pulse" />
-              <span className="text-xs font-semibold text-brand-300 uppercase tracking-wide">Active Run</span>
-            </div>
-            <RunCard run={activeRun} onAdvance={advanceStatus} updating={updating} navigate={navigate} />
-          </div>
+        {/* Active / History tab switcher */}
+        <div className="bg-navy-700 rounded-2xl p-1.5 border border-white/[0.07] flex gap-1.5">
+          {[
+            { value: 'active',  label: 'Active' },
+            { value: 'history', label: 'History' },
+          ].map(t => (
+            <button
+              key={t.value}
+              onClick={() => setTab(t.value)}
+              className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                tab === t.value ? 'bg-brand-600 text-white' : 'text-white/40'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'active' && (
+          <>
+            {/* Active run — prominent */}
+            {activeRun && (
+              <div className="bg-navy-700 rounded-2xl border border-brand-600/30 overflow-hidden">
+                <div className="bg-brand-600/10 px-4 py-2 border-b border-brand-600/20 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-brand-400 animate-pulse" />
+                  <span className="text-xs font-semibold text-brand-300 uppercase tracking-wide">Active Run</span>
+                </div>
+                <RunCard run={activeRun} onAdvance={advanceStatus} updating={updating} navigate={navigate} />
+              </div>
+            )}
+
+            {/* Today's runs */}
+            {todayRuns.filter(r => r.id !== activeRun?.id).length > 0 && (
+              <section>
+                <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide px-1 mb-2">Today</h2>
+                <div className="space-y-2">
+                  {todayRuns
+                    .filter(r => r.id !== activeRun?.id)
+                    .map(run => (
+                      <div key={run.id} className="bg-navy-700 rounded-2xl border border-white/[0.07] overflow-hidden">
+                        <RunCard run={run} onAdvance={advanceStatus} updating={updating} navigate={navigate} />
+                      </div>
+                    ))}
+                </div>
+              </section>
+            )}
+
+            {/* Upcoming runs */}
+            {upcomingRuns.length > 0 && (
+              <section>
+                <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide px-1 mb-2">Upcoming</h2>
+                <div className="space-y-2">
+                  {upcomingRuns.map(run => (
+                    <div key={run.id} className="bg-navy-700 rounded-2xl border border-white/[0.07] overflow-hidden">
+                      <RunCard run={run} onAdvance={advanceStatus} updating={updating} navigate={navigate} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Empty */}
+            {!loading && runs.length === 0 && (
+              <div className="bg-navy-700 rounded-2xl border border-white/[0.07] p-8 text-center space-y-2">
+                <CheckCircle2 size={32} className="text-green-400 mx-auto" />
+                <p className="text-white font-semibold">All caught up!</p>
+                <p className="text-white/40 text-sm">No active or upcoming runs assigned to you.</p>
+              </div>
+            )}
+          </>
         )}
 
-        {/* Today's runs */}
-        {todayRuns.filter(r => r.id !== activeRun?.id).length > 0 && (
+        {tab === 'history' && (
           <section>
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide px-1 mb-2">Today</h2>
-            <div className="space-y-2">
-              {todayRuns
-                .filter(r => r.id !== activeRun?.id)
-                .map(run => (
+            {historyLoading && (
+              <p className="text-white/40 text-sm text-center py-8">Loading history…</p>
+            )}
+            {!historyLoading && history.length === 0 && (
+              <div className="bg-navy-700 rounded-2xl border border-white/[0.07] p-8 text-center space-y-2">
+                <Clock size={32} className="text-white/20 mx-auto" />
+                <p className="text-white font-semibold">No run history yet</p>
+                <p className="text-white/40 text-sm">Delivered and cancelled runs from the last {HISTORY_WINDOW_DAYS} days show up here.</p>
+              </div>
+            )}
+            {!historyLoading && history.length > 0 && (
+              <div className="space-y-2">
+                {history.map(run => (
                   <div key={run.id} className="bg-navy-700 rounded-2xl border border-white/[0.07] overflow-hidden">
                     <RunCard run={run} onAdvance={advanceStatus} updating={updating} navigate={navigate} />
                   </div>
                 ))}
-            </div>
+              </div>
+            )}
           </section>
-        )}
-
-        {/* Upcoming runs */}
-        {upcomingRuns.length > 0 && (
-          <section>
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide px-1 mb-2">Upcoming</h2>
-            <div className="space-y-2">
-              {upcomingRuns.map(run => (
-                <div key={run.id} className="bg-navy-700 rounded-2xl border border-white/[0.07] overflow-hidden">
-                  <RunCard run={run} onAdvance={advanceStatus} updating={updating} navigate={navigate} />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Empty */}
-        {!loading && runs.length === 0 && (
-          <div className="bg-navy-700 rounded-2xl border border-white/[0.07] p-8 text-center space-y-2">
-            <CheckCircle2 size={32} className="text-green-400 mx-auto" />
-            <p className="text-white font-semibold">All caught up!</p>
-            <p className="text-white/40 text-sm">No active or upcoming runs assigned to you.</p>
-          </div>
         )}
       </div>
     </div>
+  )
+}
+
+// Opens the device's native maps app (or Google Maps in a new tab on
+// desktop) for turn-by-turn directions to an address. Prefers lat/lng when
+// the run has them since that's exact; falls back to the free-text address
+// otherwise. No native app dependency — this is a plain https:// link so it
+// works the same in the installed PWA.
+function mapsUrl(lat, lng, address) {
+  if (lat != null && lng != null) return `https://maps.google.com/?daddr=${lat},${lng}`
+  return `https://maps.google.com/?daddr=${encodeURIComponent(address)}`
+}
+
+function NavigateButton({ lat, lng, address }) {
+  return (
+    <a
+      href={mapsUrl(lat, lng, address)}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={e => e.stopPropagation()}
+      className="shrink-0 w-7 h-7 rounded-lg bg-brand-600/20 border border-brand-600/25 flex items-center justify-center text-brand-300 active:bg-brand-600/30 transition-colors"
+      aria-label={`Navigate to ${address}`}
+    >
+      <Navigation size={13} />
+    </a>
   )
 }
 
@@ -184,12 +312,14 @@ function RunCard({ run, onAdvance, updating, navigate }) {
           <div className="w-4 h-4 rounded-full bg-brand-600/30 border border-brand-600/50 shrink-0 mt-0.5 flex items-center justify-center">
             <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
           </div>
-          <p className="text-sm text-white/80 leading-tight line-clamp-1">{run.pickup_address}</p>
+          <p className="text-sm text-white/80 leading-tight line-clamp-1 flex-1">{run.pickup_address}</p>
+          <NavigateButton lat={run.pickup_lat} lng={run.pickup_lng} address={run.pickup_address} />
         </div>
         <div className="ml-2 w-px h-3 bg-white/10" />
         <div className="flex items-start gap-2.5">
           <MapPin size={16} className="text-green-400 shrink-0 mt-0.5" />
-          <p className="text-sm text-white/80 leading-tight line-clamp-1">{run.dropoff_address}</p>
+          <p className="text-sm text-white/80 leading-tight line-clamp-1 flex-1">{run.dropoff_address}</p>
+          <NavigateButton lat={run.dropoff_lat} lng={run.dropoff_lng} address={run.dropoff_address} />
         </div>
       </div>
 

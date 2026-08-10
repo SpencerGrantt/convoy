@@ -3,6 +3,7 @@ import { useDrivers } from '../hooks/useDrivers'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
+import ExpiryBadge from '../components/ui/ExpiryBadge'
 import { safeDifferenceInDays } from '../lib/dates'
 
 const DOC_TYPES = [
@@ -11,17 +12,6 @@ const DOC_TYPES = [
   { key: 'background_check', label: 'BG Check' },
   { key: 'insurance',        label: 'Insurance' },
 ]
-
-function ExpiryBadge({ date }) {
-  const d = safeDifferenceInDays(date, new Date())
-  if (d === null) return <span className="text-white/20 text-xs">—</span>
-  const color = d <= 30 ? 'text-red-400 bg-red-500/20' : d <= 60 ? 'text-yellow-400 bg-yellow-500/20' : 'text-green-400 bg-green-500/20'
-  return (
-    <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${color}`}>
-      {d < 0 ? 'Expired' : `${d}d`}
-    </span>
-  )
-}
 
 function Sheet({ title, onClose, children }) {
   return (

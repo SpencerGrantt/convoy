@@ -10,6 +10,16 @@ export async function uploadPhoto(blob, runId, photoType, position) {
   return data.path
 }
 
+export async function uploadInspectionPhoto(blob, driverId) {
+  const ext = 'jpg'
+  const path = `${driverId}/${Date.now()}.${ext}`
+  const { data, error } = await supabase.storage
+    .from('vehicle-inspections')
+    .upload(path, blob, { contentType: 'image/jpeg', upsert: false })
+  if (error) throw error
+  return data.path
+}
+
 export async function uploadSignature(blob, runId) {
   const path = `${runId}/signature_${Date.now()}.png`
   const { data, error } = await supabase.storage

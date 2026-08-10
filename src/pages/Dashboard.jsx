@@ -83,7 +83,7 @@ export default function Dashboard() {
 
   return (
     <div className="pb-24 md:pb-8">
-      <TopBar />
+      <TopBar title="Dashboard" />
       <div className="px-4 pt-4 space-y-4 md:px-8 md:pt-8">
         {samDaysLeft !== null && samDaysLeft <= 30 && (
           <AlertBanner

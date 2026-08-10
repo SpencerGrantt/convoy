@@ -95,3 +95,57 @@ export function useUnreadMessageCount() {
 
   return count
 }
+
+// Actual message previews for the TopBar notification dropdown — same
+// "needs a response" scoping as the two hooks above (driver: unread in
+// their own channel not sent by them; management: unread sent BY a driver,
+// across every channel), just returning the message content instead of a
+// bare count.
+export function useRecentNotifications(limit = 8) {
+  const { profile } = useAuth()
+  const [items, setItems] = useState([])
+  const instanceId = useId()
+
+  const fetchItems = useCallback(async () => {
+    if (!profile?.id) return
+    if (profile.role === 'driver') {
+      const { data } = await supabase
+        .from('messages')
+        .select('id, body, created_at, driver_id, sender:profiles!sender_id(full_name)')
+        .eq('driver_id', profile.id)
+        .is('read_at', null)
+        .neq('sender_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+      setItems((data ?? []).map(m => ({ ...m, label: m.sender?.full_name || 'Management' })))
+    } else {
+      // No column-to-column filter in PostgREST for "sender_id = driver_id",
+      // so pull recent unread and filter client-side — same approach
+      // useUnreadCounts already uses for the same comparison.
+      const { data } = await supabase
+        .from('messages')
+        .select('id, body, created_at, driver_id, sender_id, sender:profiles!sender_id(full_name)')
+        .is('read_at', null)
+        .order('created_at', { ascending: false })
+        .limit(50)
+      const filtered = (data ?? [])
+        .filter(m => m.sender_id === m.driver_id)
+        .slice(0, limit)
+        .map(m => ({ ...m, label: m.sender?.full_name || 'Crew member' }))
+      setItems(filtered)
+    }
+  }, [profile?.id, profile?.role, limit])
+
+  useEffect(() => {
+    fetchItems()
+
+    const channel = supabase
+      .channel(`recent-notifications-${instanceId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, fetchItems)
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [fetchItems, instanceId])
+
+  return items
+}

@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useDrivers } from '../hooks/useDrivers'
 import { useMessages } from '../hooks/useMessages'
-import { useUnreadCounts } from '../hooks/useUnreadCounts'
+import { useUnreadCounts, useUnreadMessageCount } from '../hooks/useUnreadCounts'
 import TopBar from '../components/layout/TopBar'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { safeFormatDate } from '../lib/dates'
-import { ChevronLeft, Send, MessageCircle } from 'lucide-react'
+import { ChevronLeft, Send, MessageCircle, Headset } from 'lucide-react'
 
 function Bubble({ message, isOwn }) {
   const senderName = message.sender?.full_name || (message.sender?.role === 'driver' ? 'Crew' : 'Management')
@@ -132,16 +133,28 @@ function DriverListItem({ driver, unreadCount, onClick }) {
   )
 }
 
-function ManagementView() {
+function ManagementView({ initialDriverId }) {
   const { drivers, loading } = useDrivers()
   const unreadCounts = useUnreadCounts()
-  const [selectedDriver, setSelectedDriver] = useState(null)
+  const [clickedDriver, setClickedDriver] = useState(null)
+  // A click from the TopBar notification dropdown carries which driver's
+  // channel it was about — jump straight there once that driver's row has
+  // loaded, instead of always landing on the plain list. Derived at render
+  // time rather than synced into state via an effect: "Back" clears
+  // clickedDriver, and dismissed (also set by "Back") stops the same
+  // initialDriverId from re-selecting itself right after leaving it —
+  // initialDriverId itself never changes once the page has mounted.
+  const [dismissed, setDismissed] = useState(false)
+  const initialMatch = !dismissed && initialDriverId && !loading
+    ? drivers.find(d => d.id === initialDriverId)
+    : null
+  const selectedDriver = clickedDriver || initialMatch
 
   if (selectedDriver) {
     return (
       <ChatThread
         driverId={selectedDriver.id}
-        onBack={() => setSelectedDriver(null)}
+        onBack={() => { setClickedDriver(null); setDismissed(true) }}
         headerLabel={selectedDriver.full_name || 'Unnamed crew member'}
       />
     )
@@ -161,27 +174,67 @@ function ManagementView() {
           key={driver.id}
           driver={driver}
           unreadCount={unreadCounts[driver.id] ?? 0}
-          onClick={() => setSelectedDriver(driver)}
+          onClick={() => setClickedDriver(driver)}
         />
       ))}
     </div>
   )
 }
 
+// A driver only ever has one channel, but landing straight in the thread
+// (the old behavior) skipped past any sense of "this is an inbox" — a
+// one-row list matches the same chat-list pattern management sees, and
+// still opens directly if a notification click already knows where to go.
+function DriverChatListView({ profile, autoOpen }) {
+  const [opened, setOpened] = useState(!!autoOpen)
+  const unread = useUnreadMessageCount()
+
+  if (opened) {
+    return (
+      <ChatThread
+        driverId={profile.id}
+        onBack={() => setOpened(false)}
+        headerLabel="Chats"
+      />
+    )
+  }
+
+  return (
+    <div className="px-4 pt-4 pb-24 space-y-2 md:px-8 md:pt-6 md:pb-8">
+      <button
+        onClick={() => setOpened(true)}
+        className="w-full flex items-center gap-3 bg-navy-700 rounded-xl p-3 border border-white/[0.07] active:bg-navy-600 transition-colors text-left"
+      >
+        <div className="h-9 w-9 rounded-full bg-brand-600/30 flex items-center justify-center text-brand-300 shrink-0">
+          <Headset size={16} />
+        </div>
+        <span className="flex-1 min-w-0 text-sm font-medium text-white truncate">Management</span>
+        {unread > 0 && (
+          <span className="shrink-0 bg-brand-600 text-white text-[10px] font-bold rounded-full h-5 min-w-5 px-1.5 flex items-center justify-center">
+            {unread > 99 ? '99+' : unread}
+          </span>
+        )}
+      </button>
+    </div>
+  )
+}
+
 export default function Messages() {
   const { profile } = useAuth()
+  const location = useLocation()
   const isDriver = profile?.role === 'driver'
+  const openDriverId = location.state?.openDriverId
 
   // No page-level bottom padding here — ChatThread sizes itself to fill
-  // the remaining viewport (accounting for MobileNav) and the driver list
-  // inside ManagementView carries its own pb-24 for scroll clearance.
+  // the remaining viewport (accounting for MobileNav) and the list views
+  // below carry their own pb-24 for scroll clearance.
   return (
     <div>
       <TopBar title="Messages" />
       {isDriver ? (
-        <ChatThread driverId={profile?.id} />
+        <DriverChatListView profile={profile} autoOpen={!!openDriverId} />
       ) : (
-        <ManagementView />
+        <ManagementView initialDriverId={openDriverId} />
       )}
     </div>
   )

@@ -1,14 +1,15 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Truck, FileText, DollarSign, MessageCircle } from 'lucide-react'
+import { Home, Truck, FileText, DollarSign, MessageCircle, MapPinned } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useUnreadMessageCount } from '../../hooks/useUnreadCounts'
 
 const allTabs = [
-  { to: '/',          icon: Home,          label: 'Home',      roles: ['owner', 'dispatcher', 'driver'] },
-  { to: '/runs',      icon: Truck,         label: 'Runs',      roles: ['owner', 'dispatcher', 'driver'] },
-  { to: '/messages',  icon: MessageCircle, label: 'Messages',  roles: ['owner', 'dispatcher', 'driver'] },
-  { to: '/contracts', icon: FileText,      label: 'Contracts', roles: ['owner', 'dispatcher'] },
-  { to: '/finances',  icon: DollarSign,    label: 'Finances',  roles: ['owner'] },
+  { to: '/',            icon: Home,          label: 'Home',        roles: ['owner', 'dispatcher', 'driver'] },
+  { to: '/runs',        icon: Truck,         label: 'Runs',        roles: ['owner', 'dispatcher', 'driver'] },
+  { to: '/messages',    icon: MessageCircle, label: 'Messages',    roles: ['owner', 'dispatcher', 'driver'] },
+  { to: '/contracts',   icon: FileText,      label: 'Contracts',   roles: ['owner', 'dispatcher'] },
+  { to: '/finances',    icon: DollarSign,    label: 'Finances',    roles: ['owner'] },
+  { to: '/ifta-report', icon: MapPinned,     label: 'IFTA',        roles: ['owner'] },
 ]
 
 export default function MobileNav() {

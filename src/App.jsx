@@ -26,6 +26,8 @@ const MyCompliance     = lazy(() => import('./pages/MyCompliance'))
 const MyTeam           = lazy(() => import('./pages/MyTeam'))
 const MyEarnings       = lazy(() => import('./pages/MyEarnings'))
 const Messages         = lazy(() => import('./pages/Messages'))
+const MileageLog       = lazy(() => import('./pages/MileageLog'))
+const IftaReport       = lazy(() => import('./pages/IftaReport'))
 
 // Redirect to onboarding until the user completes setup — including the
 // case where profile is still null (e.g. first-login auto-provisioning
@@ -96,6 +98,8 @@ function AppRoutes() {
                 <Route path="/my-team"         element={<AuthGate><MyTeam /></AuthGate>} />
                 <Route path="/my-earnings"     element={<AuthGate><MyEarnings /></AuthGate>} />
                 <Route path="/messages"        element={<AuthGate><Messages /></AuthGate>} />
+                <Route path="/mileage"         element={<AuthGate><MileageLog /></AuthGate>} />
+                <Route path="/ifta-report"     element={<AuthGate roles={['owner']}><IftaReport /></AuthGate>} />
                 <Route path="*"           element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>

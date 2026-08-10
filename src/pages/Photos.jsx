@@ -18,6 +18,16 @@ import CustodyLog from '../components/photos/CustodyLog'
 import * as SignaturePadModule from 'react-signature-canvas'
 const ReactSignatureCanvas = SignaturePadModule.default ?? SignaturePadModule
 
+// TEMP DIAGNOSTIC — remove once error #130's culprit is identified.
+console.warn('[photos-diag]', {
+  TopBar: typeof TopBar,
+  LoadingSpinner: typeof LoadingSpinner,
+  StatusPill: typeof StatusPill,
+  CustodyLog: typeof CustodyLog,
+  ReactSignatureCanvas: typeof ReactSignatureCanvas,
+  rawModule: SignaturePadModule,
+})
+
 const SLOTS = [
   { type: 'pickup_before',    icon: '📦', title: 'Pickup — Before Loading' },
   { type: 'pickup_sealed',    icon: '🔒', title: 'Pickup — Sealed Package' },

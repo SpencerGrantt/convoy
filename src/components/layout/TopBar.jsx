@@ -146,8 +146,13 @@ export default function TopBar({ title }) {
 
       {/* Center — current page name */}
       <div className="justify-self-center min-w-0">
+        {/* Mobile hides this — the current page is already highlighted in
+            MobileNav below, and there isn't room for it alongside the
+            wordmark, bell, and profile without everything feeling cramped.
+            Desktop keeps it; Sidebar's own highlight isn't as visible from
+            the content area as MobileNav's is on a phone screen. */}
         {title && (
-          <span className="text-white font-semibold text-sm truncate block max-w-[50vw] md:max-w-xs">
+          <span className="hidden md:block text-white font-semibold text-sm truncate max-w-xs">
             {title}
           </span>
         )}

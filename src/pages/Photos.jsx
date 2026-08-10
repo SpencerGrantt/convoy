@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { uploadPhoto, uploadSignature } from '../lib/storage'
+import { uploadPhoto, uploadSignature, compressImage } from '../lib/storage'
 import TopBar from '../components/layout/TopBar'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import StatusPill from '../components/ui/StatusPill'
@@ -44,8 +44,8 @@ function PhotoSlot({ slot, runId, companyId, profile, existingPath, onCaptured }
     setUploading(true)
     setError('')
     try {
-      const pos = await getPosition()
-      const path = await uploadPhoto(file, runId, slot.type, pos)
+      const [pos, compressed] = await Promise.all([getPosition(), compressImage(file)])
+      const path = await uploadPhoto(compressed, runId, slot.type, pos)
       await supabase.from('photos').insert({
         run_id: runId, company_id: companyId, driver_id: profile?.id,
         photo_type: slot.type, storage_path: path,

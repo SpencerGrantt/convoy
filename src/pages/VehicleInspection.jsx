@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
-import { uploadInspectionPhoto } from '../lib/storage'
+import { uploadInspectionPhoto, compressImage } from '../lib/storage'
 import TopBar from '../components/layout/TopBar'
 import CameraCapture from '../components/photos/CameraCapture'
 import { AlertTriangle, CheckCircle2 } from 'lucide-react'
@@ -100,7 +100,8 @@ export default function VehicleInspection() {
     setPhotoUploading(true)
     setPhotoError('')
     try {
-      const path = await uploadInspectionPhoto(photoBlob, profile.id)
+      const compressed = await compressImage(photoBlob)
+      const path = await uploadInspectionPhoto(compressed, profile.id)
       setPhotoPath(path)
       setPhotoMode('done')
     } catch (err) {

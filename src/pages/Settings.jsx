@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { supabase, invokeFn } from '../lib/supabase'
+import { supabase, invokeFn, APP_URL } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
 import { safeFormatDate } from '../lib/dates'
 import { Shield, Users, Calendar, Hash, Building2 } from 'lucide-react'
@@ -170,7 +170,7 @@ export default function Settings() {
     const { error } = await supabase.auth.signInWithOtp({
       email: inviteEmail,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: APP_URL,
         data: { company_id: profile.company_id, role: inviteRole },
       },
     })

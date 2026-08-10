@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { Home, Truck, FileText, DollarSign, Settings, Plus, X } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useDrivers } from '../../hooks/useDrivers'
-import { supabase } from '../../lib/supabase'
+import { supabase, APP_URL } from '../../lib/supabase'
 
 const roleLabel = { owner: 'Head Admin', dispatcher: 'Dispatcher', driver: 'Driver' }
 
@@ -76,7 +76,7 @@ export default function Sidebar() {
     const { error } = await supabase.auth.signInWithOtp({
       email: driverEmail,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: APP_URL,
         data: { company_id: profile?.company_id, role: 'driver' },
       },
     })

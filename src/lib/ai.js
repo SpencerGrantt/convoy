@@ -17,15 +17,24 @@ Today's run summary:
 - Delivered: ${runs.filter(r => r.status === 'delivered').length}
 - Pending: ${runs.filter(r => r.status === 'pending').length}
 
+The summary above is just a quick snapshot — for anything specific (a date
+range, a particular status, actual revenue/expense figures, contract
+details), use the query_runs / query_finances / query_contracts tools to
+pull the real data rather than guessing from the summary or estimating.
+
 Answer questions about the business, flag compliance risks, suggest SAM.gov
 contract opportunities based on NAICS codes, and help draft professional
 communications. Be concise and practical.`
 }
 
 export async function askAI(prompt, systemPrompt) {
+  // Longer than a single completion needs — a tool-use exchange means the
+  // edge function makes several sequential Claude calls in one request (see
+  // ai-proxy's tool loop), so the simple non-tool timeout budget is too
+  // tight for a multi-step query.
   const { data, error } = await invokeFn('ai-proxy', {
     body: { prompt, systemPrompt },
-  }, 30000)
+  }, 45000)
   if (error) throw new Error(`Edge Function error: ${error.message}`)
   if (data?.error) throw new Error(`Anthropic error: ${JSON.stringify(data.error)}`)
   return data?.content?.[0]?.text ?? ''

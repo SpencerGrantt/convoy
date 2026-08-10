@@ -20,6 +20,7 @@ const Photos           = lazy(() => import('./pages/Photos'))
 const Contracts        = lazy(() => import('./pages/Contracts'))
 const Finances         = lazy(() => import('./pages/Finances'))
 const Drivers          = lazy(() => import('./pages/Drivers'))
+const Fleet            = lazy(() => import('./pages/Fleet'))
 const Settings         = lazy(() => import('./pages/Settings'))
 const VehicleInspection = lazy(() => import('./pages/VehicleInspection'))
 const MyCompliance     = lazy(() => import('./pages/MyCompliance'))
@@ -101,6 +102,7 @@ function AppRoutes() {
                 <Route path="/contracts"  element={<AuthGate roles={['owner', 'dispatcher']}><Contracts /></AuthGate>} />
                 <Route path="/finances"   element={<AuthGate roles={['owner']}><Finances /></AuthGate>} />
                 <Route path="/drivers"    element={<AuthGate roles={['owner', 'dispatcher']}><Drivers /></AuthGate>} />
+                <Route path="/fleet"      element={<AuthGate roles={['owner', 'dispatcher']}><Fleet /></AuthGate>} />
                 <Route path="/settings"   element={<AuthGate><Settings /></AuthGate>} />
                 <Route path="/inspections/new" element={<AuthGate><VehicleInspection /></AuthGate>} />
                 <Route path="/my-compliance"   element={<AuthGate><MyCompliance /></AuthGate>} />

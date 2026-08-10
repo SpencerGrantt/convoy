@@ -18,12 +18,21 @@ export default function Onboarding() {
   const navigate = useNavigate()
   const company = profile?.companies
 
-  const [path, setPath]   = useState(null)
-  const [step, setStep]   = useState(0)
+  // A driver/dispatcher only ever gets here via someone else's invite — the
+  // invite already fixed their role and company (see AuthProvider's
+  // fetchOrCreateProfile, which reads company_id/role off the invite's user
+  // metadata). They should never see the "start your own company" choice,
+  // so skip step 0 entirely and land directly on the team-join form.
+  const isInvitedTeamMember = profile?.role === 'driver' || profile?.role === 'dispatcher'
+
+  const [path, setPath]   = useState(isInvitedTeamMember ? 'team' : null)
+  const [step, setStep]   = useState(isInvitedTeamMember ? 1 : 0)
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState('')
 
   const [fullName, setFullName]       = useState(profile?.full_name ?? '')
+  const [phone, setPhone]             = useState(profile?.phone ?? '')
+  const [address, setAddress]         = useState(profile?.address ?? '')
   const [companyName, setCompanyName] = useState(
     company?.name && company.name !== 'My Company' ? company.name : ''
   )
@@ -57,6 +66,7 @@ export default function Onboarding() {
   function handleStep1(e) {
     e.preventDefault()
     if (!fullName.trim()) return
+    if (path === 'team' && (!phone.trim() || !address.trim())) return
     if (path === 'admin') setStep(2)
     else                  handleTeamFinish()
   }
@@ -67,6 +77,8 @@ export default function Onboarding() {
       const { data, error: fnErr } = await invokeFn('upsert-company', {
         body: {
           full_name: fullName.trim(),
+          phone: phone.trim(),
+          address: address.trim(),
           company_id: company?.id ?? null,
           skip_company: true,
           onboarding_complete: true,
@@ -222,6 +234,18 @@ export default function Onboarding() {
             </p>
           </div>
 
+          {isInvitedTeamMember && company?.name && (
+            <div className="flex items-center gap-3 bg-brand-600/10 border border-brand-600/20 rounded-2xl p-4">
+              <div className="w-10 h-10 rounded-xl bg-brand-600/20 border border-brand-600/30 flex items-center justify-center shrink-0">
+                <Building2 size={18} className="text-brand-300" />
+              </div>
+              <div>
+                <p className="text-xs text-brand-200/70">You're joining</p>
+                <p className="text-white font-bold">{company.name}</p>
+              </div>
+            </div>
+          )}
+
           <div className="bg-navy-700 rounded-2xl p-5 border border-white/[0.07] space-y-4">
             <div>
               <label className="block text-xs text-white/50 mb-1.5 font-medium">Your Full Name</label>
@@ -235,7 +259,42 @@ export default function Onboarding() {
               />
             </div>
 
+            {session?.user?.email && (
+              <div>
+                <label className="block text-xs text-white/50 mb-1.5 font-medium">Email</label>
+                <div className="px-4 py-2.5 bg-white/[0.04] rounded-xl border border-white/[0.06]">
+                  <span className="text-sm text-white/55">{session.user.email}</span>
+                </div>
+              </div>
+            )}
+
             {path === 'team' && (
+              <>
+                <div>
+                  <label className="block text-xs text-white/50 mb-1.5 font-medium">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    placeholder="(555) 123-4567"
+                    required
+                    className={fieldClass}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/50 mb-1.5 font-medium">Address</label>
+                  <input
+                    value={address}
+                    onChange={e => setAddress(e.target.value)}
+                    placeholder="123 Main St, City, ST 00000"
+                    required
+                    className={fieldClass}
+                  />
+                </div>
+              </>
+            )}
+
+            {path === 'team' && !isInvitedTeamMember && (
               <div className="flex items-start gap-3 bg-brand-600/10 border border-brand-600/20 rounded-xl p-3">
                 <Mail size={15} className="text-brand-400 shrink-0 mt-0.5" />
                 <p className="text-xs text-brand-200/80 leading-snug">
@@ -257,13 +316,15 @@ export default function Onboarding() {
           {error && <p className="text-red-400 text-xs font-medium text-center">{error}</p>}
 
           <div className="flex gap-3">
-            <button type="button" onClick={() => { setStep(0); setPath(null) }}
-              className="px-5 py-3.5 bg-white/8 hover:bg-white/12 text-white/60 font-semibold rounded-xl transition-colors">
-              Back
-            </button>
+            {!isInvitedTeamMember && (
+              <button type="button" onClick={() => { setStep(0); setPath(null) }}
+                className="px-5 py-3.5 bg-white/8 hover:bg-white/12 text-white/60 font-semibold rounded-xl transition-colors">
+                Back
+              </button>
+            )}
             <button
               type="submit"
-              disabled={saving || !fullName.trim()}
+              disabled={saving || !fullName.trim() || (path === 'team' && (!phone.trim() || !address.trim()))}
               className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
             >
               {saving ? 'Saving…' : path === 'team'

@@ -82,32 +82,49 @@ export function AuthProvider({ children }) {
       // New user — check for invite metadata
       const { data: authData } = await supabase.auth.getUser()
       const meta = authData?.user?.user_metadata ?? {}
-      let companyId = meta.company_id
+      const companyIdFromInvite = meta.company_id
       const role = meta.role ?? 'owner'
 
-      if (!companyId) {
-        const { data: company, error: companyError } = await supabase
-          .from('companies')
-          .insert({ name: 'My Company', sdvosb: true })
-          .select()
-          .single()
-        if (companyError) throw companyError
-        companyId = company.id
+      // Same class of race as the existing-user retry above: this can fail
+      // transiently on a freshly-restored session before the auth token has
+      // fully propagated to RLS. A silent failure here is worse than for an
+      // existing user, though — it leaves an invited driver/dispatcher with
+      // no profile at all, and upsert-company's server-side self-heal has no
+      // way to tell "provisioning raced" apart from "this account is
+      // actually broken" without re-deriving the same invite metadata. So
+      // retry here rather than letting it fall through.
+      let fresh, provisionError
+      for (let attempt = 0; attempt <= 1; attempt++) {
+        try {
+          let companyId = companyIdFromInvite
+          if (!companyId) {
+            const { data: company, error: companyError } = await supabase
+              .from('companies')
+              .insert({ name: 'My Company', sdvosb: true })
+              .select()
+              .single()
+            if (companyError) throw companyError
+            companyId = company.id
+          }
+
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert(
+              { id: userId, company_id: companyId, full_name: '', role },
+              { onConflict: 'id', ignoreDuplicates: true }
+            )
+          if (profileError) throw profileError
+
+          const result = await supabase.from('profiles').select('*, companies(*)').eq('id', userId).single()
+          fresh = result.data
+          provisionError = result.error
+          break
+        } catch (err) {
+          provisionError = err
+          if (attempt === 0) await new Promise(r => setTimeout(r, 500))
+        }
       }
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert(
-          { id: userId, company_id: companyId, full_name: '', role },
-          { onConflict: 'id', ignoreDuplicates: true }
-        )
-      if (profileError) throw profileError
-
-      const { data: fresh } = await supabase
-        .from('profiles')
-        .select('*, companies(*)')
-        .eq('id', userId)
-        .single()
+      if (!fresh && provisionError) throw provisionError
 
       setProfile(fresh ?? null)
       if (fresh) loadedUserId.current = userId

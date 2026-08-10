@@ -23,6 +23,7 @@ const Drivers          = lazy(() => import('./pages/Drivers'))
 const Settings         = lazy(() => import('./pages/Settings'))
 const VehicleInspection = lazy(() => import('./pages/VehicleInspection'))
 const MyCompliance     = lazy(() => import('./pages/MyCompliance'))
+const MyTeam           = lazy(() => import('./pages/MyTeam'))
 
 // Redirect to onboarding until the user completes setup — including the
 // case where profile is still null (e.g. first-login auto-provisioning
@@ -82,6 +83,7 @@ function AppRoutes() {
                 <Route path="/settings"   element={<AuthGate><Settings /></AuthGate>} />
                 <Route path="/inspections/new" element={<AuthGate><VehicleInspection /></AuthGate>} />
                 <Route path="/my-compliance"   element={<AuthGate><MyCompliance /></AuthGate>} />
+                <Route path="/my-team"         element={<AuthGate><MyTeam /></AuthGate>} />
                 <Route path="*"           element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
 import StatusPill from '../components/ui/StatusPill'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Clock, Package, CheckCircle2, ChevronRight, Truck, AlertCircle, Navigation, ClipboardCheck, ShieldCheck } from 'lucide-react'
+import { MapPin, Clock, Package, CheckCircle2, ChevronRight, Truck, AlertCircle, Navigation, ClipboardCheck, ShieldCheck, Users } from 'lucide-react'
 import { safeFormatDate, safeIsToday } from '../lib/dates'
 
 const STATUS_ACTIONS = {
@@ -116,24 +116,33 @@ export default function DriverDashboard() {
         </div>
 
         {/* Quick actions */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-2.5">
           <button
             onClick={() => navigate('/inspections/new')}
-            className="bg-navy-700 rounded-2xl p-3 border border-white/[0.07] flex items-center gap-2.5 active:bg-navy-800 transition-colors"
+            className="bg-navy-700 rounded-2xl p-3 border border-white/[0.07] flex flex-col items-center gap-2 active:bg-navy-800 transition-colors"
           >
             <div className="w-8 h-8 rounded-xl bg-brand-600/20 border border-brand-600/25 flex items-center justify-center shrink-0">
               <ClipboardCheck size={16} className="text-brand-300" />
             </div>
-            <span className="text-xs font-semibold text-white/80 text-left leading-tight">Vehicle Inspection</span>
+            <span className="text-xs font-semibold text-white/80 text-center leading-tight">Inspection</span>
           </button>
           <button
             onClick={() => navigate('/my-compliance')}
-            className="bg-navy-700 rounded-2xl p-3 border border-white/[0.07] flex items-center gap-2.5 active:bg-navy-800 transition-colors"
+            className="bg-navy-700 rounded-2xl p-3 border border-white/[0.07] flex flex-col items-center gap-2 active:bg-navy-800 transition-colors"
           >
             <div className="w-8 h-8 rounded-xl bg-brand-600/20 border border-brand-600/25 flex items-center justify-center shrink-0">
               <ShieldCheck size={16} className="text-brand-300" />
             </div>
-            <span className="text-xs font-semibold text-white/80 text-left leading-tight">My Documents</span>
+            <span className="text-xs font-semibold text-white/80 text-center leading-tight">Documents</span>
+          </button>
+          <button
+            onClick={() => navigate('/my-team')}
+            className="bg-navy-700 rounded-2xl p-3 border border-white/[0.07] flex flex-col items-center gap-2 active:bg-navy-800 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-xl bg-brand-600/20 border border-brand-600/25 flex items-center justify-center shrink-0">
+              <Users size={16} className="text-brand-300" />
+            </div>
+            <span className="text-xs font-semibold text-white/80 text-center leading-tight">My Team</span>
           </button>
         </div>
 

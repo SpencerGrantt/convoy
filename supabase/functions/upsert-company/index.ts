@@ -83,14 +83,25 @@ serve(async (req) => {
       // provisioned (e.g. client-side auto-creation on first login failed
       // silently). Create it now instead of erroring, so onboarding is
       // always able to self-heal a broken account rather than dead-ending.
+      //
+      // Critical: an invited driver/dispatcher who hits this path must NOT
+      // silently become an 'owner' with no company. Their real role and
+      // company were fixed at invite time in the auth user's metadata (see
+      // Settings.jsx/Sidebar.jsx's signInWithOtp calls) — recover those
+      // here rather than defaulting, or the self-heal "fix" actively
+      // corrupts an invited account into an unrelated admin profile.
       if (!updatedRows || updatedRows.length === 0) {
+        const meta = (user.user_metadata ?? {}) as Record<string, unknown>
+        const inviteRole = typeof meta.role === 'string' ? meta.role : 'owner'
+        const inviteCompanyId = typeof meta.company_id === 'string' ? meta.company_id : undefined
+
         const { error: insertErr } = await admin.from('profiles').insert({
           id: user.id,
-          company_id: (profileUpdate.company_id as string | undefined) ?? companyId,
+          company_id: (profileUpdate.company_id as string | undefined) ?? companyId ?? inviteCompanyId ?? null,
           full_name: (profileUpdate.full_name as string | undefined) ?? '',
           phone: (profileUpdate.phone as string | undefined) ?? null,
           address: (profileUpdate.address as string | undefined) ?? null,
-          role: 'owner',
+          role: inviteRole,
           onboarding_complete: (profileUpdate.onboarding_complete as boolean | undefined) ?? false,
         })
         if (insertErr) throw new Error(insertErr.message)

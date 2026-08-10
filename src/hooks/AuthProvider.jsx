@@ -52,17 +52,32 @@ export function AuthProvider({ children }) {
 
   async function fetchOrCreateProfile(userId) {
     try {
-      const { data: existing } = await supabase
-        .from('profiles')
-        .select('*, companies(*)')
-        .eq('id', userId)
-        .single()
+      let existing, fetchError
+      for (let attempt = 0; attempt <= 1; attempt++) {
+        const result = await supabase
+          .from('profiles')
+          .select('*, companies(*)')
+          .eq('id', userId)
+          .single()
+        existing = result.data
+        fetchError = result.error
+        // PGRST116 ("no rows returned") is the only signal that actually
+        // means this user has no profile yet. Any other failure — e.g. the
+        // auth token not having propagated to PostgREST/RLS yet on a
+        // freshly-restored session — must not be treated the same way, or
+        // an existing user gets misclassified as new and routed straight
+        // into onboarding. Retry once before giving up.
+        if (existing || fetchError?.code === 'PGRST116') break
+        if (attempt === 0) await new Promise(r => setTimeout(r, 500))
+      }
 
       if (existing) {
         setProfile(existing)
         loadedUserId.current = userId
         return
       }
+
+      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError
 
       // New user — check for invite metadata
       const { data: authData } = await supabase.auth.getUser()

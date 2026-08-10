@@ -195,13 +195,12 @@ export default function Settings() {
     setInviting(false)
   }
 
-  // Company info and team management are limited to owner/dispatcher
-  // ("management") — a driver only ever sees their own account settings.
-  // Mirrors the server-side check in upsert-company/manage-team, which is
-  // the actual enforcement; this just keeps a driver from seeing controls
-  // that would fail anyway.
+  // Editing is limited to owner/dispatcher ("management") — company info
+  // stays hidden from drivers entirely, but the team roster is fine to view
+  // (read-only, no invite/role controls; those are hidden further down and,
+  // more importantly, enforced server-side in upsert-company/manage-team).
   const canManage = profile?.role === 'owner' || profile?.role === 'dispatcher'
-  const tabs = canManage ? ['account', 'company', 'team'] : ['account']
+  const tabs = canManage ? ['account', 'company', 'team'] : ['account', 'team']
 
   return (
     <div className="pb-24 md:pb-8">
@@ -419,31 +418,33 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Invite Team Member</h2>
-            <p className="text-xs text-white/40">They'll receive a magic link to set up their account.</p>
-            <div>
-              <label className="block text-xs text-white/50 mb-1">Email Address</label>
-              <input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="driver@example.com" className={fieldClass} />
+          {canManage && (
+            <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
+              <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Invite Team Member</h2>
+              <p className="text-xs text-white/40">They'll receive a magic link to set up their account.</p>
+              <div>
+                <label className="block text-xs text-white/50 mb-1">Email Address</label>
+                <input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="driver@example.com" className={fieldClass} />
+              </div>
+              <div>
+                <label className="block text-xs text-white/50 mb-1">Role</label>
+                <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className={fieldClass}>
+                  <option value="driver">Driver</option>
+                  <option value="dispatcher">Dispatcher</option>
+                  <option value="owner">Owner</option>
+                </select>
+              </div>
+              {inviteMsg && (
+                <p className={`text-xs font-medium ${inviteMsg.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>
+                  {inviteMsg}
+                </p>
+              )}
+              <button type="button" onClick={inviteUser} disabled={inviting || !inviteEmail}
+                className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
+                {inviting ? 'Sending…' : 'Send Invite'}
+              </button>
             </div>
-            <div>
-              <label className="block text-xs text-white/50 mb-1">Role</label>
-              <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className={fieldClass}>
-                <option value="driver">Driver</option>
-                <option value="dispatcher">Dispatcher</option>
-                <option value="owner">Owner</option>
-              </select>
-            </div>
-            {inviteMsg && (
-              <p className={`text-xs font-medium ${inviteMsg.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>
-                {inviteMsg}
-              </p>
-            )}
-            <button type="button" onClick={inviteUser} disabled={inviting || !inviteEmail}
-              className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
-              {inviting ? 'Sending…' : 'Send Invite'}
-            </button>
-          </div>
+          )}
           </>
         )}
 

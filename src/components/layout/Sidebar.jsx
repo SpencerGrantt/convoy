@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { Home, Truck, FileText, DollarSign, Settings, Plus, X } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useDrivers } from '../../hooks/useDrivers'
-import { supabase, APP_URL } from '../../lib/supabase'
+import { invokeFn } from '../../lib/supabase'
 
 const roleLabel = { owner: 'Head Admin', dispatcher: 'Dispatcher', driver: 'Driver' }
 
@@ -73,15 +73,13 @@ export default function Sidebar() {
     if (!driverEmail) return
     setInviting(true)
     setInviteMsg('')
-    const { error } = await supabase.auth.signInWithOtp({
-      email: driverEmail,
-      options: {
-        emailRedirectTo: APP_URL,
-        data: { company_id: profile?.company_id, role: 'driver' },
-      },
+    const { data, error } = await invokeFn('manage-team', {
+      body: { action: 'invite', email: driverEmail, role: 'driver' },
     })
     if (error) {
       setInviteMsg(`Error: ${error.message}`)
+    } else if (data?.error) {
+      setInviteMsg(`Error: ${data.error}`)
     } else {
       setInviteMsg('Invite sent!')
       setDriverEmail('')

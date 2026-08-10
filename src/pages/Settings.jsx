@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { supabase, invokeFn, APP_URL } from '../lib/supabase'
+import { supabase, invokeFn } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
 import { safeFormatDate } from '../lib/dates'
 import { Shield, Users, Calendar, Hash, Building2 } from 'lucide-react'
@@ -22,6 +22,7 @@ export default function Settings() {
   const [activeTab, setActiveTab] = useState('account')
 
   const [name, setName]               = useState(profile?.full_name ?? '')
+  const [phone, setPhone]             = useState(profile?.phone ?? '')
   const [companyName, setCompanyName] = useState(company?.name ?? '')
   const [cageCode, setCageCode]       = useState(company?.cage_code ?? '')
   const [uei, setUei]                 = useState(company?.uei ?? '')
@@ -104,6 +105,7 @@ export default function Settings() {
   // Sync form state if profile reloads
   useEffect(() => {
     if (profile?.full_name) setName(profile.full_name)
+    if (profile?.phone)      setPhone(profile.phone)
     if (company?.name)        setCompanyName(company.name)
     if (company?.cage_code)   setCageCode(company.cage_code)
     if (company?.uei)         setUei(company.uei)
@@ -137,19 +139,31 @@ export default function Settings() {
     setSaving(true)
     setSaveErr('')
     try {
+      // The account tab only ever touches the caller's own name/phone — it
+      // must not also resubmit company fields, both because a driver isn't
+      // allowed to (upsert-company now rejects that server-side) and because
+      // an owner/dispatcher saving their own name shouldn't silently rewrite
+      // company info from whatever's left in this form's local state.
       const naicsCodes = naics.split(',').map(s => s.trim()).filter(Boolean)
-      const { data, error: fnErr } = await invokeFn('upsert-company', {
-        body: {
-          name: companyName,
-          cage_code: cageCode || null,
-          uei: uei || null,
-          naics_codes: naicsCodes,
-          sam_expiry: samExpiry || null,
-          sdvosb,
-          full_name: name,
-          company_id: company?.id ?? null,
-        },
-      })
+      const body = activeTab === 'company'
+        ? {
+            name: companyName,
+            cage_code: cageCode || null,
+            uei: uei || null,
+            naics_codes: naicsCodes,
+            sam_expiry: samExpiry || null,
+            sdvosb,
+            full_name: name,
+            phone: phone || null,
+            company_id: company?.id ?? null,
+          }
+        : {
+            full_name: name,
+            phone: phone || null,
+            company_id: company?.id ?? null,
+            skip_company: true,
+          }
+      const { data, error: fnErr } = await invokeFn('upsert-company', { body })
       if (fnErr) throw new Error(fnErr.message)
       if (data?.error) throw new Error(data.error)
       if (!data?.profile) throw new Error('Save did not complete — please try again.')
@@ -167,20 +181,27 @@ export default function Settings() {
     if (!inviteEmail) return
     setInviting(true)
     setInviteMsg('')
-    const { error } = await supabase.auth.signInWithOtp({
-      email: inviteEmail,
-      options: {
-        emailRedirectTo: APP_URL,
-        data: { company_id: profile.company_id, role: inviteRole },
-      },
+    // Routed through manage-team rather than calling signInWithOtp directly
+    // — inviting has to be enforced server-side (owner/dispatcher only, and
+    // a dispatcher can't grant ownership), which a client-only check can't
+    // guarantee since nothing stops a crafted request straight to the API.
+    const { data, error } = await invokeFn('manage-team', {
+      body: { action: 'invite', email: inviteEmail, role: inviteRole },
     })
     if (error) setInviteMsg(`Error: ${error.message}`)
+    else if (data?.error) setInviteMsg(`Error: ${data.error}`)
     else setInviteMsg(`Invite sent to ${inviteEmail}`)
     setInviteEmail('')
     setInviting(false)
   }
 
-  const tabs = ['account', 'company', 'team']
+  // Company info and team management are limited to owner/dispatcher
+  // ("management") — a driver only ever sees their own account settings.
+  // Mirrors the server-side check in upsert-company/manage-team, which is
+  // the actual enforcement; this just keeps a driver from seeing controls
+  // that would fail anyway.
+  const canManage = profile?.role === 'owner' || profile?.role === 'dispatcher'
+  const tabs = canManage ? ['account', 'company', 'team'] : ['account']
 
   return (
     <div className="pb-24 md:pb-8">
@@ -205,6 +226,10 @@ export default function Settings() {
             <div>
               <label className="block text-xs text-white/50 mb-1">Your Name</label>
               <input value={name} onChange={e => setName(e.target.value)} className={fieldClass} />
+            </div>
+            <div>
+              <label className="block text-xs text-white/50 mb-1">Phone Number</label>
+              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="(555) 123-4567" className={fieldClass} />
             </div>
             <div>
               <label className="block text-xs text-white/50 mb-1">Role</label>

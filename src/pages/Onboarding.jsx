@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { invokeFn } from '../lib/supabase'
+import { supabase, invokeFn } from '../lib/supabase'
 import {
   CheckCircle, ChevronRight, Building2, User, Shield,
   Users, Crown, Mail,
@@ -33,6 +33,11 @@ export default function Onboarding() {
   const [fullName, setFullName]       = useState(profile?.full_name ?? '')
   const [phone, setPhone]             = useState(profile?.phone ?? '')
   const [address, setAddress]         = useState(profile?.address ?? '')
+  // Invited team members only ever authenticate via the invite's one-time
+  // magic link — without this, they'd have no password and would have to
+  // request a fresh magic link every single time they want to sign in.
+  const [password, setPassword]         = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [companyName, setCompanyName] = useState(
     company?.name && company.name !== 'My Company' ? company.name : ''
   )
@@ -67,6 +72,7 @@ export default function Onboarding() {
     e.preventDefault()
     if (!fullName.trim()) return
     if (path === 'team' && (!phone.trim() || !address.trim())) return
+    if (path === 'team' && (password.length < 6 || password !== confirmPassword)) return
     if (path === 'admin') setStep(2)
     else                  handleTeamFinish()
   }
@@ -74,6 +80,9 @@ export default function Onboarding() {
   async function handleTeamFinish() {
     setSaving(true); setError('')
     try {
+      const { error: pwErr } = await supabase.auth.updateUser({ password })
+      if (pwErr) throw new Error(pwErr.message)
+
       const { data, error: fnErr } = await invokeFn('upsert-company', {
         body: {
           full_name: fullName.trim(),
@@ -291,6 +300,32 @@ export default function Onboarding() {
                     className={fieldClass}
                   />
                 </div>
+                <div>
+                  <label className="block text-xs text-white/50 mb-1.5 font-medium">Create Password</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="At least 6 characters"
+                    required
+                    className={fieldClass}
+                  />
+                  <p className="text-[11px] text-white/30 mt-1">So you can sign in directly next time, without waiting on another email link.</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-white/50 mb-1.5 font-medium">Confirm Password</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className={fieldClass}
+                  />
+                  {password && confirmPassword && password !== confirmPassword && (
+                    <p className="text-[11px] text-red-400 mt-1">Passwords do not match.</p>
+                  )}
+                </div>
               </>
             )}
 
@@ -324,7 +359,7 @@ export default function Onboarding() {
             )}
             <button
               type="submit"
-              disabled={saving || !fullName.trim() || (path === 'team' && (!phone.trim() || !address.trim()))}
+              disabled={saving || !fullName.trim() || (path === 'team' && (!phone.trim() || !address.trim() || password.length < 6 || password !== confirmPassword))}
               className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
             >
               {saving ? 'Saving…' : path === 'team'

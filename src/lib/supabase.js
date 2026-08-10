@@ -1,12 +1,5 @@
 import { createClient, processLock } from '@supabase/supabase-js'
 
-// Invite emails go to someone else's inbox, so the redirect link has to be a
-// stable, publicly-reachable URL — never `window.location.origin`, which is
-// whatever the *sender* happens to be running (localhost during dev, a
-// throwaway preview deployment, etc.) and would send the invitee somewhere
-// only the sender's machine can reach.
-export const APP_URL = 'https://convoy-taupe.vercel.app'
-
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 

@@ -33,7 +33,7 @@ serve(async (req) => {
       })
     }
 
-    const { action, target_id, role } = await req.json()
+    const { action, target_id, role, email } = await req.json()
 
     const { data: caller, error: callerErr } = await admin
       .from('profiles')
@@ -41,6 +41,46 @@ serve(async (req) => {
       .eq('id', user.id)
       .single()
     if (callerErr || !caller) throw new Error('Caller profile not found')
+
+    // Inviting is allowed for owner and dispatcher ("management"); everything
+    // else here (changing an existing member's role, removing them) stays
+    // owner-only. Handled before the target_id lookup below since an invite
+    // has no existing target — the invitee doesn't have a profile yet.
+    if (action === 'invite') {
+      if (caller.role !== 'owner' && caller.role !== 'dispatcher') {
+        return new Response(JSON.stringify({ error: 'Only an owner or dispatcher can invite team members' }), {
+          status: 403, headers: { 'Content-Type': 'application/json', ...CORS },
+        })
+      }
+      if (!email || !['owner', 'dispatcher', 'driver'].includes(role)) {
+        return new Response(JSON.stringify({ error: 'Invalid email or role' }), {
+          status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
+        })
+      }
+      // A dispatcher can bring on drivers/dispatchers but not grant ownership
+      // — only an owner can invite another owner.
+      if (caller.role === 'dispatcher' && role === 'owner') {
+        return new Response(JSON.stringify({ error: 'Only an owner can invite another owner' }), {
+          status: 403, headers: { 'Content-Type': 'application/json', ...CORS },
+        })
+      }
+
+      // Invite links must always land on the real production app, never
+      // wherever the sender happens to be running from (see APP_URL in
+      // src/lib/supabase.js — same constant, duplicated here because this
+      // function runs in Deno, outside that bundle).
+      const APP_URL = 'https://convoy-taupe.vercel.app'
+
+      const { error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, {
+        data: { company_id: caller.company_id, role },
+        redirectTo: APP_URL,
+      })
+      if (inviteErr) throw new Error(inviteErr.message)
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { 'Content-Type': 'application/json', ...CORS },
+      })
+    }
 
     if (caller.role !== 'owner') {
       return new Response(JSON.stringify({ error: 'Only an owner can manage team members' }), {

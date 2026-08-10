@@ -36,6 +36,25 @@ serve(async (req) => {
 
     let companyId = body.company_id ?? null
 
+    // Drivers can update their own profile fields (name/phone/address) through
+    // this same function, but must never be able to edit company info — that's
+    // limited to owner/dispatcher ("management"). A brand-new self-signup
+    // admin has no profile row yet at this point (that's expected — they're
+    // creating their company for the first time), so only block when a
+    // profile already exists and its role is 'driver'.
+    if (!body.skip_company) {
+      const { data: caller } = await admin
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+      if (caller && caller.role === 'driver') {
+        return new Response(JSON.stringify({ error: 'Only an owner or dispatcher can edit company info' }), {
+          status: 403, headers: { 'Content-Type': 'application/json', ...CORS },
+        })
+      }
+    }
+
     // skip_company: true → only update the profile (used by team-member onboarding path)
     if (!body.skip_company) {
       const companyFields = {

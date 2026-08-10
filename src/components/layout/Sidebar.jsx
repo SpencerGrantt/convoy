@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Home, Truck, FileText, DollarSign, Settings, Plus, X } from 'lucide-react'
+import { Home, Truck, FileText, DollarSign, MessageCircle, Settings, Plus, X } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useDrivers } from '../../hooks/useDrivers'
 import { invokeFn } from '../../lib/supabase'
@@ -8,10 +8,11 @@ import { invokeFn } from '../../lib/supabase'
 const roleLabel = { owner: 'Head Admin', dispatcher: 'Dispatcher', driver: 'Driver' }
 
 const allNavItems = [
-  { to: '/',          icon: Home,       label: 'Dashboard', roles: ['owner', 'dispatcher', 'driver'] },
-  { to: '/runs',      icon: Truck,      label: 'Runs',      roles: ['owner', 'dispatcher', 'driver'] },
-  { to: '/contracts', icon: FileText,   label: 'Contracts', roles: ['owner', 'dispatcher'] },
-  { to: '/finances',  icon: DollarSign, label: 'Finances',  roles: ['owner'] },
+  { to: '/',          icon: Home,          label: 'Dashboard', roles: ['owner', 'dispatcher', 'driver'] },
+  { to: '/runs',      icon: Truck,         label: 'Runs',      roles: ['owner', 'dispatcher', 'driver'] },
+  { to: '/messages',  icon: MessageCircle, label: 'Messages',  roles: ['owner', 'dispatcher', 'driver'] },
+  { to: '/contracts', icon: FileText,      label: 'Contracts', roles: ['owner', 'dispatcher'] },
+  { to: '/finances',  icon: DollarSign,    label: 'Finances',  roles: ['owner'] },
 ]
 
 function NavItem({ to, icon: Icon, label, end }) {

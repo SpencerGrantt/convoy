@@ -12,6 +12,21 @@ import { differenceInMinutes, startOfMonth } from 'date-fns'
 import { safeFormatDate, safeDifferenceInDays } from '../lib/dates'
 import { useNavigate } from 'react-router-dom'
 
+const DISMISSED_KEY = 'convoy-dismissed-alerts'
+
+// Keyed by a fingerprint of the alert's content (e.g. contract id + end_date,
+// not just contract id), not just the entity id — so if a dismissed
+// "expiring in 12 days" alert later becomes "expired 3 days ago", that's a
+// materially different warning and reappears rather than staying silenced
+// forever from one earlier dismissal.
+function loadDismissed() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(DISMISSED_KEY) ?? '[]'))
+  } catch {
+    return new Set()
+  }
+}
+
 export default function Dashboard() {
   const { profile } = useAuth()
   const { runs, loading: runsLoading } = useRuns({ limit: 5 })
@@ -19,6 +34,15 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const [anomalies, setAnomalies] = useState([])
   const [mtdStats, setMtdStats] = useState({ totalMiles: 0, deadheadMiles: 0, contractRuns: 0, commercialRuns: 0 })
+  const [dismissed, setDismissed] = useState(loadDismissed)
+
+  function dismiss(key) {
+    setDismissed(prev => {
+      const next = new Set(prev).add(key)
+      localStorage.setItem(DISMISSED_KEY, JSON.stringify([...next]))
+      return next
+    })
+  }
 
   useEffect(() => {
     requestNotificationPermission().then(granted => {
@@ -95,44 +119,58 @@ export default function Dashboard() {
   const openContracts = contracts.filter(c => c.status === 'active').length
 
   const samDaysLeft = company?.sam_expiry ? safeDifferenceInDays(company.sam_expiry, today) : null
-  const expiredContracts = contracts.filter(c => {
-    const days = safeDifferenceInDays(c.end_date, today)
-    return days !== null && days < 0
-  })
-  const expiringContracts = contracts.filter(c => {
-    const days = safeDifferenceInDays(c.end_date, today)
-    return days !== null && days >= 0 && days <= 30
-  })
+  const samKey = `sam-${profile?.company_id}-${company?.sam_expiry}`
+  const expiredContracts = contracts
+    .filter(c => {
+      const days = safeDifferenceInDays(c.end_date, today)
+      return days !== null && days < 0
+    })
+    .map(c => ({ ...c, alertKey: `expired-${c.id}-${c.end_date}` }))
+    .filter(c => !dismissed.has(c.alertKey))
+  const expiringContracts = contracts
+    .filter(c => {
+      const days = safeDifferenceInDays(c.end_date, today)
+      return days !== null && days >= 0 && days <= 30
+    })
+    .map(c => ({ ...c, alertKey: `expiring-${c.id}-${c.end_date}` }))
+    .filter(c => !dismissed.has(c.alertKey))
+  const visibleAnomalies = anomalies
+    .map(r => ({ ...r, alertKey: `anomaly-${r.id}` }))
+    .filter(r => !dismissed.has(r.alertKey))
 
   return (
     <div className="pb-24 md:pb-8">
       <TopBar title="Dashboard" />
       <div className="px-4 pt-4 space-y-4 md:px-8 md:pt-8">
-        {samDaysLeft !== null && samDaysLeft <= 30 && (
+        {samDaysLeft !== null && samDaysLeft <= 30 && !dismissed.has(samKey) && (
           <AlertBanner
             type={samDaysLeft <= 7 ? 'error' : 'warning'}
             message={`SAM.gov expires in ${samDaysLeft} day${samDaysLeft === 1 ? '' : 's'} — renew immediately to keep government contracts active.`}
+            onDismiss={() => dismiss(samKey)}
           />
         )}
         {expiredContracts.map(c => (
           <AlertBanner
-            key={c.id}
+            key={c.alertKey}
             type="error"
             message={`Contract "${c.name}" expired ${safeFormatDate(c.end_date, 'MMM d')} — ${Math.abs(safeDifferenceInDays(c.end_date, today))} days ago.`}
+            onDismiss={() => dismiss(c.alertKey)}
           />
         ))}
         {expiringContracts.map(c => (
           <AlertBanner
-            key={c.id}
+            key={c.alertKey}
             type="warning"
             message={`Contract "${c.name}" expires ${safeFormatDate(c.end_date, 'MMM d')} — ${safeDifferenceInDays(c.end_date, today)} days remaining.`}
+            onDismiss={() => dismiss(c.alertKey)}
           />
         ))}
-        {anomalies.map(r => (
+        {visibleAnomalies.map(r => (
           <AlertBanner
-            key={r.id}
+            key={r.alertKey}
             type="error"
             message={`Run to ${r.dropoff_address} is running 40%+ over average delivery time.`}
+            onDismiss={() => dismiss(r.alertKey)}
           />
         ))}
 

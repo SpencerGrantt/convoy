@@ -90,6 +90,7 @@ function OpportunityCard({ opp, companyId, defaultNaics, onSaved }) {
         agency: opp.agency ?? null,
         contract_number: opp.noticeId ?? null,
         naics_code: opp.naicsCode ?? defaultNaics ?? null,
+        location: opp.placeOfPerformance ?? null,
         status: 'pending',
         sam_link: opp.link ?? null,
         end_date,
@@ -289,6 +290,7 @@ export default function Contracts() {
                     <StatusPill status={c.status} />
                   </div>
                   <p className="text-xs text-white/50">{c.agency} · #{c.contract_number}</p>
+                  {c.location && <p className="text-xs text-white/40 mt-0.5">📍 {c.location}</p>}
                   {c.annual_value && (
                     <p className="text-xs text-green-400 font-semibold mt-1">
                       ${Number(c.annual_value).toLocaleString()} / yr

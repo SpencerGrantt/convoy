@@ -5,38 +5,52 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const MOCK_OPPORTUNITIES = [
-  {
-    title: 'Medical Specimen Transport — VA Medical Center',
-    score: 8,
-    reason: 'Direct match: VA medical logistics with SDVOSB set-aside',
-    deadline: '2026-07-15',
-    link: 'https://sam.gov',
-    noticeId: null,
-    naicsCode: '492110',
-    agency: 'Department of Veterans Affairs',
-  },
-  {
-    title: 'Lab Courier Services — HHS Region 3',
-    score: 7,
-    reason: 'Strong fit: HHS lab courier aligns with NAICS 492110',
-    deadline: '2026-07-30',
-    link: 'https://sam.gov',
-    noticeId: null,
-    naicsCode: '492110',
-    agency: 'Department of Health and Human Services',
-  },
-  {
-    title: 'DoD Medical Supply Delivery — SDVOSB Set-Aside',
-    score: 6,
-    reason: 'Good fit: SDVOSB set-aside for medical supply delivery',
-    deadline: '2026-08-01',
-    link: 'https://sam.gov',
-    noticeId: null,
-    naicsCode: '621610',
-    agency: 'Department of Defense',
-  },
-]
+// Hardcoded dates here used to go stale the moment they passed — a fallback
+// shown as "sample results" still shouldn't display deadlines already in
+// the past. Compute them relative to today instead, every time.
+function daysFromNow(n: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() + n)
+  return d.toISOString().slice(0, 10)
+}
+
+function mockOpportunities() {
+  return [
+    {
+      title: 'Medical Specimen Transport — VA Medical Center',
+      score: 8,
+      reason: 'Direct match: VA medical logistics with SDVOSB set-aside',
+      deadline: daysFromNow(21),
+      link: 'https://sam.gov',
+      noticeId: null,
+      naicsCode: '492110',
+      agency: 'Department of Veterans Affairs',
+      placeOfPerformance: null,
+    },
+    {
+      title: 'Lab Courier Services — HHS Region 3',
+      score: 7,
+      reason: 'Strong fit: HHS lab courier aligns with NAICS 492110',
+      deadline: daysFromNow(35),
+      link: 'https://sam.gov',
+      noticeId: null,
+      naicsCode: '492110',
+      agency: 'Department of Health and Human Services',
+      placeOfPerformance: null,
+    },
+    {
+      title: 'DoD Medical Supply Delivery — SDVOSB Set-Aside',
+      score: 6,
+      reason: 'Good fit: SDVOSB set-aside for medical supply delivery',
+      deadline: daysFromNow(45),
+      link: 'https://sam.gov',
+      noticeId: null,
+      naicsCode: '621610',
+      agency: 'Department of Defense',
+      placeOfPerformance: null,
+    },
+  ]
+}
 
 function mmddyyyy(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, '0')
@@ -59,8 +73,9 @@ serve(async (req) => {
     const { naicsCodes, title } = await req.json()
     const samApiKey = Deno.env.get('SAM_GOV_API_KEY')
 
-    let opportunities = MOCK_OPPORTUNITIES
+    let opportunities = mockOpportunities()
     let live = false
+    let debugReason = samApiKey ? null : 'no SAM_GOV_API_KEY secret set'
 
     if (samApiKey) {
       try {
@@ -92,10 +107,12 @@ serve(async (req) => {
         const samRes = await withTimeout(fetch(samUrl), 12000)
 
         if (!samRes) {
-          console.log('[sam-gov-sync] timed out after 12s — likely AWS IP blocked by SAM.gov/Akamai')
+          debugReason = 'request timed out after 12s (likely blocked at network level, not a SAM.gov error response)'
+          console.log('[sam-gov-sync]', debugReason)
         } else if (!samRes.ok) {
           const body = await samRes.text().catch(() => '')
-          console.log('[sam-gov-sync] HTTP', samRes.status, body.slice(0, 200))
+          debugReason = `SAM.gov returned HTTP ${samRes.status}: ${body.slice(0, 200)}`
+          console.log('[sam-gov-sync]', debugReason)
         } else {
           const samData = await samRes.json()
           const raw: any[] = samData.opportunitiesData ?? []
@@ -115,20 +132,27 @@ serve(async (req) => {
               noticeId: opp.noticeId ?? null,
               naicsCode: opp.naicsCode ?? null,
               agency: opp.fullParentPathName?.split('.').pop()?.trim() ?? opp.department ?? null,
+              placeOfPerformance: [
+                opp.placeOfPerformance?.city?.name,
+                opp.placeOfPerformance?.state?.code,
+              ].filter(Boolean).join(', ') || null,
             }))
+          } else {
+            debugReason = 'SAM.gov responded OK but returned zero opportunitiesData rows for this NAICS/date range'
           }
         }
       } catch (fetchErr: any) {
-        console.log('[sam-gov-sync] fetch error:', fetchErr.message)
+        debugReason = `fetch threw: ${fetchErr.message}`
+        console.log('[sam-gov-sync]', debugReason)
       }
     }
 
-    return new Response(JSON.stringify({ opportunities, live }), {
+    return new Response(JSON.stringify({ opportunities, live, debugReason }), {
       headers: { 'Content-Type': 'application/json', ...CORS },
     })
   } catch (err: any) {
     return new Response(
-      JSON.stringify({ opportunities: MOCK_OPPORTUNITIES, error: err.message }),
+      JSON.stringify({ opportunities: mockOpportunities(), error: err.message }),
       { headers: { 'Content-Type': 'application/json', ...CORS } }
     )
   }

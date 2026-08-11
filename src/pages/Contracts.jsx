@@ -53,6 +53,7 @@ async function samSearch({ naicsCode, title }) {
             noticeId: opp.noticeId ?? null,
             naicsCode: opp.naicsCode ?? null,
             agency: opp.fullParentPathName?.split('.').pop()?.trim() ?? opp.department ?? null,
+            placeOfPerformance: [opp.placeOfPerformance?.city?.name, opp.placeOfPerformance?.state?.code].filter(Boolean).join(', ') || null,
           })),
         }
       }
@@ -68,7 +69,7 @@ async function samSearch({ naicsCode, title }) {
     body: { naicsCodes: naicsCode ? [naicsCode] : [], title },
   })
   if (error) throw error
-  return { live: data?.live ?? false, opportunities: data?.opportunities ?? [] }
+  return { live: data?.live ?? false, opportunities: data?.opportunities ?? [], debugReason: data?.debugReason ?? null }
 }
 
 function OpportunityCard({ opp, companyId, defaultNaics, onSaved }) {
@@ -113,6 +114,7 @@ function OpportunityCard({ opp, companyId, defaultNaics, onSaved }) {
         <p className="text-xs font-semibold text-white flex-1 truncate">{opp.title}</p>
       </div>
       <p className="text-xs text-white/50">{opp.reason}</p>
+      {opp.placeOfPerformance && <p className="text-xs text-white/40">📍 {opp.placeOfPerformance}</p>}
       <div className="flex items-center justify-between gap-2">
         {opp.deadline && <p className="text-xs text-white/40">Deadline: {opp.deadline}</p>}
         <button
@@ -139,6 +141,7 @@ export default function Contracts() {
   const [matched, setMatched] = useState(false)
   const [scanError, setScanError] = useState('')
   const [liveResults, setLiveResults] = useState(false)
+  const [liveDebugReason, setLiveDebugReason] = useState('')
 
   const [manualQuery, setManualQuery] = useState('')
   const [manualResults, setManualResults] = useState([])
@@ -151,9 +154,10 @@ export default function Contracts() {
     setMatching(true)
     setScanError('')
     try {
-      const { live, opportunities } = await samSearch({ naicsCode: company?.naics_codes?.[0] })
+      const { live, opportunities, debugReason } = await samSearch({ naicsCode: company?.naics_codes?.[0] })
       setOpportunities(opportunities)
       setLiveResults(live)
+      setLiveDebugReason(live ? '' : (debugReason ?? ''))
     } catch (err) {
       setScanError(err?.message ?? 'Scan failed')
     } finally {
@@ -222,6 +226,9 @@ export default function Contracts() {
               <p className="text-xs text-white/40">
                 {matched && liveResults ? 'Live SAM.gov results' : matched ? 'SAM.gov unavailable — showing sample results' : 'SAM.gov matches for your NAICS codes'}
               </p>
+              {matched && !liveResults && liveDebugReason && (
+                <p className="text-[10px] text-white/25 mt-0.5">{liveDebugReason}</p>
+              )}
             </div>
             <button
               onClick={findOpportunities}

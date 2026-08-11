@@ -16,12 +16,31 @@ const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded
 // in plain text for anyone who opens dev tools, no login required. The key
 // stays a server-only secret (SAM_GOV_API_KEY, read by the edge function)
 // specifically so this can't happen. Do not reintroduce a client-side key.
-async function samSearch({ naicsCode, title }) {
+async function samSearch({ naicsCode, title, state }) {
   const { data, error } = await invokeFn('sam-gov-sync', {
-    body: { naicsCodes: naicsCode ? [naicsCode] : [], title },
+    body: { naicsCodes: naicsCode ? [naicsCode] : [], title, state },
   })
   if (error) throw error
   return { live: data?.live ?? false, opportunities: data?.opportunities ?? [], debugReason: data?.debugReason ?? null }
+}
+
+const PAGE_SIZE = 5
+
+// Shared "N of M, See more" control — reveals more of an already-fetched
+// results array client-side. SAM.gov's public API keys are rate-limited to
+// roughly 10 requests/day for non-federal accounts, so "See more" must never
+// fire a second network request; the edge function already fetches up to 25
+// results in one call for exactly this reason.
+function SeeMore({ total, visible, onMore }) {
+  if (visible >= total) return null
+  return (
+    <button
+      onClick={onMore}
+      className="w-full text-xs font-semibold text-brand-300 bg-brand-500/10 py-2 rounded-lg"
+    >
+      See more ({total - visible} more)
+    </button>
+  )
 }
 
 function OpportunityCard({ opp, companyId, defaultNaics, onSaved }) {
@@ -90,14 +109,18 @@ export default function Contracts() {
   const today = new Date()
 
   const [opportunities, setOpportunities] = useState([])
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [matching, setMatching] = useState(false)
   const [matched, setMatched] = useState(false)
   const [scanError, setScanError] = useState('')
   const [liveResults, setLiveResults] = useState(false)
   const [liveDebugReason, setLiveDebugReason] = useState('')
+  const [stateFilter, setStateFilter] = useState('')
 
   const [manualQuery, setManualQuery] = useState('')
+  const [manualState, setManualState] = useState('')
   const [manualResults, setManualResults] = useState([])
+  const [manualVisibleCount, setManualVisibleCount] = useState(PAGE_SIZE)
   const [manualSearching, setManualSearching] = useState(false)
   const [manualMatched, setManualMatched] = useState(false)
   const [manualError, setManualError] = useState('')
@@ -107,8 +130,9 @@ export default function Contracts() {
     setMatching(true)
     setScanError('')
     try {
-      const { live, opportunities, debugReason } = await samSearch({ naicsCode: company?.naics_codes?.[0] })
+      const { live, opportunities, debugReason } = await samSearch({ naicsCode: company?.naics_codes?.[0], state: stateFilter })
       setOpportunities(opportunities)
+      setVisibleCount(PAGE_SIZE)
       setLiveResults(live)
       setLiveDebugReason(live ? '' : (debugReason ?? ''))
     } catch (err) {
@@ -125,8 +149,9 @@ export default function Contracts() {
     setManualSearching(true)
     setManualError('')
     try {
-      const { live, opportunities } = await samSearch({ title: manualQuery, naicsCode: company?.naics_codes?.[0] })
+      const { live, opportunities } = await samSearch({ title: manualQuery, naicsCode: company?.naics_codes?.[0], state: manualState })
       setManualResults(opportunities)
+      setManualVisibleCount(PAGE_SIZE)
       setManualLive(live)
     } catch (err) {
       setManualError(err?.message ?? 'Search failed')
@@ -173,7 +198,7 @@ export default function Contracts() {
 
         {/* AI / NAICS-based auto match */}
         <div className="bg-navy-700 rounded-2xl border border-white/[0.07] p-4 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <div>
               <p className="text-sm font-semibold text-white">Contract Opportunities</p>
               <p className="text-xs text-white/40">
@@ -186,18 +211,26 @@ export default function Contracts() {
             <button
               onClick={findOpportunities}
               disabled={matching}
-              className="bg-brand-600 text-white text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-50"
+              className="bg-brand-600 text-white text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-50 shrink-0"
             >
               {matching ? 'Fetching from SAM.gov…' : '🔍 Find Matches'}
             </button>
           </div>
+          <input
+            value={stateFilter}
+            onChange={e => setStateFilter(e.target.value)}
+            placeholder="Filter by state (optional, e.g. TX)"
+            maxLength={2}
+            className={`${fieldClass} uppercase`}
+          />
           {scanError && <p className="text-xs text-red-400 font-medium">{scanError}</p>}
           {matched && !scanError && opportunities.length === 0 && (
             <p className="text-xs text-white/40">No matches found. Try updating your NAICS codes in Settings.</p>
           )}
-          {opportunities.map((opp, i) => (
+          {opportunities.slice(0, visibleCount).map((opp, i) => (
             <OpportunityCard key={i} opp={opp} companyId={profile?.company_id} defaultNaics={company?.naics_codes?.[0]} onSaved={refresh} />
           ))}
+          <SeeMore total={opportunities.length} visible={visibleCount} onMore={() => setVisibleCount(v => v + PAGE_SIZE)} />
         </div>
 
         {/* Manual keyword search */}
@@ -209,6 +242,13 @@ export default function Contracts() {
               onChange={e => setManualQuery(e.target.value)}
               placeholder="e.g. lab specimen courier"
               className={fieldClass}
+            />
+            <input
+              value={manualState}
+              onChange={e => setManualState(e.target.value)}
+              placeholder="State"
+              maxLength={2}
+              className={`${fieldClass} uppercase w-20 shrink-0`}
             />
             <button
               type="submit"
@@ -225,9 +265,10 @@ export default function Contracts() {
           {manualMatched && !manualError && manualResults.length === 0 && (
             <p className="text-xs text-white/40">No matches found for "{manualQuery}".</p>
           )}
-          {manualResults.map((opp, i) => (
+          {manualResults.slice(0, manualVisibleCount).map((opp, i) => (
             <OpportunityCard key={i} opp={opp} companyId={profile?.company_id} defaultNaics={company?.naics_codes?.[0]} onSaved={refresh} />
           ))}
+          <SeeMore total={manualResults.length} visible={manualVisibleCount} onMore={() => setManualVisibleCount(v => v + PAGE_SIZE)} />
         </div>
 
         <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Contracts</h2>

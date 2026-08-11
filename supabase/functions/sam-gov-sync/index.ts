@@ -70,7 +70,7 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   try {
-    const { naicsCodes, title } = await req.json()
+    const { naicsCodes, title, state } = await req.json()
     const samApiKey = Deno.env.get('SAM_GOV_API_KEY')
 
     let opportunities = mockOpportunities()
@@ -83,21 +83,34 @@ serve(async (req) => {
         const ninetyDaysAgo = new Date()
         ninetyDaysAgo.setDate(today.getDate() - 90)
 
+        // Fetch a larger batch than the UI shows up front (25 vs. 5) in
+        // this ONE call — "see more" reveals from what's already fetched
+        // instead of firing a second API request. SAM.gov public-API keys
+        // are rate-limited to roughly 10 requests/day for non-federal
+        // accounts, so every extra call is expensive; a bigger single fetch
+        // is the only way to support pagination without burning through it.
         const params = new URLSearchParams({
           api_key: samApiKey,
-          limit: '10',
+          limit: '25',
           postedFrom: mmddyyyy(ninetyDaysAgo),
           postedTo: mmddyyyy(today),
           active: 'Yes',
         })
 
-        // SAM.gov v2 accepts one naicsCode at a time
+        // The documented param is "ncode", not "naicsCode" — the latter is
+        // silently ignored by SAM.gov (no error, just an unfiltered result
+        // set), which is exactly what was happening here: every search
+        // returned live, real, but completely NAICS-irrelevant opportunities.
         if (naicsCodes?.[0]) {
-          params.set('naicsCode', String(naicsCodes[0]).trim())
+          params.set('ncode', String(naicsCodes[0]).trim())
         }
         // Manual keyword search — matches against opportunity title
         if (title?.trim()) {
           params.set('title', title.trim())
+        }
+        // Place-of-performance state, e.g. "TX" — optional
+        if (state?.trim()) {
+          params.set('state', state.trim().toUpperCase())
         }
 
         const samUrl = `https://api.sam.gov/opportunities/v2/search?${params}`
@@ -119,7 +132,7 @@ serve(async (req) => {
           console.log('[sam-gov-sync] got', raw.length, 'results')
           if (raw.length) {
             live = true
-            opportunities = raw.slice(0, 5).map((opp, i) => ({
+            opportunities = raw.map((opp, i) => ({
               title: opp.title ?? 'Untitled Opportunity',
               score: Math.max(6, 8 - i),
               reason: [

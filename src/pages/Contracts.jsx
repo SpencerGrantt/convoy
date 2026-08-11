@@ -9,62 +9,14 @@ import { safeFormatDate, safeDifferenceInDays } from '../lib/dates'
 
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
 
-function fmtSamDate(d) {
-  const day = String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0') + '/' + d.getFullYear()
-  return day
-}
-
-// Shared SAM.gov lookup — tries a direct browser call first, falls back to
-// the sam-gov-sync edge function (which itself falls back to mock data) if
-// the direct call fails for any reason. SAM.gov's API commonly rejects
-// direct browser requests via CORS, so the direct path failing is expected
-// and must not be treated as a hard error — always fall through instead.
+// SAM.gov lookups always go through the sam-gov-sync edge function, never
+// direct from the browser — a direct call needs the API key available
+// client-side, and any Vite `VITE_`-prefixed env var is compiled straight
+// into the public JS bundle. That's not "hard to find," it's just sitting
+// in plain text for anyone who opens dev tools, no login required. The key
+// stays a server-only secret (SAM_GOV_API_KEY, read by the edge function)
+// specifically so this can't happen. Do not reintroduce a client-side key.
 async function samSearch({ naicsCode, title }) {
-  const samKey = import.meta.env.VITE_SAM_GOV_API_KEY
-
-  if (samKey) {
-    try {
-      const ninetyDaysAgo = new Date()
-      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
-
-      const params = new URLSearchParams({
-        api_key: samKey,
-        limit: '10',
-        postedFrom: fmtSamDate(ninetyDaysAgo),
-        postedTo: fmtSamDate(new Date()),
-        active: 'Yes',
-      })
-      if (naicsCode) params.set('naicsCode', String(naicsCode).trim())
-      if (title?.trim()) params.set('title', title.trim())
-
-      const res = await fetch(`https://api.sam.gov/opportunities/v2/search?${params}`)
-      if (!res.ok) throw new Error(`SAM.gov returned ${res.status}`)
-      const json = await res.json()
-      const raw = json.opportunitiesData ?? []
-      if (raw.length) {
-        return {
-          live: true,
-          opportunities: raw.slice(0, 5).map((opp, i) => ({
-            title: opp.title ?? 'Untitled Opportunity',
-            score: Math.max(6, 8 - i),
-            reason: [opp.typeOfSetAsideDescription, opp.naicsCode ? `NAICS ${opp.naicsCode}` : null, opp.baseType].filter(Boolean).join(' — ') || 'Government opportunity',
-            deadline: opp.responseDeadLine ?? opp.archiveDate ?? 'See SAM.gov',
-            link: opp.uiLink ?? `https://sam.gov/opp/${opp.noticeId}/view`,
-            noticeId: opp.noticeId ?? null,
-            naicsCode: opp.naicsCode ?? null,
-            agency: opp.fullParentPathName?.split('.').pop()?.trim() ?? opp.department ?? null,
-            placeOfPerformance: [opp.placeOfPerformance?.city?.name, opp.placeOfPerformance?.state?.code].filter(Boolean).join(', ') || null,
-          })),
-        }
-      }
-      // Direct call succeeded but returned zero results — fall through to
-      // the edge function rather than reporting "no matches" prematurely.
-    } catch (directErr) {
-      console.warn('[samSearch] direct SAM.gov call failed, falling back to edge function:', directErr.message)
-    }
-  }
-
-  // Fallback: edge function (returns mock data if SAM.gov is unreachable from cloud)
   const { data, error } = await invokeFn('sam-gov-sync', {
     body: { naicsCodes: naicsCode ? [naicsCode] : [], title },
   })

@@ -6,6 +6,7 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [authError, setAuthError] = useState(null)
   // supabase-js re-validates the session (and re-fires this listener with a
   // SIGNED_IN event) every time the tab regains focus, not just on an actual
   // sign-in — see GoTrueClient's visibilitychange -> _recoverAndRefresh().
@@ -51,6 +52,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function fetchOrCreateProfile(userId) {
+    setAuthError(null)
     try {
       let existing, fetchError
       for (let attempt = 0; attempt <= 1; attempt++) {
@@ -115,9 +117,18 @@ export function AuthProvider({ children }) {
             )
           if (profileError) throw profileError
 
+          // supabase-js resolves a Postgrest failure as { error } rather than
+          // rejecting — throwing it here (instead of just recording it) is
+          // what makes this attempt actually fall into the catch below and
+          // retry. Without this, a transient failure right after this
+          // freshly-established invite session (the same class of race the
+          // existing-user fetch above already retries on) breaks out of the
+          // loop on attempt 0 with no profile ever created, and no visible
+          // error — fetchOrCreateProfile's outer catch only console.errors.
           const result = await supabase.from('profiles').select('*, companies(*)').eq('id', userId).single()
+          if (result.error) throw result.error
           fresh = result.data
-          provisionError = result.error
+          provisionError = null
           break
         } catch (err) {
           provisionError = err
@@ -129,7 +140,12 @@ export function AuthProvider({ children }) {
       setProfile(fresh ?? null)
       if (fresh) loadedUserId.current = userId
     } catch (err) {
+      // A signed-in user with no profile and no visible error is a dead
+      // end — they'd just see the generic onboarding welcome screen with no
+      // indication anything failed. Surface it so OnboardingGate can show a
+      // retry state instead.
       console.error('fetchOrCreateProfile failed:', err)
+      setAuthError(err?.message ?? 'Failed to set up your account')
     } finally {
       setLoading(false)
     }
@@ -161,7 +177,7 @@ export function AuthProvider({ children }) {
   function setProfileDirect(p) { setProfile(p) }
 
   return (
-    <AuthContext.Provider value={{ session, profile, loading, signOut, refreshProfile, setProfileDirect }}>
+    <AuthContext.Provider value={{ session, profile, loading, authError, signOut, refreshProfile, setProfileDirect }}>
       {children}
     </AuthContext.Provider>
   )

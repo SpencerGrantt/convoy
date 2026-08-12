@@ -13,6 +13,11 @@ const DOC_TYPES = [
   { key: 'insurance',        label: 'Insurance' },
 ]
 
+const ROLE_BADGE = {
+  driver:     { label: 'Crew',       color: 'text-green-300 bg-green-500/15 border-green-500/25' },
+  dispatcher: { label: 'Dispatcher', color: 'text-blue-300 bg-blue-500/15 border-blue-500/25' },
+}
+
 function Sheet({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
@@ -96,8 +101,15 @@ export default function Drivers() {
                 <div className="h-10 w-10 rounded-full bg-brand-600/30 flex items-center justify-center text-brand-300 font-bold text-sm">
                   {initials}
                 </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-white">{driver.full_name}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-white flex items-center gap-1.5">
+                    <span className="truncate">{driver.full_name}</span>
+                    {ROLE_BADGE[driver.role] && (
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 ${ROLE_BADGE[driver.role].color}`}>
+                        {ROLE_BADGE[driver.role].label}
+                      </span>
+                    )}
+                  </p>
                   <p className="text-xs text-white/40">{driver.phone ?? 'No phone'}</p>
                 </div>
                 <button

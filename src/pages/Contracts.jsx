@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase, invokeFn } from '../lib/supabase'
 import StatusPill from '../components/ui/StatusPill'
 import AlertBanner from '../components/ui/AlertBanner'
+import StateFilterDropdown from '../components/ui/StateFilterDropdown'
 import TopBar from '../components/layout/TopBar'
 import { safeFormatDate, safeDifferenceInDays } from '../lib/dates'
 
@@ -208,21 +209,17 @@ export default function Contracts() {
                 <p className="text-[10px] text-white/25 mt-0.5">{liveDebugReason}</p>
               )}
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <StateFilterDropdown value={stateFilter} onChange={setStateFilter} />
             <button
               onClick={findOpportunities}
               disabled={matching}
-              className="bg-brand-600 text-white text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-50 shrink-0"
+              className="bg-brand-600 text-white text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-50 shrink-0 flex-1"
             >
               {matching ? 'Fetching from SAM.gov…' : '🔍 Find Matches'}
             </button>
           </div>
-          <input
-            value={stateFilter}
-            onChange={e => setStateFilter(e.target.value)}
-            placeholder="Filter by state (optional, e.g. TX)"
-            maxLength={2}
-            className={`${fieldClass} uppercase`}
-          />
           {scanError && <p className="text-xs text-red-400 font-medium">{scanError}</p>}
           {matched && !scanError && opportunities.length === 0 && (
             <p className="text-xs text-white/40">No matches found. Try updating your NAICS codes in Settings.</p>
@@ -243,13 +240,6 @@ export default function Contracts() {
               placeholder="e.g. lab specimen courier"
               className={fieldClass}
             />
-            <input
-              value={manualState}
-              onChange={e => setManualState(e.target.value)}
-              placeholder="State"
-              maxLength={2}
-              className={`${fieldClass} uppercase w-20 shrink-0`}
-            />
             <button
               type="submit"
               disabled={manualSearching || !manualQuery.trim()}
@@ -258,6 +248,7 @@ export default function Contracts() {
               {manualSearching ? 'Searching…' : 'Search'}
             </button>
           </form>
+          <StateFilterDropdown value={manualState} onChange={setManualState} />
           <p className="text-xs text-white/40">
             {manualMatched && manualLive ? 'Live SAM.gov results' : manualMatched ? 'SAM.gov unavailable — showing sample results' : 'Search SAM.gov opportunities by keyword'}
           </p>

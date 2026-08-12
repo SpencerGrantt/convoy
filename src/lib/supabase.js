@@ -32,7 +32,24 @@ export async function invokeFn(name, options = {}, timeoutMs = 15000) {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    return await supabase.functions.invoke(name, { ...options, signal: controller.signal })
+    const result = await supabase.functions.invoke(name, { ...options, signal: controller.signal })
+    // On a non-2xx response, supabase-js resolves `error` to a generic
+    // FunctionsHttpError ("Edge Function returned a non-2xx status code")
+    // rather than the specific reason our functions actually threw (e.g.
+    // "User already registered", "Only an owner or dispatcher can invite
+    // team members") — that real message is left sitting in the unread
+    // response body on `result.response`. Every caller across the app reads
+    // `error.message` directly, so they were all showing the same useless
+    // generic text; parse the real one here once instead of in each caller.
+    if (result.error && result.response) {
+      try {
+        const body = await result.response.clone().json()
+        if (body?.error) result.error = new Error(body.error)
+      } catch {
+        // Body wasn't JSON, or already consumed — keep the generic message.
+      }
+    }
+    return result
   } catch (err) {
     if (err?.name === 'AbortError') {
       return { data: null, error: new Error(`Request to "${name}" timed out — please try again`) }

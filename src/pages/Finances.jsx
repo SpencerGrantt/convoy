@@ -5,11 +5,13 @@ import { supabase } from '../lib/supabase'
 import MetricCard from '../components/ui/MetricCard'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
+import FuelCardImportSheet from '../components/finance/FuelCardImportSheet'
 import {
   BarChart, Bar, LineChart, Line, Legend,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts'
 import { safeFormatDate } from '../lib/dates'
+import { haversineMiles } from '../lib/geo'
 import {
   subDays, startOfYear, startOfWeek, parseISO, isValid,
   differenceInCalendarDays, format as formatDateFns,
@@ -267,15 +269,6 @@ const RANGE_PRESETS = [
 // the MetricCard tiles so identity (Revenue vs Expenses) never gets read
 // as a good/bad status signal.
 const TREND_COLORS = { revenue: '#3987e5', expenses: '#d95926' }
-
-function haversineMiles(lat1, lng1, lat2, lng2) {
-  const R = 3958.8 // earth radius, miles
-  const toRad = d => (d * Math.PI) / 180
-  const dLat = toRad(lat2 - lat1)
-  const dLng = toRad(lng2 - lng1)
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2
-  return R * 2 * Math.asin(Math.sqrt(a))
-}
 
 function formatDuration(ms) {
   if (ms == null || !Number.isFinite(ms) || ms < 0) return '—'
@@ -625,6 +618,9 @@ export default function Finances() {
               <button onClick={() => setSheet('expense')} className="bg-yellow-500/20 text-yellow-300 font-semibold py-2.5 rounded-xl text-xs active:bg-yellow-500/30">+ Expense</button>
               <button onClick={() => setSheet('invoice')} className="bg-brand-500/20 text-brand-300 font-semibold py-2.5 rounded-xl text-xs active:bg-brand-500/30">+ Invoice</button>
             </div>
+            <button onClick={() => setSheet('fuel-import')} className="w-full bg-navy-700 border border-white/[0.08] text-white/70 font-semibold py-2.5 rounded-xl text-xs active:bg-navy-800">
+              ⛽ Import Fuel Card CSV
+            </button>
 
             <div>
               <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Recent Revenue</p>
@@ -692,6 +688,11 @@ export default function Finances() {
       {sheet === 'invoice' && (
         <Sheet title="Generate Invoice" onClose={() => setSheet(null)}>
           <InvoiceForm companyId={companyId} contracts={contracts} onSave={refresh} onClose={() => setSheet(null)} />
+        </Sheet>
+      )}
+      {sheet === 'fuel-import' && (
+        <Sheet title="Import Fuel Card CSV" onClose={() => setSheet(null)}>
+          <FuelCardImportSheet companyId={companyId} onSaved={refresh} onClose={() => setSheet(null)} />
         </Sheet>
       )}
     </div>

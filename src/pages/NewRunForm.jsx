@@ -1,10 +1,59 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { geocodeAddress } from '../lib/geocode'
+import { haversineMiles } from '../lib/geo'
 import TopBar from '../components/layout/TopBar'
 
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
+
+const ACTIVE_STATUSES = ['assigned', 'in_transit']
+
+// Ranks drivers for the "Suggested Crew" panel by availability first, then
+// proximity. Proximity has no live GPS feed to work from — the app doesn't
+// track driver location continuously — so "where a driver probably is" is
+// approximated as the dropoff point of their most recent run (falling back
+// to that run's pickup point if it was never geocoded), i.e. wherever
+// they'll likely be free from next. Drivers with no run history, or whose
+// past runs were never geocoded, simply sort after everyone with a known
+// distance rather than being excluded.
+function rankDrivers(drivers, recentRuns, pickupCoords) {
+  const lastPointByDriver = new Map()
+  const activeCountByDriver = new Map()
+
+  for (const r of recentRuns) {
+    if (!r.driver_id) continue
+    if (ACTIVE_STATUSES.includes(r.status)) {
+      activeCountByDriver.set(r.driver_id, (activeCountByDriver.get(r.driver_id) ?? 0) + 1)
+    }
+    if (!lastPointByDriver.has(r.driver_id)) {
+      const point = (r.dropoff_lat != null && r.dropoff_lng != null)
+        ? { lat: r.dropoff_lat, lng: r.dropoff_lng }
+        : (r.pickup_lat != null && r.pickup_lng != null)
+          ? { lat: r.pickup_lat, lng: r.pickup_lng }
+          : null
+      if (point) lastPointByDriver.set(r.driver_id, point)
+    }
+  }
+
+  return drivers
+    .map(d => {
+      const activeCount = activeCountByDriver.get(d.id) ?? 0
+      const point = lastPointByDriver.get(d.id) ?? null
+      const distance = point && pickupCoords
+        ? haversineMiles(pickupCoords.lat, pickupCoords.lng, point.lat, point.lng)
+        : null
+      return { ...d, activeCount, distance }
+    })
+    .sort((a, b) => {
+      if ((a.activeCount === 0) !== (b.activeCount === 0)) return a.activeCount === 0 ? -1 : 1
+      if (a.distance == null && b.distance == null) return a.activeCount - b.activeCount
+      if (a.distance == null) return 1
+      if (b.distance == null) return -1
+      return a.distance - b.distance
+    })
+}
 
 export default function NewRunForm() {
   const navigate = useNavigate()
@@ -14,9 +63,13 @@ export default function NewRunForm() {
     temp_sensitive: false, driver_id: '', vehicle_id: '', contract_id: '', scheduled_at: '',
     broker_name: '', bol_number: '', rate_per_mile: '', loaded_miles: '', deadhead_miles: '',
   })
+  const [pickupCoords, setPickupCoords] = useState(null)
+  const [dropoffCoords, setDropoffCoords] = useState(null)
+  const [geocodingField, setGeocodingField] = useState(null)
   const [drivers, setDrivers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [contracts, setContracts] = useState([])
+  const [recentRuns, setRecentRuns] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -25,14 +78,37 @@ export default function NewRunForm() {
       supabase.from('profiles').select('id, full_name').eq('role', 'driver'),
       supabase.from('vehicles').select('id, name, plate').eq('active', true),
       supabase.from('contracts').select('id, name').eq('status', 'active'),
-    ]).then(([d, v, c]) => {
+      // Recent runs only, not the full history — enough to establish each
+      // driver's current workload and last known dropoff point without
+      // pulling the company's entire run archive into a creation form.
+      supabase.from('runs')
+        .select('driver_id, status, pickup_lat, pickup_lng, dropoff_lat, dropoff_lng, created_at')
+        .not('driver_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(200),
+    ]).then(([d, v, c, r]) => {
       setDrivers(d.data ?? [])
       setVehicles(v.data ?? [])
       setContracts(c.data ?? [])
+      setRecentRuns(r.data ?? [])
     })
   }, [])
 
   function set(k, v) { setForm(f => ({ ...f, [k]: v })) }
+
+  async function geocodeField(addressKey, setCoords) {
+    const address = form[addressKey]
+    if (!address?.trim()) { setCoords(null); return }
+    setGeocodingField(addressKey)
+    const coords = await geocodeAddress(address)
+    setCoords(coords)
+    setGeocodingField(null)
+  }
+
+  const suggestedDrivers = useMemo(
+    () => rankDrivers(drivers, recentRuns, pickupCoords),
+    [drivers, recentRuns, pickupCoords]
+  )
 
   async function submit(e) {
     e.preventDefault()
@@ -52,6 +128,10 @@ export default function NewRunForm() {
         rate_per_mile: form.rate_per_mile ? parseFloat(form.rate_per_mile) : null,
         loaded_miles: form.loaded_miles ? parseFloat(form.loaded_miles) : null,
         deadhead_miles: form.deadhead_miles ? parseFloat(form.deadhead_miles) : null,
+        pickup_lat: pickupCoords?.lat ?? null,
+        pickup_lng: pickupCoords?.lng ?? null,
+        dropoff_lat: dropoffCoords?.lat ?? null,
+        dropoff_lng: dropoffCoords?.lng ?? null,
       }).select().single()
 
       if (insertError) throw insertError
@@ -76,11 +156,23 @@ export default function NewRunForm() {
           <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Addresses</h2>
           <div>
             <label className="block text-xs text-white/50 mb-1">Pickup Address *</label>
-            <input required value={form.pickup_address} onChange={e => set('pickup_address', e.target.value)} className={fieldClass} placeholder="123 Main St, City, ST" />
+            <input
+              required value={form.pickup_address}
+              onChange={e => { set('pickup_address', e.target.value); setPickupCoords(null) }}
+              onBlur={() => geocodeField('pickup_address', setPickupCoords)}
+              className={fieldClass} placeholder="123 Main St, City, ST"
+            />
+            {geocodingField === 'pickup_address' && <p className="text-[10px] text-white/30 mt-1">Locating…</p>}
           </div>
           <div>
             <label className="block text-xs text-white/50 mb-1">Dropoff Address *</label>
-            <input required value={form.dropoff_address} onChange={e => set('dropoff_address', e.target.value)} className={fieldClass} placeholder="456 Oak Ave, City, ST" />
+            <input
+              required value={form.dropoff_address}
+              onChange={e => { set('dropoff_address', e.target.value); setDropoffCoords(null) }}
+              onBlur={() => geocodeField('dropoff_address', setDropoffCoords)}
+              className={fieldClass} placeholder="456 Oak Ave, City, ST"
+            />
+            {geocodingField === 'dropoff_address' && <p className="text-[10px] text-white/30 mt-1">Locating…</p>}
           </div>
         </div>
 
@@ -100,6 +192,36 @@ export default function NewRunForm() {
 
         <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
           <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Assignment</h2>
+
+          {suggestedDrivers.length > 0 && (
+            <div className="space-y-1.5">
+              <p className="text-xs text-white/50">
+                Suggested Crew
+                {!pickupCoords && ' — ranked by availability (enter a pickup address to also rank by distance)'}
+              </p>
+              {suggestedDrivers.slice(0, 3).map(d => (
+                <button
+                  type="button"
+                  key={d.id}
+                  onClick={() => set('driver_id', d.id)}
+                  className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-left transition-colors ${
+                    form.driver_id === d.id ? 'bg-brand-500/20 border border-brand-500/40' : 'bg-navy-800 border border-white/10'
+                  }`}
+                >
+                  <span className="text-sm text-white font-medium truncate">{d.full_name}</span>
+                  <span className="flex items-center gap-2 shrink-0">
+                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${d.activeCount === 0 ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'}`}>
+                      {d.activeCount === 0 ? 'Available' : `On ${d.activeCount} run${d.activeCount === 1 ? '' : 's'}`}
+                    </span>
+                    <span className="text-[10px] text-white/40 w-20 text-right">
+                      {d.distance != null ? `${d.distance.toFixed(1)} mi away` : 'Location unknown'}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
           <div>
             <label className="block text-xs text-white/50 mb-1">Crew</label>
             <select value={form.driver_id} onChange={e => set('driver_id', e.target.value)} className={fieldClass}>

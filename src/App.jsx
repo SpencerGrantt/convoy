@@ -52,10 +52,28 @@ function AuthGate({ children, roles }) {
 
 // Onboarding is only accessible while onboarding is incomplete
 function OnboardingGate() {
-  const { session, profile, loading } = useAuth()
+  const { session, profile, loading, authError, refreshProfile } = useAuth()
   if (loading) return <LoadingSpinner />
   if (!session) return <Navigate to="/login" replace />
   if (profile?.onboarding_complete) return <Navigate to="/" replace />
+  // A signed-in user with no profile and a recorded provisioning error would
+  // otherwise fall through to the generic "Welcome to Convoy" choice screen
+  // with zero indication that account setup actually failed server-side —
+  // this surfaces it with a way to retry instead of a silent dead end.
+  if (!profile && authError) {
+    return (
+      <div className="min-h-screen bg-navy-900 flex flex-col items-center justify-center px-4 text-center gap-4">
+        <p className="text-white font-bold text-lg">Couldn't set up your account</p>
+        <p className="text-white/50 text-sm max-w-sm">{authError}</p>
+        <button
+          onClick={refreshProfile}
+          className="bg-brand-600 text-white font-bold px-5 py-2.5 rounded-xl"
+        >
+          Try Again
+        </button>
+      </div>
+    )
+  }
   return <Onboarding />
 }
 

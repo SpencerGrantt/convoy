@@ -6,10 +6,16 @@ export function useDrivers() {
   const [loading, setLoading] = useState(true)
 
   const fetch = useCallback(async () => {
+    // Crew compliance tracking applies to both field roles, not just
+    // drivers — a dispatcher can hold a HIPAA cert/background check too.
+    // Owner is deliberately excluded: this page is management tracking
+    // staff, the same boundary Finances/Contracts already draw.
     const { data } = await supabase
       .from('profiles')
       .select('*, compliance_docs(*)')
-      .eq('role', 'driver')
+      .in('role', ['driver', 'dispatcher'])
+      .order('role')
+      .order('full_name')
     setDrivers(data ?? [])
     setLoading(false)
   }, [])

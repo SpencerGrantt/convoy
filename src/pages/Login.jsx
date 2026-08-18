@@ -29,7 +29,10 @@ export default function Login() {
     e.preventDefault()
     setLoading(true); setError('')
     if (magicLink) {
-      const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } })
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false, emailRedirectTo: window.location.origin },
+      })
       if (error) setError(error.message)
       else setStep('sent')
     } else {

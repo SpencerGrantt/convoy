@@ -100,22 +100,40 @@ export function AuthProvider({ children }) {
         try {
           let companyId = companyIdFromInvite
           if (!companyId) {
-            const { data: company, error: companyError } = await supabase
+            // Chaining .select() here (to read back the generated id) makes
+            // this an INSERT ... RETURNING under the hood — Postgres denies
+            // that outright (42501) unless a SELECT policy already grants
+            // the caller visibility into the new row, and read_own_company
+            // depends on my_company_id(), which requires a profile row that
+            // can't exist yet for a brand-new owner signup. Same chicken-
+            // and-egg bootstrap problem as the profiles insert below, just
+            // hitting the companies table first. Generating the id
+            // client-side sidesteps RETURNING entirely — no read-back needed.
+            companyId = crypto.randomUUID()
+            const { error: companyError } = await supabase
               .from('companies')
-              .insert({ name: 'My Company', sdvosb: true })
-              .select()
-              .single()
+              .insert({ id: companyId, name: 'My Company', sdvosb: true })
             if (companyError) throw companyError
-            companyId = company.id
           }
 
+          // A plain insert, not an upsert/ON CONFLICT — Postgres RLS denies
+          // INSERT ... ON CONFLICT outright for a role with no SELECT
+          // visibility into the table yet (42501, "new row violates
+          // row-level security policy"), which is exactly the case for a
+          // brand-new user: my_company_id() reads company_id off the
+          // caller's own profile row, which doesn't exist yet, so
+          // read_company_profiles resolves to zero visibility and Postgres
+          // can't safely evaluate the conflict target at all. This isn't a
+          // narrow edge case — it deterministically broke the first login
+          // of every invited teammate (confirmed 2026-08-19 against
+          // production while debugging a stuck dispatcher account). A 23505
+          // unique-violation below (another tab/request won the race) is
+          // the only case ON CONFLICT was ever meant to guard against, and
+          // it's handled explicitly instead.
           const { error: profileError } = await supabase
             .from('profiles')
-            .upsert(
-              { id: userId, company_id: companyId, full_name: '', role },
-              { onConflict: 'id', ignoreDuplicates: true }
-            )
-          if (profileError) throw profileError
+            .insert({ id: userId, company_id: companyId, full_name: '', role })
+          if (profileError && profileError.code !== '23505') throw profileError
 
           // supabase-js resolves a Postgrest failure as { error } rather than
           // rejecting — throwing it here (instead of just recording it) is

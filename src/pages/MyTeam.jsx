@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { supabase } from '../lib/supabase'
+import { useTeamMembers } from '../hooks/useTeamMembers'
 import TopBar from '../components/layout/TopBar'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { Building2, Crown, Headset, Truck, Phone } from 'lucide-react'
@@ -20,33 +19,9 @@ const ROLE_META = {
 export default function MyTeam() {
   const { profile } = useAuth()
   const company = profile?.companies
-  const [members, setMembers] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (!profile?.company_id) return
-    let cancelled = false
-    async function load() {
-      setLoading(true)
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, full_name, role, phone')
-        .eq('company_id', profile.company_id)
-        .order('role')
-        .order('full_name')
-      if (!cancelled) {
-        setMembers(data ?? [])
-        setLoading(false)
-      }
-    }
-    load()
-    return () => { cancelled = true }
-  }, [profile?.company_id])
+  const { members: sorted, loading } = useTeamMembers()
 
   if (loading) return <div className="pb-24"><TopBar title="My Team" /><LoadingSpinner /></div>
-
-  const order = { owner: 0, dispatcher: 1, driver: 2 }
-  const sorted = [...members].sort((a, b) => (order[a.role] ?? 3) - (order[b.role] ?? 3))
 
   return (
     <div className="pb-24 md:pb-8">
@@ -98,7 +73,7 @@ export default function MyTeam() {
           })}
         </div>
 
-        {members.length === 0 && (
+        {sorted.length === 0 && (
           <div className="bg-navy-700 rounded-2xl border border-white/[0.07] p-8 text-center space-y-2">
             <Building2 size={32} className="text-white/20 mx-auto" />
             <p className="text-white font-semibold">No team data yet</p>

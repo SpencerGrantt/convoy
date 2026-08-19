@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Home, Truck, FileText, DollarSign, MessageCircle, Settings, Plus, X, MapPinned, Wrench } from 'lucide-react'
+import {
+  Home, Truck, FileText, DollarSign, MessageCircle, Settings, Plus, X, MapPinned, Wrench, Send,
+  ClipboardCheck, ShieldCheck, Users, Wallet, Route,
+} from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
-import { useDrivers } from '../../hooks/useDrivers'
+import { useTeamMembers } from '../../hooks/useTeamMembers'
 import { useUnreadMessageCount } from '../../hooks/useUnreadCounts'
 import { invokeFn } from '../../lib/supabase'
 import { roleLabel } from '../../lib/roles'
@@ -15,6 +18,21 @@ const allNavItems = [
   { to: '/fleet',       icon: Wrench,        label: 'Fleet',       roles: ['owner', 'dispatcher'] },
   { to: '/finances',    icon: DollarSign,    label: 'Finances',    roles: ['owner'] },
   { to: '/ifta-report', icon: MapPinned,     label: 'IFTA Report', roles: ['owner'] },
+]
+
+// The driver-only pages (DriverDashboard's tile links) have always been
+// open routes — no `roles` restriction in App.jsx — but were only ever
+// reachable through DriverDashboard itself, so an owner had no way to get
+// to them short of typing the URL. Owner already has full dispatcher
+// parity (Contracts/Fleet/Drivers are owner+dispatcher routes); this
+// closes the other half — owner gets driver capability too, for the
+// common small-fleet case where the owner also drives sometimes.
+const ownerDriverTools = [
+  { to: '/inspections/new', icon: ClipboardCheck, label: 'Vehicle Inspection' },
+  { to: '/my-compliance',   icon: ShieldCheck,     label: 'My Documents' },
+  { to: '/my-team',         icon: Users,           label: 'My Team' },
+  { to: '/my-earnings',     icon: Wallet,          label: 'My Earnings' },
+  { to: '/mileage',         icon: Route,           label: 'Mileage Log' },
 ]
 
 function NavItem({ to, icon: Icon, label, end, showDot }) {
@@ -37,32 +55,49 @@ function NavItem({ to, icon: Icon, label, end, showDot }) {
   )
 }
 
-function DriverItem({ driver, onClick }) {
+function DriverItem({ driver, onClick, onMessage }) {
   const name = driver.full_name || 'Unnamed'
   const initials = name !== 'Unnamed'
     ? name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
     : '?'
 
   return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[0.05] transition-colors"
-    >
-      {driver.avatar_url ? (
-        <img src={driver.avatar_url} alt={name} className="h-6 w-6 rounded-full object-cover shrink-0" />
-      ) : (
-        <div className="h-6 w-6 rounded-full bg-brand-600/30 flex items-center justify-center text-brand-300 text-[10px] font-bold shrink-0">
-          {initials}
-        </div>
+    <div className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[0.05] transition-colors group">
+      <button onClick={onClick} className="flex items-center gap-2 flex-1 min-w-0 text-left">
+        {driver.avatar_url ? (
+          <img src={driver.avatar_url} alt={name} className="h-6 w-6 rounded-full object-cover shrink-0" />
+        ) : (
+          <div className="h-6 w-6 rounded-full bg-brand-600/30 flex items-center justify-center text-brand-300 text-[10px] font-bold shrink-0">
+            {initials}
+          </div>
+        )}
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm text-white/70 truncate">{name}</span>
+          <span className="block text-[10px] text-white/30 truncate">{roleLabel(driver.role)}</span>
+        </span>
+      </button>
+      {/* Messaging is one channel per driver (useMessages.js) — there's no
+          owner/dispatcher channel to open, so only driver rows get this. */}
+      {onMessage && (
+        <button
+          onClick={onMessage}
+          title={`Message ${name}`}
+          className="shrink-0 text-white/20 hover:text-brand-400 transition-colors opacity-0 group-hover:opacity-100 p-1"
+        >
+          <Send size={13} />
+        </button>
       )}
-      <span className="text-sm text-white/70 truncate text-left">{name}</span>
-    </button>
+    </div>
   )
 }
 
 export default function Sidebar() {
   const { profile } = useAuth()
-  const { drivers } = useDrivers()
+  const { members } = useTeamMembers()
+  // Everyone but yourself — this is a "your teammates" list, not a roster
+  // of the whole company including the viewer (MyTeam.jsx's fuller page
+  // already covers that with a "(You)" tag).
+  const teammates = members.filter(m => m.id !== profile?.id)
   const unreadMessages = useUnreadMessageCount()
   const navigate = useNavigate()
   const role = profile?.role ?? 'owner'
@@ -107,6 +142,15 @@ export default function Sidebar() {
           <NavItem key={to} to={to} icon={icon} label={label} end={to === '/'} showDot={to === '/messages' && unreadMessages > 0} />
         ))}
 
+        {role === 'owner' && (
+          <div className="pt-4 mt-4 border-t border-white/[0.08] space-y-0.5">
+            <p className="px-3 pb-1 text-[10px] font-semibold text-white/30 uppercase tracking-widest">My Driver Tools</p>
+            {ownerDriverTools.map(({ to, icon, label }) => (
+              <NavItem key={to} to={to} icon={icon} label={label} />
+            ))}
+          </div>
+        )}
+
         {showDrivers && (
           <div className="pt-4 mt-4 border-t border-white/[0.08]">
             <div className="flex items-center justify-between px-2 mb-2">
@@ -144,11 +188,16 @@ export default function Sidebar() {
             )}
 
             <div className="space-y-0.5 max-h-36 overflow-y-auto">
-              {drivers.length === 0 && !addingDriver && (
-                <p className="text-[10px] text-white/20 px-2 py-1">No drivers yet</p>
+              {teammates.length === 0 && !addingDriver && (
+                <p className="text-[10px] text-white/20 px-2 py-1">No teammates yet</p>
               )}
-              {drivers.map(d => (
-                <DriverItem key={d.id} driver={d} onClick={() => navigate('/drivers')} />
+              {teammates.map(d => (
+                <DriverItem
+                  key={d.id}
+                  driver={d}
+                  onClick={() => navigate('/drivers')}
+                  onMessage={d.role === 'driver' ? () => navigate('/messages', { state: { openDriverId: d.id } }) : null}
+                />
               ))}
             </div>
           </div>

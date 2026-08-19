@@ -114,7 +114,7 @@ function AppRoutes() {
                 <Route path="/onboarding" element={<OnboardingGate />} />
                 <Route path="/"           element={<AuthGate><Home /></AuthGate>} />
                 <Route path="/runs"       element={<AuthGate><Runs /></AuthGate>} />
-                <Route path="/runs/new"   element={<AuthGate><NewRunForm /></AuthGate>} />
+                <Route path="/runs/new"   element={<AuthGate roles={['owner', 'dispatcher']}><NewRunForm /></AuthGate>} />
                 <Route path="/runs/:id"   element={<AuthGate><RunDetailPage /></AuthGate>} />
                 <Route path="/photos"     element={<AuthGate><Photos /></AuthGate>} />
                 <Route path="/contracts"  element={<AuthGate roles={['owner', 'dispatcher']}><Contracts /></AuthGate>} />

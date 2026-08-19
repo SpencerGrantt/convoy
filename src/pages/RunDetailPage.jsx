@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { generateCustodyPDF } from '../lib/pdf'
+import { useAuth } from '../hooks/useAuth'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
@@ -12,6 +13,7 @@ const STATUS_FLOW = ['pending', 'assigned', 'in_transit', 'delivered']
 export default function RunDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { profile } = useAuth()
   const [run, setRun] = useState(null)
   const [custody, setCustody] = useState([])
   const [photos, setPhotos] = useState([])
@@ -136,7 +138,8 @@ export default function RunDetailPage() {
           </div>
         )}
 
-        {run?.status !== 'delivered' && run?.status !== 'cancelled' && (
+        {run?.status !== 'delivered' && run?.status !== 'cancelled' &&
+          (profile?.role === 'owner' || profile?.role === 'dispatcher' || run?.driver_id === profile?.id) && (
           <button
             onClick={advanceStatus}
             disabled={updating}

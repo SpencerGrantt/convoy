@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useRuns } from '../hooks/useRuns'
+import { useAuth } from '../hooks/useAuth'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
 import { safeFormatDate } from '../lib/dates'
@@ -13,6 +14,11 @@ export default function Runs() {
   const [typeFilter, setTypeFilter] = useState('all')
   const { runs: allRuns, loading } = useRuns({ status: activeTab })
   const navigate = useNavigate()
+  const { profile } = useAuth()
+  // Creating/assigning a run is dispatch work — matches /runs/new's own
+  // route restriction (App.jsx) and the RLS policy backing it
+  // (018_lock_down_chain_of_custody_rls.sql), not just a UI-only hide.
+  const canCreateRuns = profile?.role === 'owner' || profile?.role === 'dispatcher'
 
   // contract_id is optional on every run — a null value means a commercial/
   // broker-booked haul with no SAM contract behind it. Filtering client-side
@@ -45,12 +51,14 @@ export default function Runs() {
       </div>
 
       <div className="px-4 pt-4 space-y-2 md:px-8 md:pt-6">
-        <button
-          onClick={() => navigate('/runs/new')}
-          className="w-full bg-brand-600 text-white font-semibold py-3 rounded-xl active:bg-brand-700 transition-colors mb-4"
-        >
-          + New Run
-        </button>
+        {canCreateRuns && (
+          <button
+            onClick={() => navigate('/runs/new')}
+            className="w-full bg-brand-600 text-white font-semibold py-3 rounded-xl active:bg-brand-700 transition-colors mb-4"
+          >
+            + New Run
+          </button>
+        )}
 
         <div className="flex gap-1 bg-navy-800 rounded-xl p-1 mb-4">
           {TYPE_FILTERS.map(t => (

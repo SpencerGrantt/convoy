@@ -6,6 +6,7 @@ import MetricCard from '../components/ui/MetricCard'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
 import FuelCardImportSheet from '../components/finance/FuelCardImportSheet'
+import ExcelTrackerImportSheet from '../components/finance/ExcelTrackerImportSheet'
 import {
   BarChart, Bar, LineChart, Line, Legend,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -621,6 +622,9 @@ export default function Finances() {
             <button onClick={() => setSheet('fuel-import')} className="w-full bg-navy-700 border border-white/[0.08] text-white/70 font-semibold py-2.5 rounded-xl text-xs active:bg-navy-800">
               ⛽ Import Fuel Card CSV
             </button>
+            <button onClick={() => setSheet('excel-import')} className="w-full bg-navy-700 border border-white/[0.08] text-white/70 font-semibold py-2.5 rounded-xl text-xs active:bg-navy-800">
+              📊 Import Miles & Expense Tracker (.xlsx)
+            </button>
 
             <div>
               <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Recent Revenue</p>
@@ -693,6 +697,11 @@ export default function Finances() {
       {sheet === 'fuel-import' && (
         <Sheet title="Import Fuel Card CSV" onClose={() => setSheet(null)}>
           <FuelCardImportSheet companyId={companyId} onSaved={refresh} onClose={() => setSheet(null)} />
+        </Sheet>
+      )}
+      {sheet === 'excel-import' && (
+        <Sheet title="Import Miles & Expense Tracker" onClose={() => setSheet(null)}>
+          <ExcelTrackerImportSheet companyId={companyId} onSaved={refresh} onClose={() => setSheet(null)} />
         </Sheet>
       )}
     </div>

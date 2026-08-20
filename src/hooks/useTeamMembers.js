@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useId } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
@@ -14,6 +14,12 @@ export function useTeamMembers() {
   const { profile } = useAuth()
   const [members, setMembers] = useState([])
   const [loading, setLoading] = useState(true)
+  // Sidebar mounts this alongside whatever page is on screen (which may
+  // itself also call useTeamMembers, e.g. MyTeam.jsx) — two simultaneously
+  // mounted instances sharing one channel name crashes the app (see
+  // useMessages.js for the exact failure this pattern already caused
+  // elsewhere), so each instance gets its own channel.
+  const instanceId = useId()
 
   const fetch = useCallback(async () => {
     if (!profile?.company_id) {
@@ -31,7 +37,24 @@ export function useTeamMembers() {
     setLoading(false)
   }, [profile?.company_id])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => {
+    fetch()
+    if (!profile?.company_id) return
+
+    // Role changes happen from Settings.jsx (or another tab/user entirely)
+    // — the Sidebar's own copy of this list has no other way to find out,
+    // so it needs a live subscription rather than just a one-time fetch.
+    const channel = supabase
+      .channel(`team-members-${profile.company_id}-${instanceId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles', filter: `company_id=eq.${profile.company_id}` },
+        fetch
+      )
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [fetch, profile?.company_id, instanceId])
 
   return { members, loading, refresh: fetch }
 }

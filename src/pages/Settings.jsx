@@ -17,6 +17,13 @@ export default function Settings() {
   const [teamLoading, setTeamLoading] = useState(true)
   const [teamActionErr, setTeamActionErr] = useState('')
   const [busyMemberId, setBusyMemberId] = useState(null)
+  // Role changes are staged in the dropdown, not applied on every keystroke
+  // of a select — a member id only appears here between picking a new role
+  // and hitting Save, so the button can tell "nothing changed yet" apart
+  // from "there's an unsaved change" and the row shows a real Save action
+  // instead of silently committing on change with no confirmation.
+  const [pendingRoles, setPendingRoles] = useState({})
+  const [savedMemberId, setSavedMemberId] = useState(null)
   const [saving, setSaving]     = useState(false)
   const [saved, setSaved]       = useState(false)
   const [saveErr, setSaveErr]   = useState('')
@@ -84,11 +91,26 @@ export default function Settings() {
       if (error) throw new Error(error.message)
       if (data?.error) throw new Error(data.error)
       loadTeam()
+      return true
     } catch (err) {
       setTeamActionErr(err.message)
+      return false
     } finally {
       setBusyMemberId(null)
     }
+  }
+
+  async function saveRole(memberId) {
+    const role = pendingRoles[memberId]
+    if (!role) return
+    const ok = await changeRole(memberId, role)
+    if (!ok) return
+    setPendingRoles(p => {
+      const { [memberId]: _discard, ...rest } = p
+      return rest
+    })
+    setSavedMemberId(memberId)
+    setTimeout(() => setSavedMemberId(id => (id === memberId ? null : id)), 2000)
   }
 
   async function updatePayPercent(memberId, payPercent) {
@@ -418,23 +440,36 @@ export default function Settings() {
                       {profile?.role === 'owner' && !isSelf ? (
                         <div className="flex items-center gap-2 shrink-0">
                           <select
-                            value={member.role}
+                            value={pendingRoles[member.id] ?? member.role}
                             disabled={busy}
-                            onChange={e => changeRole(member.id, e.target.value)}
+                            onChange={e => setPendingRoles(p => ({ ...p, [member.id]: e.target.value }))}
                             className="bg-navy-700 border border-white/10 text-white rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-50"
                           >
-                            <option value="owner">Owner</option>
+                            <option value="owner">Admin</option>
                             <option value="dispatcher">Dispatcher</option>
-                            <option value="driver">Crew</option>
+                            <option value="driver">Driver</option>
                           </select>
-                          <button
-                            type="button"
-                            onClick={() => removeMember(member.id)}
-                            disabled={busy}
-                            className="text-xs text-red-400 font-medium bg-red-500/10 px-2 py-1.5 rounded-lg disabled:opacity-50"
-                          >
-                            Remove
-                          </button>
+                          {pendingRoles[member.id] && pendingRoles[member.id] !== member.role ? (
+                            <button
+                              type="button"
+                              onClick={() => saveRole(member.id)}
+                              disabled={busy}
+                              className={`text-xs font-bold px-2.5 py-1.5 rounded-lg disabled:opacity-50 transition-colors ${
+                                savedMemberId === member.id ? 'bg-green-600 text-white' : 'bg-brand-600 text-white'
+                              }`}
+                            >
+                              {busy ? 'Saving…' : savedMemberId === member.id ? '✓ Saved' : 'Save'}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => removeMember(member.id)}
+                              disabled={busy}
+                              className="text-xs text-red-400 font-medium bg-red-500/10 px-2 py-1.5 rounded-lg disabled:opacity-50"
+                            >
+                              Remove
+                            </button>
+                          )}
                         </div>
                       ) : (
                         <span className="text-xs text-white/50 shrink-0 px-2 py-1">{roleLabel(member.role)}</span>
@@ -478,9 +513,9 @@ export default function Settings() {
               <div>
                 <label className="block text-xs text-white/50 mb-1">Role</label>
                 <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className={fieldClass}>
-                  <option value="driver">Crew</option>
+                  <option value="driver">Driver</option>
                   <option value="dispatcher">Dispatcher</option>
-                  <option value="owner">Owner</option>
+                  <option value="owner">Admin</option>
                 </select>
               </div>
               {inviteMsg && (

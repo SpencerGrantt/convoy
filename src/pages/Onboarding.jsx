@@ -343,7 +343,7 @@ export default function Onboarding() {
               <label className="block text-xs text-white/50 mb-1.5 font-medium">Role</label>
               <div className="px-4 py-2.5 bg-white/[0.04] rounded-xl border border-white/[0.06]">
                 <span className="text-sm text-white/55">
-                  {path === 'admin' ? 'Administrator' : roleLabel(profile?.role) || 'Crew'}
+                  {path === 'admin' ? 'Administrator' : roleLabel(profile?.role) || 'Driver'}
                 </span>
               </div>
             </div>

@@ -154,7 +154,7 @@ export default function Sidebar() {
         {showDrivers && (
           <div className="pt-4 mt-4 border-t border-white/[0.08]">
             <div className="flex items-center justify-between px-2 mb-2">
-              <span className="text-xs font-semibold text-white/40 uppercase tracking-widest">Crew</span>
+              <span className="text-xs font-semibold text-white/40 uppercase tracking-widest">Team</span>
               <button
                 onClick={() => { setAddingDriver(v => !v); setInviteMsg('') }}
                 className="text-white/30 hover:text-white transition-colors"

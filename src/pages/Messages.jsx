@@ -10,7 +10,7 @@ import { safeFormatDate } from '../lib/dates'
 import { ChevronLeft, Send, MessageCircle, Headset } from 'lucide-react'
 
 function Bubble({ message, isOwn }) {
-  const senderName = message.sender?.full_name || (message.sender?.role === 'driver' ? 'Crew' : 'Management')
+  const senderName = message.sender?.full_name || (message.sender?.role === 'driver' ? 'Driver' : 'Management')
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
       <div className={`max-w-[80%] rounded-xl px-3 py-2 ${

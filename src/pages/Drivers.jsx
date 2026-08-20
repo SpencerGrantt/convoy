@@ -14,7 +14,7 @@ const DOC_TYPES = [
 ]
 
 const ROLE_BADGE = {
-  driver:     { label: 'Crew',       color: 'text-green-300 bg-green-500/15 border-green-500/25' },
+  driver:     { label: 'Driver',     color: 'text-green-300 bg-green-500/15 border-green-500/25' },
   dispatcher: { label: 'Dispatcher', color: 'text-blue-300 bg-blue-500/15 border-blue-500/25' },
 }
 
@@ -78,7 +78,7 @@ export default function Drivers() {
 
   return (
     <div className="pb-24 md:pb-8">
-      <TopBar title="Crew" />
+      <TopBar title="Team" />
       <div className="px-4 pt-4 space-y-3 md:px-8 md:pt-6">
 
         {expiring.length > 0 && (

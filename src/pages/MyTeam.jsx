@@ -5,9 +5,9 @@ import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { Building2, Crown, Headset, Truck, Phone } from 'lucide-react'
 
 const ROLE_META = {
-  owner:      { label: 'Owner',      icon: Crown,   color: 'text-brand-300 bg-brand-600/20 border-brand-600/30' },
+  owner:      { label: 'Admin',      icon: Crown,   color: 'text-brand-300 bg-brand-600/20 border-brand-600/30' },
   dispatcher: { label: 'Dispatcher', icon: Headset, color: 'text-blue-300 bg-blue-500/15 border-blue-500/25' },
-  driver:     { label: 'Crew',       icon: Truck,   color: 'text-green-300 bg-green-500/15 border-green-500/25' },
+  driver:     { label: 'Driver',     icon: Truck,   color: 'text-green-300 bg-green-500/15 border-green-500/25' },
 }
 
 // Read-only roster for drivers — company name + everyone on their team.

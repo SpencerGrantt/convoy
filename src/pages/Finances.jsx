@@ -43,11 +43,22 @@ function Sheet({ title, onClose, children }) {
 
 const PAYMENT_METHODS = ['cash', 'check', 'ach', 'credit_card', 'other']
 
-function RevenueForm({ companyId, contracts, onSave, onClose }) {
-  const [amount, setAmount] = useState('')
-  const [description, setDescription] = useState('')
-  const [contractId, setContractId] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState('')
+function EnteredOnNote({ entry }) {
+  if (!entry?.created_at) return null
+  return (
+    <p className="text-[10px] text-white/30">
+      Entered {safeFormatDate(entry.created_at, "MMM d, yyyy 'at' h:mm a")}
+    </p>
+  )
+}
+
+function RevenueForm({ companyId, contracts, entry, onSave, onClose }) {
+  const isEdit = Boolean(entry)
+  const [amount, setAmount] = useState(entry ? String(entry.amount) : '')
+  const [description, setDescription] = useState(entry?.description ?? '')
+  const [contractId, setContractId] = useState(entry?.contract_id ?? '')
+  const [paymentMethod, setPaymentMethod] = useState(entry?.payment_method ?? '')
+  const [entryDate, setEntryDate] = useState(entry?.entry_date ?? new Date().toISOString().slice(0, 10))
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
 
@@ -56,14 +67,16 @@ function RevenueForm({ companyId, contracts, onSave, onClose }) {
     setSaving(true)
     setErr('')
     try {
-      const { error } = await supabase.from('revenue_entries').insert({
-        company_id: companyId,
+      const payload = {
         amount: parseFloat(amount),
         description,
         contract_id: contractId || null,
         payment_method: paymentMethod || null,
-        entry_date: new Date().toISOString().slice(0, 10),
-      })
+        entry_date: entryDate,
+      }
+      const { error } = isEdit
+        ? await supabase.from('revenue_entries').update(payload).eq('id', entry.id)
+        : await supabase.from('revenue_entries').insert({ ...payload, company_id: companyId })
       if (error) throw error
       onSave()
       onClose()
@@ -74,11 +87,30 @@ function RevenueForm({ companyId, contracts, onSave, onClose }) {
     }
   }
 
+  async function remove() {
+    if (!window.confirm('Delete this revenue entry? This cannot be undone.')) return
+    setSaving(true)
+    setErr('')
+    try {
+      const { error } = await supabase.from('revenue_entries').delete().eq('id', entry.id)
+      if (error) throw error
+      onSave()
+      onClose()
+    } catch (e) {
+      setErr(e.message)
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-3">
       <div>
         <label className="block text-xs text-white/50 mb-1">Amount *</label>
         <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className={fieldClass} />
+      </div>
+      <div>
+        <label className="block text-xs text-white/50 mb-1">Date</label>
+        <input type="date" value={entryDate} onChange={e => setEntryDate(e.target.value)} className={fieldClass} />
       </div>
       <div>
         <label className="block text-xs text-white/50 mb-1">Description</label>
@@ -98,18 +130,26 @@ function RevenueForm({ companyId, contracts, onSave, onClose }) {
           {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m.replace('_', ' ')}</option>)}
         </select>
       </div>
+      {isEdit && <EnteredOnNote entry={entry} />}
       {err && <p className="text-red-400 text-xs font-medium">{err}</p>}
       <button onClick={save} disabled={saving || !amount} className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
-        {saving ? 'Saving…' : 'Add Revenue'}
+        {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Revenue'}
       </button>
+      {isEdit && (
+        <button onClick={remove} disabled={saving} className="w-full bg-red-500/10 text-red-400 font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50">
+          Delete Entry
+        </button>
+      )}
     </div>
   )
 }
 
-function ExpenseForm({ companyId, onSave, onClose }) {
-  const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState('fuel')
-  const [description, setDescription] = useState('')
+function ExpenseForm({ companyId, entry, onSave, onClose }) {
+  const isEdit = Boolean(entry)
+  const [amount, setAmount] = useState(entry ? String(entry.amount) : '')
+  const [category, setCategory] = useState(entry?.category ?? 'fuel')
+  const [description, setDescription] = useState(entry?.description ?? '')
+  const [entryDate, setEntryDate] = useState(entry?.entry_date ?? new Date().toISOString().slice(0, 10))
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
 
@@ -118,19 +158,36 @@ function ExpenseForm({ companyId, onSave, onClose }) {
     setSaving(true)
     setErr('')
     try {
-      const { error } = await supabase.from('expense_entries').insert({
-        company_id: companyId,
+      const payload = {
         amount: parseFloat(amount),
         category,
         description,
-        entry_date: new Date().toISOString().slice(0, 10),
-      })
+        entry_date: entryDate,
+      }
+      const { error } = isEdit
+        ? await supabase.from('expense_entries').update(payload).eq('id', entry.id)
+        : await supabase.from('expense_entries').insert({ ...payload, company_id: companyId })
       if (error) throw error
       onSave()
       onClose()
     } catch (e) {
       setErr(e.message)
     } finally {
+      setSaving(false)
+    }
+  }
+
+  async function remove() {
+    if (!window.confirm('Delete this expense entry? This cannot be undone.')) return
+    setSaving(true)
+    setErr('')
+    try {
+      const { error } = await supabase.from('expense_entries').delete().eq('id', entry.id)
+      if (error) throw error
+      onSave()
+      onClose()
+    } catch (e) {
+      setErr(e.message)
       setSaving(false)
     }
   }
@@ -148,13 +205,23 @@ function ExpenseForm({ companyId, onSave, onClose }) {
         <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className={fieldClass} />
       </div>
       <div>
+        <label className="block text-xs text-white/50 mb-1">Date</label>
+        <input type="date" value={entryDate} onChange={e => setEntryDate(e.target.value)} className={fieldClass} />
+      </div>
+      <div>
         <label className="block text-xs text-white/50 mb-1">Description</label>
         <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Gas — Van 01" className={fieldClass} />
       </div>
+      {isEdit && <EnteredOnNote entry={entry} />}
       {err && <p className="text-red-400 text-xs font-medium">{err}</p>}
       <button onClick={save} disabled={saving || !amount} className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
-        {saving ? 'Saving…' : 'Add Expense'}
+        {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Expense'}
       </button>
+      {isEdit && (
+        <button onClick={remove} disabled={saving} className="w-full bg-red-500/10 text-red-400 font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50">
+          Delete Entry
+        </button>
+      )}
     </div>
   )
 }
@@ -585,7 +652,17 @@ export default function Finances() {
   const { profile } = useAuth()
   const { revenue, expenses, invoices, contracts, totalRevenue, totalExpenses, netProfit, outstanding, refresh } = useFinances()
   const [sheet, setSheet] = useState(null)
+  const [editingEntry, setEditingEntry] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
+
+  function openSheet(name, entry = null) {
+    setEditingEntry(entry)
+    setSheet(name)
+  }
+  function closeSheet() {
+    setSheet(null)
+    setEditingEntry(null)
+  }
   const companyId = profile?.company_id
   const tabs = ['overview', 'analytics']
 
@@ -615,14 +692,14 @@ export default function Finances() {
             </div>
 
             <div className="grid grid-cols-3 gap-2">
-              <button onClick={() => setSheet('revenue')} className="bg-green-500/20 text-green-300 font-semibold py-2.5 rounded-xl text-xs active:bg-green-500/30">+ Revenue</button>
-              <button onClick={() => setSheet('expense')} className="bg-yellow-500/20 text-yellow-300 font-semibold py-2.5 rounded-xl text-xs active:bg-yellow-500/30">+ Expense</button>
-              <button onClick={() => setSheet('invoice')} className="bg-brand-500/20 text-brand-300 font-semibold py-2.5 rounded-xl text-xs active:bg-brand-500/30">+ Invoice</button>
+              <button onClick={() => openSheet('revenue')} className="bg-green-500/20 text-green-300 font-semibold py-2.5 rounded-xl text-xs active:bg-green-500/30">+ Revenue</button>
+              <button onClick={() => openSheet('expense')} className="bg-yellow-500/20 text-yellow-300 font-semibold py-2.5 rounded-xl text-xs active:bg-yellow-500/30">+ Expense</button>
+              <button onClick={() => openSheet('invoice')} className="bg-brand-500/20 text-brand-300 font-semibold py-2.5 rounded-xl text-xs active:bg-brand-500/30">+ Invoice</button>
             </div>
-            <button onClick={() => setSheet('fuel-import')} className="w-full bg-navy-700 border border-white/[0.08] text-white/70 font-semibold py-2.5 rounded-xl text-xs active:bg-navy-800">
+            <button onClick={() => openSheet('fuel-import')} className="w-full bg-navy-700 border border-white/[0.08] text-white/70 font-semibold py-2.5 rounded-xl text-xs active:bg-navy-800">
               ⛽ Import Fuel Card CSV
             </button>
-            <button onClick={() => setSheet('excel-import')} className="w-full bg-navy-700 border border-white/[0.08] text-white/70 font-semibold py-2.5 rounded-xl text-xs active:bg-navy-800">
+            <button onClick={() => openSheet('excel-import')} className="w-full bg-navy-700 border border-white/[0.08] text-white/70 font-semibold py-2.5 rounded-xl text-xs active:bg-navy-800">
               📊 Import Miles & Expense Tracker (.xlsx)
             </button>
 
@@ -630,13 +707,16 @@ export default function Finances() {
               <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Recent Revenue</p>
               {revenue.length === 0 && <p className="text-sm text-white/40 text-center py-2">No entries this month</p>}
               {revenue.slice(0, 5).map(r => (
-                <div key={r.id} className="bg-navy-700 rounded-xl px-4 py-3 border border-white/[0.07] flex items-center justify-between mb-2">
+                <button key={r.id} onClick={() => openSheet('revenue', r)} className="w-full text-left bg-navy-700 rounded-xl px-4 py-3 border border-white/[0.07] flex items-center justify-between mb-2 active:bg-navy-800">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white/80 truncate">{r.description || 'Revenue entry'}</p>
-                    {r.payment_method && <p className="text-[10px] text-white/30 capitalize">{r.payment_method.replace('_', ' ')}</p>}
+                    <p className="text-[10px] text-white/30">
+                      {safeFormatDate(r.entry_date, 'MMM d, yyyy')}
+                      {r.payment_method && <span className="capitalize"> · {r.payment_method.replace('_', ' ')}</span>}
+                    </p>
                   </div>
                   <p className="text-sm font-bold text-green-400 ml-3">{fmt(r.amount)}</p>
-                </div>
+                </button>
               ))}
             </div>
 
@@ -644,13 +724,14 @@ export default function Finances() {
               <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Recent Expenses</p>
               {expenses.length === 0 && <p className="text-sm text-white/40 text-center py-2">No entries this month</p>}
               {expenses.slice(0, 5).map(e => (
-                <div key={e.id} className="bg-navy-700 rounded-xl px-4 py-3 border border-white/[0.07] flex items-center justify-between mb-2">
+                <button key={e.id} onClick={() => openSheet('expense', e)} className="w-full text-left bg-navy-700 rounded-xl px-4 py-3 border border-white/[0.07] flex items-center justify-between mb-2 active:bg-navy-800">
                   <div>
                     <p className="text-sm text-white/80">{e.description || e.category.replace('_', ' ')}</p>
                     <p className="text-xs text-white/40 capitalize">{e.category.replace('_', ' ')}</p>
+                    <p className="text-[10px] text-white/30">{safeFormatDate(e.entry_date, 'MMM d, yyyy')}</p>
                   </div>
                   <p className="text-sm font-bold text-red-400 ml-3">{fmt(e.amount)}</p>
-                </div>
+                </button>
               ))}
             </div>
 
@@ -680,28 +761,28 @@ export default function Finances() {
       </div>
 
       {sheet === 'revenue' && (
-        <Sheet title="Add Revenue" onClose={() => setSheet(null)}>
-          <RevenueForm companyId={companyId} contracts={contracts} onSave={refresh} onClose={() => setSheet(null)} />
+        <Sheet title={editingEntry ? 'Edit Revenue' : 'Add Revenue'} onClose={closeSheet}>
+          <RevenueForm companyId={companyId} contracts={contracts} entry={editingEntry} onSave={refresh} onClose={closeSheet} />
         </Sheet>
       )}
       {sheet === 'expense' && (
-        <Sheet title="Add Expense" onClose={() => setSheet(null)}>
-          <ExpenseForm companyId={companyId} onSave={refresh} onClose={() => setSheet(null)} />
+        <Sheet title={editingEntry ? 'Edit Expense' : 'Add Expense'} onClose={closeSheet}>
+          <ExpenseForm companyId={companyId} entry={editingEntry} onSave={refresh} onClose={closeSheet} />
         </Sheet>
       )}
       {sheet === 'invoice' && (
-        <Sheet title="Generate Invoice" onClose={() => setSheet(null)}>
-          <InvoiceForm companyId={companyId} contracts={contracts} onSave={refresh} onClose={() => setSheet(null)} />
+        <Sheet title="Generate Invoice" onClose={closeSheet}>
+          <InvoiceForm companyId={companyId} contracts={contracts} onSave={refresh} onClose={closeSheet} />
         </Sheet>
       )}
       {sheet === 'fuel-import' && (
-        <Sheet title="Import Fuel Card CSV" onClose={() => setSheet(null)}>
-          <FuelCardImportSheet companyId={companyId} onSaved={refresh} onClose={() => setSheet(null)} />
+        <Sheet title="Import Fuel Card CSV" onClose={closeSheet}>
+          <FuelCardImportSheet companyId={companyId} onSaved={refresh} onClose={closeSheet} />
         </Sheet>
       )}
       {sheet === 'excel-import' && (
-        <Sheet title="Import Miles & Expense Tracker" onClose={() => setSheet(null)}>
-          <ExcelTrackerImportSheet companyId={companyId} onSaved={refresh} onClose={() => setSheet(null)} />
+        <Sheet title="Import Miles & Expense Tracker" onClose={closeSheet}>
+          <ExcelTrackerImportSheet companyId={companyId} onSaved={refresh} onClose={closeSheet} />
         </Sheet>
       )}
     </div>

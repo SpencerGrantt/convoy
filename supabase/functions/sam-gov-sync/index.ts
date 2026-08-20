@@ -1,4 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -70,6 +71,33 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   try {
+    // This had no authentication at all — SAM.gov opportunity data itself
+    // is public, so it's not a data leak, but the API key behind it is a
+    // scarce shared resource (~10 requests/day on a non-federal key, per
+    // the pagination note below). An unauthenticated caller who found this
+    // URL could exhaust the whole company's daily quota with no rate limit
+    // of their own. Same fix already applied to ai-proxy for the same
+    // reason — require a real session before spending it.
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Not authenticated' }), {
+        status: 401, headers: { 'Content-Type': 'application/json', ...CORS },
+      })
+    }
+    const authClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+    const { data: { user }, error: authErr } = await authClient.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    )
+    if (authErr || !user) {
+      return new Response(JSON.stringify({ error: 'Invalid session — please sign out and back in' }), {
+        status: 401, headers: { 'Content-Type': 'application/json', ...CORS },
+      })
+    }
+
     const { naicsCodes, title, state } = await req.json()
     const samApiKey = Deno.env.get('SAM_GOV_API_KEY')
 

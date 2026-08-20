@@ -53,8 +53,9 @@ const TOOLS = [
   },
 ]
 
-async function runTool(admin, companyId, name, input) {
+async function runTool(admin, caller, name, input) {
   const clamp = (n, max) => Math.max(1, Math.min(Number(n) || max, max))
+  const companyId = caller.company_id
 
   if (name === 'query_runs') {
     let q = admin
@@ -66,6 +67,12 @@ async function runTool(admin, companyId, name, input) {
     if (input?.status) q = q.eq('status', input.status)
     if (input?.start_date) q = q.gte('scheduled_at', input.start_date)
     if (input?.end_date) q = q.lte('scheduled_at', input.end_date + 'T23:59:59')
+    // This runs as the service role (bypasses RLS) so it must reproduce
+    // runs_select's own scoping by hand (018_lock_down_chain_of_custody_rls.sql)
+    // — a driver asking the assistant about "runs" should only ever surface
+    // their own assigned runs, same as everywhere else in the app, not every
+    // company run just because the tool itself has no RLS applied to it.
+    if (caller.role === 'driver') q = q.eq('driver_id', caller.id)
     const { data, error } = await q
     if (error) return { error: error.message }
     return { runs: data }
@@ -97,6 +104,13 @@ async function runTool(admin, companyId, name, input) {
   }
 
   if (name === 'query_contracts') {
+    // contracts_manage (018_lock_down_chain_of_custody_rls.sql) restricts
+    // contracts to owner/dispatcher — Contracts.jsx's own route is gated
+    // the same way. This tool bypasses RLS via the service role, so it has
+    // to enforce that boundary itself instead of silently handing a driver
+    // full contract data (agency, contract numbers, annual values) the rest
+    // of the app never shows them.
+    if (caller.role === 'driver') return { error: 'Not authorized to view contracts.' }
     let q = admin.from('contracts').select('name, agency, contract_number, annual_value, start_date, end_date, status, naics_code').eq('company_id', companyId).order('end_date', { ascending: true })
     if (input?.status) q = q.eq('status', input.status)
     if (input?.expiring_within_days != null) {
@@ -145,7 +159,7 @@ serve(async (req) => {
 
     const { data: caller, error: callerErr } = await admin
       .from('profiles')
-      .select('id, company_id')
+      .select('id, company_id, role')
       .eq('id', user.id)
       .single()
     if (callerErr || !caller?.company_id) {
@@ -196,7 +210,7 @@ serve(async (req) => {
       const toolResults = []
       for (const block of data.content) {
         if (block.type !== 'tool_use') continue
-        const result = await runTool(admin, caller.company_id, block.name, block.input)
+        const result = await runTool(admin, caller, block.name, block.input)
         toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify(result) })
       }
       messages.push({ role: 'user', content: toolResults })

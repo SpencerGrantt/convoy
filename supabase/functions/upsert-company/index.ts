@@ -45,11 +45,31 @@ serve(async (req) => {
     if (!body.skip_company) {
       const { data: caller } = await admin
         .from('profiles')
-        .select('role')
+        .select('role, company_id')
         .eq('id', user.id)
         .single()
       if (caller && caller.role === 'driver') {
         return new Response(JSON.stringify({ error: 'Only an owner or dispatcher can edit company info' }), {
+          status: 403, headers: { 'Content-Type': 'application/json', ...CORS },
+        })
+      }
+      // This runs as the service role (bypasses RLS), so unlike a normal
+      // client update it never gets my_company_id()'s scoping for free —
+      // without this check, any owner/dispatcher could pass an arbitrary
+      // company_id in the request body and this function would happily
+      // overwrite a completely different company's CAGE code, UEI, SDVOSB
+      // status, etc. `companyId` must match the caller's own company_id
+      // exactly (an existing profile always has one at this point — the
+      // no-profile-yet case is the brand-new self-signup admin creating
+      // their first company, which is why caller can be null/companyless
+      // here rather than rejected outright).
+      if (companyId && caller?.company_id && companyId !== caller.company_id) {
+        return new Response(JSON.stringify({ error: 'Not authorized to edit this company' }), {
+          status: 403, headers: { 'Content-Type': 'application/json', ...CORS },
+        })
+      }
+      if (companyId && caller && !caller.company_id) {
+        return new Response(JSON.stringify({ error: 'Not authorized to edit this company' }), {
           status: 403, headers: { 'Content-Type': 'application/json', ...CORS },
         })
       }

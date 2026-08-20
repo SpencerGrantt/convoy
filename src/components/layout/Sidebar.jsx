@@ -76,8 +76,11 @@ function DriverItem({ driver, onClick, onMessage }) {
           <span className="block text-[10px] text-white/30 truncate">{roleLabel(driver.role)}</span>
         </span>
       </button>
-      {/* Messaging is one channel per driver (useMessages.js) — there's no
-          owner/dispatcher channel to open, so only driver rows get this. */}
+      {/* Messaging is one channel per non-owner company member
+          (011_messages.sql — the `driver_id` column names whose channel it
+          is, not a role restriction; useDrivers() already pulls in
+          dispatchers too, confirmed live via Messages.jsx). There's no
+          channel for the owner themself, so only non-owner rows get this. */}
       {onMessage && (
         <button
           onClick={onMessage}
@@ -196,7 +199,7 @@ export default function Sidebar() {
                   key={d.id}
                   driver={d}
                   onClick={() => navigate('/drivers')}
-                  onMessage={d.role === 'driver' ? () => navigate('/messages', { state: { openDriverId: d.id } }) : null}
+                  onMessage={d.role !== 'owner' ? () => navigate('/messages', { state: { openDriverId: d.id } }) : null}
                 />
               ))}
             </div>

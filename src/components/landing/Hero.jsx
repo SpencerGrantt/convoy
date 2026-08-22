@@ -16,14 +16,13 @@ export default function Hero() {
         </div>
 
         <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
-          Logistics Software from a{' '}
-          <span className="text-brand-400">Veteran-Owned Business</span>
+          Logistics Software Built for{' '}
+          <span className="text-brand-400">Government Contract Work</span>
         </h2>
         <p className="text-white/60 text-base md:text-lg mt-5 max-w-2xl mx-auto leading-relaxed">
           Convoy is the all-in-one dispatch, tracking, and compliance platform for
-          logistics and courier companies — an SDVOSB-certified small business built
-          for operators fulfilling VA, DoD, and HHS contracts, and any fleet that
-          needs the same rigor.
+          logistics and courier companies, built for operators fulfilling VA, DoD,
+          and HHS contracts, and any fleet that needs the same rigor.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-9">

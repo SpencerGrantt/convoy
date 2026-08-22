@@ -259,7 +259,7 @@ function Screen({ children }) {
           <p className="text-white/40 text-sm mt-1">Logistics Platform</p>
         </div>
         {children}
-        <p className="text-center text-white/25 text-xs pt-2">SDVOSB · SAM.gov Compliant</p>
+        <p className="text-center text-white/25 text-xs pt-2">SAM.gov Compliant</p>
       </div>
     </div>
   )

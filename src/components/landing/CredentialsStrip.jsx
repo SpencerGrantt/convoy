@@ -1,7 +1,6 @@
-import { ShieldCheck, BadgeCheck, FileCheck, Landmark } from 'lucide-react'
+import { BadgeCheck, FileCheck, Landmark } from 'lucide-react'
 
 const CREDENTIALS = [
-  { icon: ShieldCheck, label: 'SDVOSB Certified' },
   { icon: Landmark, label: 'VA · DoD · HHS Contract Vehicles' },
   { icon: FileCheck, label: 'SAM.gov Integrated' },
   { icon: BadgeCheck, label: 'Chain-of-Custody Compliant' },

@@ -8,6 +8,7 @@ import MetricCard from '../components/ui/MetricCard'
 import AlertBanner from '../components/ui/AlertBanner'
 import StatusPill from '../components/ui/StatusPill'
 import TopBar from '../components/layout/TopBar'
+import { Search } from 'lucide-react'
 import { differenceInMinutes, startOfMonth } from 'date-fns'
 import { safeFormatDate, safeDifferenceInDays } from '../lib/dates'
 import { useNavigate } from 'react-router-dom'
@@ -175,7 +176,17 @@ export default function Dashboard() {
         ))}
 
         <div>
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Overview</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Overview</h2>
+            <a
+              href="https://loadboard.truckerpath.com/carrier/loads/home"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-brand-400 font-medium flex items-center gap-1"
+            >
+              <Search size={12} /> Find Backhaul
+            </a>
+          </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <MetricCard label="Active Runs"    value={activeRuns}    color="blue"   />
             <MetricCard label="Delivered MTD"  value={deliveredMTD}  color="green"  />

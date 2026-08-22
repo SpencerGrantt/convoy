@@ -112,7 +112,7 @@ export function AuthProvider({ children }) {
             companyId = crypto.randomUUID()
             const { error: companyError } = await supabase
               .from('companies')
-              .insert({ id: companyId, name: 'My Company', sdvosb: true })
+              .insert({ id: companyId, name: 'My Company', sdvosb: false })
             if (companyError) throw companyError
           }
 

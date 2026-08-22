@@ -25,13 +25,13 @@ export default function Hero() {
 
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
-            Logistics Software Built for{' '}
-            <span className="text-brand-400">Government Contract Work</span>
+            Dispatch, Track, and Deliver,{' '}
+            <span className="text-brand-400">Built for Any Fleet</span>
           </h2>
           <p className="text-white/60 text-base md:text-lg mt-5 max-w-2xl mx-auto leading-relaxed">
             Convoy is the all-in-one dispatch, tracking, and compliance platform for
-            logistics and courier companies, built for operators fulfilling VA, DoD,
-            and HHS contracts, and any fleet that needs the same rigor.
+            logistics and courier companies of any size, with SAM.gov contract
+            matching built in for teams that need it.
           </p>
 
           <div className="flex justify-center mt-9">

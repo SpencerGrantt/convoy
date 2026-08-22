@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
 import StatusPill from '../components/ui/StatusPill'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Clock, Package, CheckCircle2, ChevronRight, Truck, AlertCircle, Navigation, ClipboardCheck, ShieldCheck, Users, DollarSign, MapPinned } from 'lucide-react'
+import { MapPin, Clock, Package, CheckCircle2, ChevronRight, Truck, AlertCircle, Navigation, ClipboardCheck, ShieldCheck, Users, DollarSign, MapPinned, Search } from 'lucide-react'
 import { safeFormatDate, safeIsToday } from '../lib/dates'
 
 const STATUS_ACTIONS = {
@@ -162,6 +162,17 @@ export default function DriverDashboard() {
             </div>
             <span className="text-xs font-semibold text-white/80 text-center leading-tight">Mileage</span>
           </button>
+          <a
+            href="https://loadboard.truckerpath.com/carrier/loads/home"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-navy-700 rounded-2xl p-3 border border-white/[0.07] flex flex-col items-center gap-2 active:bg-navy-800 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-xl bg-brand-600/20 border border-brand-600/25 flex items-center justify-center shrink-0">
+              <Search size={16} className="text-brand-300" />
+            </div>
+            <span className="text-xs font-semibold text-white/80 text-center leading-tight">Find Backhaul</span>
+          </a>
         </div>
 
         {/* Stats row */}

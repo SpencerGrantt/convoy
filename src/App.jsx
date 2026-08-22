@@ -10,6 +10,7 @@ import ErrorBoundary from './components/ui/ErrorBoundary'
 
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
+import Landing from './pages/Landing'
 
 const Dashboard        = lazy(() => import('./pages/Dashboard'))
 const DriverDashboard  = lazy(() => import('./pages/DriverDashboard'))
@@ -84,6 +85,19 @@ function Home() {
   return <Dashboard />
 }
 
+// Anonymous visitors at "/" see the marketing page instead of being
+// bounced to /login — every other route keeps AuthGate's strict redirect
+// unchanged. Must check `loading` the same way AuthGate does: `session`
+// starts null until onAuthStateChange's first fire, so gating on
+// `session` alone would flash Landing at an already-logged-in user for
+// one tick on every load before correcting itself.
+function RootRoute() {
+  const { session, loading } = useAuth()
+  if (loading) return <LoadingSpinner />
+  if (!session) return <Landing />
+  return <AuthGate><Home /></AuthGate>
+}
+
 function AppRoutes() {
   const { session, profile } = useAuth()
   const location = useLocation()
@@ -112,7 +126,7 @@ function AppRoutes() {
               <Routes>
                 <Route path="/login"      element={session ? <Navigate to="/" replace /> : <Login />} />
                 <Route path="/onboarding" element={<OnboardingGate />} />
-                <Route path="/"           element={<AuthGate><Home /></AuthGate>} />
+                <Route path="/"           element={<RootRoute />} />
                 <Route path="/runs"       element={<AuthGate><Runs /></AuthGate>} />
                 <Route path="/runs/new"   element={<AuthGate roles={['owner', 'dispatcher']}><NewRunForm /></AuthGate>} />
                 <Route path="/runs/:id"   element={<AuthGate><RunDetailPage /></AuthGate>} />

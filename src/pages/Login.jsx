@@ -256,7 +256,7 @@ function Screen({ children }) {
       <div className="w-full max-w-sm space-y-3">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-black text-white tracking-tight">CONVOY</h1>
-          <p className="text-white/40 text-sm mt-1">Medical Courier Platform</p>
+          <p className="text-white/40 text-sm mt-1">Logistics Platform</p>
         </div>
         {children}
         <p className="text-center text-white/25 text-xs pt-2">SDVOSB · SAM.gov Compliant</p>

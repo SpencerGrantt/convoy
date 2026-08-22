@@ -6,38 +6,42 @@ function scrollToDemoForm() {
 
 export default function Hero() {
   return (
-    <div className="px-5 pt-8 pb-16 md:pt-16 md:pb-24">
-      <div className="max-w-4xl mx-auto text-center">
-        <div className="flex items-center justify-center gap-4 mb-10">
+    <div className="px-5 pt-6 pb-16 md:pt-8 md:pb-24">
+      <div className="max-w-6xl mx-auto">
+        <nav className="flex items-center justify-between mb-14 md:mb-20">
           <h1 className="text-2xl font-black text-white tracking-tight">CONVOY</h1>
-          <Link to="/login" className="text-white/35 text-sm hover:text-white/60 transition-colors">
-            Sign In
-          </Link>
-        </div>
+          <div className="flex items-center gap-4">
+            <Link to="/login" className="text-white/60 text-sm font-medium hover:text-white transition-colors">
+              Log In
+            </Link>
+            <Link
+              to="/login"
+              className="bg-navy-700 border border-white/10 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-navy-800 transition-colors"
+            >
+              Sign Up
+            </Link>
+          </div>
+        </nav>
 
-        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
-          Logistics Software Built for{' '}
-          <span className="text-brand-400">Government Contract Work</span>
-        </h2>
-        <p className="text-white/60 text-base md:text-lg mt-5 max-w-2xl mx-auto leading-relaxed">
-          Convoy is the all-in-one dispatch, tracking, and compliance platform for
-          logistics and courier companies, built for operators fulfilling VA, DoD,
-          and HHS contracts, and any fleet that needs the same rigor.
-        </p>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
+            Logistics Software Built for{' '}
+            <span className="text-brand-400">Government Contract Work</span>
+          </h2>
+          <p className="text-white/60 text-base md:text-lg mt-5 max-w-2xl mx-auto leading-relaxed">
+            Convoy is the all-in-one dispatch, tracking, and compliance platform for
+            logistics and courier companies, built for operators fulfilling VA, DoD,
+            and HHS contracts, and any fleet that needs the same rigor.
+          </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-9">
-          <button
-            onClick={scrollToDemoForm}
-            className="w-full sm:w-auto bg-brand-600 text-white font-bold px-8 py-3 rounded-xl transition-colors hover:bg-brand-700"
-          >
-            Schedule a Demo
-          </button>
-          <Link
-            to="/login"
-            className="text-white/50 text-sm hover:text-white/70 transition-colors font-medium"
-          >
-            Already a customer? Sign in →
-          </Link>
+          <div className="flex justify-center mt-9">
+            <button
+              onClick={scrollToDemoForm}
+              className="bg-brand-600 text-white font-bold px-8 py-3 rounded-xl transition-colors hover:bg-brand-700"
+            >
+              Schedule a Demo
+            </button>
+          </div>
         </div>
       </div>
     </div>

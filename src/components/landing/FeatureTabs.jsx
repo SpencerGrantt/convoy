@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Radio, Camera, FileSearch, Calculator, Sparkles, Smartphone } from 'lucide-react'
+import Reveal from './Reveal'
 
 const TABS = [
   {
@@ -47,7 +48,7 @@ export default function FeatureTabs() {
   return (
     <div className="px-5 py-16 md:py-24">
       <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-10">
+        <Reveal className="text-center mb-10">
           <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">
             One Platform for Every Part of the Operation
           </h3>
@@ -55,9 +56,9 @@ export default function FeatureTabs() {
             From dispatch to compliance reporting, Convoy covers what a logistics
             or courier company actually runs on.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+        <Reveal delay={100} className="flex flex-wrap items-center justify-center gap-2 mb-8">
           {TABS.map((tab, i) => {
             const Icon = tab.icon
             const isActive = i === active
@@ -66,20 +67,25 @@ export default function FeatureTabs() {
                 key={tab.label}
                 onClick={() => setActive(i)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all
-                  ${isActive ? 'bg-brand-600 text-white shadow' : 'text-white/40 hover:text-white/60 bg-navy-800'}`}
+                  ${isActive ? 'bg-brand-600 text-white shadow scale-[1.03]' : 'text-white/40 hover:text-white/60 hover:scale-[1.03] bg-navy-800'}`}
               >
                 <Icon size={16} className={isActive ? 'text-white' : 'text-white/40'} />
                 {tab.label}
               </button>
             )
           })}
-        </div>
+        </Reveal>
 
-        <div className="bg-navy-700 rounded-2xl p-8 border border-white/[0.08] max-w-2xl mx-auto text-center">
-          <current.icon size={28} className="text-brand-300 mx-auto mb-4" />
-          <h4 className="text-xl font-bold text-white mb-2">{current.title}</h4>
-          <p className="text-white/60 leading-relaxed">{current.description}</p>
-        </div>
+        <Reveal delay={200}>
+          <div
+            key={active}
+            className="bg-navy-700 rounded-2xl p-8 border border-white/[0.08] max-w-2xl mx-auto text-center animate-fadeIn"
+          >
+            <current.icon size={28} className="text-brand-300 mx-auto mb-4" />
+            <h4 className="text-xl font-bold text-white mb-2">{current.title}</h4>
+            <p className="text-white/60 leading-relaxed">{current.description}</p>
+          </div>
+        </Reveal>
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import Reveal from './Reveal'
 
 const inputBase = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/25 transition-colors'
 
@@ -28,7 +29,7 @@ export default function DemoForm() {
     <section id="demo-form" className="px-5 py-16 md:py-24 border-t border-white/[0.07]">
       <div className="max-w-md mx-auto">
         {status === 'success' ? (
-          <div className="bg-navy-700 rounded-2xl p-6 border border-white/[0.08] text-center space-y-4 py-8">
+          <div className="bg-navy-700 rounded-2xl p-6 border border-white/[0.08] text-center space-y-4 py-8 animate-fadeIn">
             <div className="text-4xl">📬</div>
             <p className="font-semibold text-white text-lg">Request received</p>
             <p className="text-sm text-white/50 leading-relaxed">
@@ -37,7 +38,7 @@ export default function DemoForm() {
             </p>
           </div>
         ) : (
-          <>
+          <Reveal>
             <div className="text-center mb-8">
               <h3 className="text-2xl font-black text-white tracking-tight">Start Your Demo Today</h3>
               <p className="text-white/50 text-sm mt-2">
@@ -98,12 +99,12 @@ export default function DemoForm() {
               <button
                 type="submit"
                 disabled={status === 'submitting'}
-                className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50 transition-colors hover:bg-brand-700"
+                className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50 transition-all hover:bg-brand-700 hover:scale-[1.02] active:scale-[0.98]"
               >
                 {status === 'submitting' ? 'Sending…' : 'Schedule a Demo'}
               </button>
             </form>
-          </>
+          </Reveal>
         )}
       </div>
     </section>

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 function scrollToDemoForm() {
@@ -5,6 +6,14 @@ function scrollToDemoForm() {
 }
 
 export default function Hero() {
+  // Above the fold, so this animates in on mount rather than on scroll
+  // (Reveal.jsx, used by the rest of the page, is scroll-triggered).
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), 50)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div className="px-5 pt-6 pb-16 md:pt-8 md:pb-24">
       <div className="max-w-6xl mx-auto">
@@ -16,14 +25,18 @@ export default function Hero() {
             </Link>
             <Link
               to="/login"
-              className="bg-navy-700 border border-white/10 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-navy-800 transition-colors"
+              className="bg-navy-700 border border-white/10 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all hover:bg-navy-800 hover:scale-[1.03] active:scale-[0.98]"
             >
               Sign Up
             </Link>
           </div>
         </nav>
 
-        <div className="max-w-4xl mx-auto text-center">
+        <div
+          className={`max-w-4xl mx-auto text-center transition-all duration-700 ease-out motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0 ${
+            visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+        >
           <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
             Dispatch, Track, and Deliver,{' '}
             <span className="text-brand-400">Built for Any Fleet</span>
@@ -37,7 +50,7 @@ export default function Hero() {
           <div className="flex justify-center mt-9">
             <button
               onClick={scrollToDemoForm}
-              className="bg-brand-600 text-white font-bold px-8 py-3 rounded-xl transition-colors hover:bg-brand-700"
+              className="bg-brand-600 text-white font-bold px-8 py-3 rounded-xl transition-all hover:bg-brand-700 hover:scale-[1.03] active:scale-[0.98]"
             >
               Schedule a Demo
             </button>

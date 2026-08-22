@@ -2,12 +2,13 @@ import { NavLink } from 'react-router-dom'
 import { Home, Truck, FileText, DollarSign, MessageCircle, MapPinned, Wrench } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useUnreadMessageCount } from '../../hooks/useUnreadCounts'
+import { BILLING_ENABLED } from '../../lib/billing'
 
 const allTabs = [
   { to: '/',            icon: Home,          label: 'Home',        roles: ['owner', 'dispatcher', 'driver'] },
   { to: '/runs',        icon: Truck,         label: 'Runs',        roles: ['owner', 'dispatcher', 'driver'] },
   { to: '/messages',    icon: MessageCircle, label: 'Messages',    roles: ['owner', 'dispatcher', 'driver'] },
-  { to: '/contracts',   icon: FileText,      label: 'Contracts',   roles: ['owner', 'dispatcher'] },
+  { to: '/contracts',   icon: FileText,      label: 'Contracts',   roles: ['owner', 'dispatcher'], plan: 'government' },
   { to: '/fleet',       icon: Wrench,        label: 'Fleet',       roles: ['owner', 'dispatcher'] },
   { to: '/finances',    icon: DollarSign,    label: 'Finances',    roles: ['owner'] },
   { to: '/ifta-report', icon: MapPinned,     label: 'IFTA',        roles: ['owner'] },
@@ -17,7 +18,8 @@ export default function MobileNav() {
   const { profile } = useAuth()
   const unreadMessages = useUnreadMessageCount()
   const role = profile?.role ?? 'owner'
-  const tabs = allTabs.filter(t => t.roles.includes(role))
+  const companyPlan = profile?.companies?.plan ?? 'standard'
+  const tabs = allTabs.filter(t => t.roles.includes(role) && (!BILLING_ENABLED || !t.plan || t.plan === companyPlan))
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-navy-900 border-t border-white/[0.08] safe-bottom z-20">

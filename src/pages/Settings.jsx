@@ -1,9 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase, invokeFn } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
+import AlertBanner from '../components/ui/AlertBanner'
 import { safeFormatDate } from '../lib/dates'
 import { roleLabel } from '../lib/roles'
+import { PLAN_META, planLabel, planPrice } from '../lib/plans'
+import { BILLING_ENABLED } from '../lib/billing'
 import { Shield, Users, Calendar, Hash, Building2 } from 'lucide-react'
 
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
@@ -11,6 +15,7 @@ const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded
 export default function Settings() {
   const { profile, loading: authLoading, signOut, setProfileDirect } = useAuth()
   const company = profile?.companies
+  const [searchParams] = useSearchParams()
 
   const [teamSize, setTeamSize] = useState(null)
   const [teamMembers, setTeamMembers] = useState([])
@@ -27,7 +32,14 @@ export default function Settings() {
   const [saving, setSaving]     = useState(false)
   const [saved, setSaved]       = useState(false)
   const [saveErr, setSaveErr]   = useState('')
-  const [activeTab, setActiveTab] = useState('account')
+  // Stripe Checkout/the billing portal both redirect back to
+  // /settings?tab=billing, so the tab needs to land there directly rather
+  // than always defaulting to 'account'.
+  const [activeTab, setActiveTab] = useState(
+    BILLING_ENABLED && searchParams.get('tab') === 'billing' ? 'billing' : 'account'
+  )
+  const [billingLoading, setBillingLoading] = useState(false)
+  const [billingErr, setBillingErr] = useState('')
 
   const [name, setName]               = useState(profile?.full_name ?? '')
   const [phone, setPhone]             = useState(profile?.phone ?? '')
@@ -247,7 +259,53 @@ export default function Settings() {
   // (read-only, no invite/role controls; those are hidden further down and,
   // more importantly, enforced server-side in upsert-company/manage-team).
   const canManage = profile?.role === 'owner' || profile?.role === 'dispatcher'
-  const tabs = canManage ? ['account', 'company', 'team'] : ['account', 'team']
+  const isOwner = profile?.role === 'owner'
+  const tabs = [
+    'account',
+    ...(canManage ? ['company'] : []),
+    ...(BILLING_ENABLED && isOwner ? ['billing'] : []),
+    'team',
+  ]
+
+  // Billing is owner-only (stricter than canManage) since these actions
+  // create/change a real payment obligation, not just an edit to company
+  // info a dispatcher can already touch.
+  async function startCheckout(interval) {
+    setBillingLoading(true); setBillingErr('')
+    try {
+      const { data, error } = await invokeFn('create-checkout-session', {
+        body: {
+          plan: company?.plan ?? 'standard',
+          interval,
+          context: 'settings',
+          return_to_origin: window.location.origin,
+        },
+      })
+      if (error) throw new Error(error.message)
+      if (data?.error) throw new Error(data.error)
+      if (!data?.url) throw new Error('Could not start checkout — please try again.')
+      window.location.href = data.url
+    } catch (err) {
+      setBillingErr(err.message)
+      setBillingLoading(false)
+    }
+  }
+
+  async function openBillingPortal() {
+    setBillingLoading(true); setBillingErr('')
+    try {
+      const { data, error } = await invokeFn('create-billing-portal-session', {
+        body: { return_to_origin: window.location.origin },
+      })
+      if (error) throw new Error(error.message)
+      if (data?.error) throw new Error(data.error)
+      if (!data?.url) throw new Error('Could not open billing portal — please try again.')
+      window.location.href = data.url
+    } catch (err) {
+      setBillingErr(err.message)
+      setBillingLoading(false)
+    }
+  }
 
   return (
     <div className="pb-24 md:pb-8">
@@ -409,6 +467,89 @@ export default function Settings() {
           </>
         )}
 
+        {/* ── Billing tab ── */}
+        {BILLING_ENABLED && activeTab === 'billing' && company && (
+          <>
+            {company.subscription_status === 'past_due' && (
+              <AlertBanner type="error" message="There was a problem with your last payment. Update your payment method to avoid losing access." />
+            )}
+            {company.subscription_status === 'canceled' && (
+              <AlertBanner type="error" message="Your subscription was canceled. Reactivate to keep using Convoy." />
+            )}
+
+            <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Current Plan</h2>
+                  <p className="text-white font-bold text-lg mt-1">{planLabel(company.plan)}</p>
+                </div>
+                <span className={`text-[10px] font-bold px-2.5 py-1.5 rounded-full uppercase tracking-wide ${
+                  company.subscription_status === 'active' ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                  : company.subscription_status === 'trialing' ? 'bg-brand-600/20 text-brand-300 border border-brand-600/30'
+                  : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                }`}>
+                  {company.subscription_status.replace('_', ' ')}
+                </span>
+              </div>
+
+              {company.subscription_status === 'trialing' && (
+                <p className="text-sm text-white/50">
+                  {Math.max(0, Math.ceil((new Date(company.trial_ends_at) - new Date()) / 86400000))} days left in your trial.
+                  ${planPrice(company.plan, 'monthly')}/mo after your trial ends.
+                </p>
+              )}
+              {company.subscription_status === 'active' && company.current_period_end && (
+                <p className="text-sm text-white/50">
+                  Renews {safeFormatDate(company.current_period_end, 'MMMM d, yyyy')}.
+                </p>
+              )}
+
+              {billingErr && <p className="text-red-400 text-xs font-medium">{billingErr}</p>}
+
+              {company.subscription_status === 'trialing' && (
+                <button type="button" onClick={() => startCheckout('monthly')} disabled={billingLoading}
+                  className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
+                  {billingLoading ? 'Loading…' : 'Add Payment Method'}
+                </button>
+              )}
+              {company.subscription_status === 'active' && (
+                <button type="button" onClick={openBillingPortal} disabled={billingLoading}
+                  className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
+                  {billingLoading ? 'Loading…' : 'Manage Billing'}
+                </button>
+              )}
+              {company.subscription_status === 'past_due' && (
+                <button type="button" onClick={openBillingPortal} disabled={billingLoading}
+                  className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
+                  {billingLoading ? 'Loading…' : 'Update Payment Method'}
+                </button>
+              )}
+              {company.subscription_status === 'canceled' && (
+                <button type="button" onClick={() => startCheckout('monthly')} disabled={billingLoading}
+                  className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">
+                  {billingLoading ? 'Loading…' : 'Reactivate'}
+                </button>
+              )}
+            </div>
+
+            <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-2">
+              <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-1">Plans</h2>
+              {Object.entries(PLAN_META).map(([key, meta]) => (
+                <div key={key} className={`rounded-xl p-3 border ${company.plan === key ? 'border-brand-600/50 bg-brand-600/5' : 'border-white/[0.07]'}`}>
+                  <div className="flex items-baseline justify-between">
+                    <p className="text-sm text-white font-semibold">{meta.label}</p>
+                    <p className="text-sm text-white/70">${meta.monthlyPrice}/mo</p>
+                  </div>
+                  <p className="text-xs text-white/40 mt-1">{meta.features.join(', ')}.</p>
+                </div>
+              ))}
+              <p className="text-xs text-white/30 pt-1">
+                To switch plans, use Manage Billing above. It opens Stripe's billing portal.
+              </p>
+            </div>
+          </>
+        )}
+
         {/* ── Team tab ── */}
         {activeTab === 'team' && (
           <>
@@ -532,7 +673,7 @@ export default function Settings() {
           </>
         )}
 
-        {activeTab !== 'team' && (
+        {activeTab !== 'team' && activeTab !== 'billing' && (
           <>
             {saveErr && <p className="text-red-400 text-xs font-medium px-1">{saveErr}</p>}
             <button type="submit" disabled={saving || authLoading}

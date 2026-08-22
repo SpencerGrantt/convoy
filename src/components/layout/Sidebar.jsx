@@ -9,12 +9,13 @@ import { useTeamMembers } from '../../hooks/useTeamMembers'
 import { useUnreadMessageCount } from '../../hooks/useUnreadCounts'
 import { invokeFn } from '../../lib/supabase'
 import { roleLabel } from '../../lib/roles'
+import { BILLING_ENABLED } from '../../lib/billing'
 
 const allNavItems = [
   { to: '/',            icon: Home,          label: 'Dashboard',   roles: ['owner', 'dispatcher', 'driver'] },
   { to: '/runs',        icon: Truck,         label: 'Runs',        roles: ['owner', 'dispatcher', 'driver'] },
   { to: '/messages',    icon: MessageCircle, label: 'Messages',    roles: ['owner', 'dispatcher', 'driver'] },
-  { to: '/contracts',   icon: FileText,      label: 'Contracts',   roles: ['owner', 'dispatcher'] },
+  { to: '/contracts',   icon: FileText,      label: 'Contracts',   roles: ['owner', 'dispatcher'], plan: 'government' },
   { to: '/fleet',       icon: Wrench,        label: 'Fleet',       roles: ['owner', 'dispatcher'] },
   { to: '/finances',    icon: DollarSign,    label: 'Finances',    roles: ['owner'] },
   { to: '/ifta-report', icon: MapPinned,     label: 'IFTA Report', roles: ['owner'] },
@@ -104,7 +105,8 @@ export default function Sidebar() {
   const unreadMessages = useUnreadMessageCount()
   const navigate = useNavigate()
   const role = profile?.role ?? 'owner'
-  const items = allNavItems.filter(item => item.roles.includes(role))
+  const companyPlan = profile?.companies?.plan ?? 'standard'
+  const items = allNavItems.filter(item => item.roles.includes(role) && (!BILLING_ENABLED || !item.plan || item.plan === companyPlan))
   const showDrivers = role === 'owner' || role === 'dispatcher'
 
   const [addingDriver, setAddingDriver] = useState(false)

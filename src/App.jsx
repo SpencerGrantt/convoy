@@ -11,6 +11,9 @@ import ErrorBoundary from './components/ui/ErrorBoundary'
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
 import Landing from './pages/Landing'
+import RequiresGovernmentPlan from './components/billing/RequiresGovernmentPlan'
+import BillingBlockedScreen from './components/billing/BillingBlockedScreen'
+import { BILLING_ENABLED } from './lib/billing'
 
 const Dashboard        = lazy(() => import('./pages/Dashboard'))
 const DriverDashboard  = lazy(() => import('./pages/DriverDashboard'))
@@ -42,12 +45,33 @@ const IftaReport       = lazy(() => import('./pages/IftaReport'))
 // still passes through the session/onboarding checks first so a
 // role-restricted deep link redirects to onboarding or login exactly like
 // any other route, rather than leaking a "not allowed" state pre-auth.
-function AuthGate({ children, roles }) {
+// `requiresPlan`, when given, blocks the route for a company on a lower
+// plan (e.g. Contracts/SAM.gov matching is Government-only) — checked
+// after `roles` so a role-restricted route still redirects the same way
+// it always has for someone who isn't allowed there at all.
+// `allowBillingBlocked` exempts a route from the trial-expired/past-due/
+// canceled screen below — Settings needs this, or an owner whose trial
+// just expired could never reach the billing tab to fix it.
+function AuthGate({ children, roles, requiresPlan, allowBillingBlocked }) {
   const { session, profile, loading } = useAuth()
   if (loading) return <LoadingSpinner />
   if (!session) return <Navigate to="/login" replace />
   if (!profile || profile.onboarding_complete === false) return <Navigate to="/onboarding" replace />
+
+  const company = profile.companies
+  const billingBlocked = BILLING_ENABLED && company && (
+    (company.subscription_status === 'trialing' && new Date(company.trial_ends_at) < new Date())
+    || company.subscription_status === 'past_due'
+    || company.subscription_status === 'canceled'
+  )
+  if (billingBlocked && !allowBillingBlocked) {
+    return <BillingBlockedScreen status={company.subscription_status} isOwner={profile.role === 'owner'} />
+  }
+
   if (roles && !roles.includes(profile.role)) return <Navigate to="/" replace />
+  if (BILLING_ENABLED && requiresPlan && company?.plan !== requiresPlan) {
+    return <RequiresGovernmentPlan isOwner={profile.role === 'owner'} />
+  }
   return children
 }
 
@@ -131,11 +155,11 @@ function AppRoutes() {
                 <Route path="/runs/new"   element={<AuthGate roles={['owner', 'dispatcher']}><NewRunForm /></AuthGate>} />
                 <Route path="/runs/:id"   element={<AuthGate><RunDetailPage /></AuthGate>} />
                 <Route path="/photos"     element={<AuthGate><Photos /></AuthGate>} />
-                <Route path="/contracts"  element={<AuthGate roles={['owner', 'dispatcher']}><Contracts /></AuthGate>} />
+                <Route path="/contracts"  element={<AuthGate roles={['owner', 'dispatcher']} requiresPlan="government"><Contracts /></AuthGate>} />
                 <Route path="/finances"   element={<AuthGate roles={['owner']}><Finances /></AuthGate>} />
                 <Route path="/drivers"    element={<AuthGate roles={['owner', 'dispatcher']}><Drivers /></AuthGate>} />
                 <Route path="/fleet"      element={<AuthGate roles={['owner', 'dispatcher']}><Fleet /></AuthGate>} />
-                <Route path="/settings"   element={<AuthGate><Settings /></AuthGate>} />
+                <Route path="/settings"   element={<AuthGate allowBillingBlocked><Settings /></AuthGate>} />
                 <Route path="/inspections/new" element={<AuthGate><VehicleInspection /></AuthGate>} />
                 <Route path="/my-compliance"   element={<AuthGate><MyCompliance /></AuthGate>} />
                 <Route path="/my-team"         element={<AuthGate><MyTeam /></AuthGate>} />

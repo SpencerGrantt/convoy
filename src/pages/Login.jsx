@@ -1,11 +1,21 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 
 const inputBase = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/25 transition-colors'
 
 export default function Login() {
-  const [view, setView]       = useState('signin') // 'signin' | 'signup' | 'forgot'
+  const [searchParams] = useSearchParams()
+  // A pricing-card CTA links here as /login?plan=government — carried
+  // through signUp's user_metadata below so Onboarding's Plan step can
+  // pre-select it. Cosmetic only: the trigger in 021_billing_stripe.sql
+  // means real plan assignment always happens through upsert-company/the
+  // Stripe webhook, never from signup metadata directly.
+  const rawPlan = searchParams.get('plan')
+  const intendedPlan = rawPlan === 'standard' || rawPlan === 'government' ? rawPlan : null
+
+  const [view, setView]       = useState(intendedPlan ? 'signup' : 'signin') // 'signin' | 'signup' | 'forgot'
   const [magicLink, setMagicLink] = useState(false)
   const [step, setStep]       = useState('form')   // 'form' | 'sent' | 'reset-sent' | 'confirm-sent'
 
@@ -50,7 +60,10 @@ export default function Login() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: window.location.origin },
+      options: {
+        emailRedirectTo: window.location.origin,
+        data: intendedPlan ? { intended_plan: intendedPlan } : undefined,
+      },
     })
     if (error) setError(error.message)
     else setStep('confirm-sent')

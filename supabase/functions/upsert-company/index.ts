@@ -36,13 +36,26 @@ serve(async (req) => {
 
     let companyId = body.company_id ?? null
 
+    // Validate a plan change (used by Onboarding's Plan step to record the
+    // free-trial plan choice) before any company writes happen, same as any
+    // other request-body-derived value that ends up in a company row.
+    const planChange: string | null =
+      body.plan === 'standard' || body.plan === 'government' ? body.plan : null
+    if (body.plan !== undefined && planChange === null) {
+      return new Response(JSON.stringify({ error: 'Invalid plan' }), {
+        status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
+      })
+    }
+
     // Drivers can update their own profile fields (name/phone/address) through
     // this same function, but must never be able to edit company info — that's
     // limited to owner/dispatcher ("management"). A brand-new self-signup
     // admin has no profile row yet at this point (that's expected — they're
     // creating their company for the first time), so only block when a
-    // profile already exists and its role is 'driver'.
-    if (!body.skip_company) {
+    // profile already exists and its role is 'driver'. A plan change is
+    // company info too — this same block must run even when skip_company is
+    // true, or a driver could smuggle a plan change past it.
+    if (!body.skip_company || planChange) {
       const { data: caller } = await admin
         .from('profiles')
         .select('role, company_id')
@@ -101,6 +114,18 @@ serve(async (req) => {
         if (insertErr) throw new Error(insertErr.message)
         companyId = newCompany.id
       }
+    }
+
+    // Applied independently of skip_company (the Onboarding Plan step calls
+    // this with skip_company: true) — this runs as the service role, so it's
+    // the one client-reachable path the companies_prevent_billing_tampering
+    // trigger (021_billing_stripe.sql) allows to set `plan`.
+    if (planChange && companyId) {
+      const { error: planErr } = await admin
+        .from('companies')
+        .update({ plan: planChange })
+        .eq('id', companyId)
+      if (planErr) throw new Error(planErr.message)
     }
 
     const profileUpdate: Record<string, unknown> = {}

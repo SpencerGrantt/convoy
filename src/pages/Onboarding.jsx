@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase, invokeFn } from '../lib/supabase'
 import { roleLabel } from '../lib/roles'
+import { PLAN_META, planPrice } from '../lib/plans'
+import { BILLING_ENABLED } from '../lib/billing'
 import {
   CheckCircle, ChevronRight, Building2, User, Shield,
-  Users, Crown, Mail,
+  Users, Crown, Mail, DollarSign,
 } from 'lucide-react'
 
 const fieldClass = 'w-full bg-white/[0.07] border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/25 transition-colors'
@@ -17,6 +19,7 @@ const fieldClass = 'w-full bg-white/[0.07] border border-white/10 text-white rou
 export default function Onboarding() {
   const { session, profile, setProfileDirect, signOut } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const company = profile?.companies
 
   // A driver/dispatcher only ever gets here via someone else's invite — the
@@ -48,17 +51,39 @@ export default function Onboarding() {
   const [samExpiry, setSamExpiry] = useState(company?.sam_expiry ?? '')
   const [sdvosb, setSdvosb]     = useState(company?.sdvosb ?? false)
 
+  // Cosmetic pre-selection only — a pricing-page CTA links to
+  // /login?plan=government, which Login.jsx carries through signup as
+  // user_metadata.intended_plan. The actual plan assignment always goes
+  // through upsert-company/the Stripe webhook regardless of this default.
+  const intendedPlan = session?.user?.user_metadata?.intended_plan
+  const [selectedPlan, setSelectedPlan] = useState(
+    intendedPlan === 'government' ? 'government' : 'standard'
+  )
+  const [selectedInterval, setSelectedInterval] = useState('monthly')
+  const [billingSaving, setBillingSaving] = useState(false)
+
   // ── Visual step labels per path ──────────────────────────────────────────
-  const STEPS_ADMIN = ['Role', 'You', 'Company', 'Done']
+  // Plan step only exists while billing is enabled (src/lib/billing.js) —
+  // while it's dormant, handleStep2 jumps straight from Company to Done
+  // (step 4), so it's dropped from the visible label list entirely rather
+  // than showing a step nobody ever passes through.
+  const STEPS_ADMIN = BILLING_ENABLED
+    ? ['Role', 'You', 'Company', 'Plan', 'Done']
+    : ['Role', 'You', 'Company', 'Done']
   const STEPS_TEAM  = ['Role', 'You', 'Done']
   const visSteps = path === 'team' ? STEPS_TEAM : STEPS_ADMIN
 
-  // Map internal step → visual index
+  // Map internal step → visual index. Step 3 diverges by path: for 'team'
+  // it's still Done (unaffected by the Plan step, which only ever exists on
+  // the admin path); for 'admin' it's Plan when billing is enabled (with
+  // Done moved to step 4), or unreachable when it's not (handleStep2 skips
+  // straight to step 4, which becomes the last visible index instead).
   function visIdx() {
     if (step === 0) return 0
     if (step === 1) return 1
-    if (step === 2) return 2  // admin only
-    if (step === 3) return path === 'team' ? 2 : 3
+    if (step === 2) return 2  // admin only (Company)
+    if (step === 3) return path === 'team' ? 2 : 3  // team: Done · admin: Plan
+    if (step === 4) return BILLING_ENABLED ? 4 : 3  // admin only (Done)
     return 0
   }
 
@@ -111,24 +136,26 @@ export default function Onboarding() {
     setSaving(true); setError('')
     try {
       const naicsCodes = naics.split(',').map(s => s.trim()).filter(Boolean)
-      const { data, error: fnErr } = await invokeFn('upsert-company', {
-        body: {
-          name: companyName.trim() || 'My Company',
-          cage_code: cageCode || null,
-          uei: uei || null,
-          naics_codes: naicsCodes,
-          sam_expiry: samExpiry || null,
-          sdvosb,
-          full_name: fullName.trim(),
-          company_id: company?.id ?? null,
-          onboarding_complete: true,
-        },
-      })
+      const body = {
+        name: companyName.trim() || 'My Company',
+        cage_code: cageCode || null,
+        uei: uei || null,
+        naics_codes: naicsCodes,
+        sam_expiry: samExpiry || null,
+        sdvosb,
+        full_name: fullName.trim(),
+        company_id: company?.id ?? null,
+      }
+      // With billing dormant there's no Plan step to reach — finish
+      // onboarding right here instead of leaving it to a step that will
+      // never render.
+      if (!BILLING_ENABLED) body.onboarding_complete = true
+      const { data, error: fnErr } = await invokeFn('upsert-company', { body })
       if (fnErr) throw new Error(fnErr.message)
       if (data?.error) throw new Error(data.error)
       if (!data?.profile) throw new Error('Save did not complete — please try again.')
       setProfileDirect(data.profile)
-      setStep(3)
+      setStep(BILLING_ENABLED ? 3 : 4)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -136,15 +163,93 @@ export default function Onboarding() {
     }
   }
 
+  // Start the 14-day no-card trial on the selected plan and finish onboarding.
+  async function handleStartTrial() {
+    setBillingSaving(true); setError('')
+    try {
+      const { data, error: fnErr } = await invokeFn('upsert-company', {
+        body: {
+          company_id: company?.id ?? null,
+          skip_company: true,
+          plan: selectedPlan,
+          onboarding_complete: true,
+        },
+      })
+      if (fnErr) throw new Error(fnErr.message)
+      if (data?.error) throw new Error(data.error)
+      if (!data?.profile) throw new Error('Save did not complete — please try again.')
+      setProfileDirect(data.profile)
+      setStep(4)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBillingSaving(false)
+    }
+  }
+
+  // Skip the trial and pay immediately — redirects to Stripe Checkout.
+  // Checkout's success_url brings the user back here with ?checkout=success
+  // (handled by the effect below), which finishes onboarding once the
+  // webhook has already set plan/subscription_status.
+  async function handleSubscribeNow() {
+    setBillingSaving(true); setError('')
+    try {
+      const { data, error: fnErr } = await invokeFn('create-checkout-session', {
+        body: {
+          plan: selectedPlan,
+          interval: selectedInterval,
+          context: 'onboarding',
+          return_to_origin: window.location.origin,
+        },
+      })
+      if (fnErr) throw new Error(fnErr.message)
+      if (data?.error) throw new Error(data.error)
+      if (!data?.url) throw new Error('Could not start checkout — please try again.')
+      window.location.href = data.url
+    } catch (err) {
+      setError(err.message)
+      setBillingSaving(false)
+    }
+  }
+
+  // Landed back here from a completed Stripe Checkout session — the
+  // webhook has already set plan/subscription_status, this just finishes
+  // onboarding (no `plan` field needed in this call).
+  useEffect(() => {
+    if (searchParams.get('checkout') !== 'success') return
+    if (profile?.onboarding_complete) return
+    async function finish() {
+      setBillingSaving(true); setError('')
+      try {
+        const { data, error: fnErr } = await invokeFn('upsert-company', {
+          body: { company_id: company?.id ?? null, skip_company: true, onboarding_complete: true },
+        })
+        if (fnErr) throw new Error(fnErr.message)
+        if (data?.error) throw new Error(data.error)
+        if (data?.profile) setProfileDirect(data.profile)
+        setStep(4)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setBillingSaving(false)
+      }
+    }
+    finish()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const firstName = fullName.trim().split(' ')[0] || 'there'
 
   // Auto-advance off the Done screen into the dashboard — the checkmarks
-  // are shown briefly for confirmation, then it just takes you in.
+  // are shown briefly for confirmation, then it just takes you in. Done is
+  // step 3 for the team path (unaffected by the new admin-only Plan step)
+  // and step 4 for the admin path.
   useEffect(() => {
-    if (step !== 3) return
+    const onDone = (step === 3 && path === 'team') || step === 4
+    if (!onDone) return
     const timer = setTimeout(() => navigate('/', { replace: true }), 2000)
     return () => clearTimeout(timer)
-  }, [step, navigate])
+  }, [step, path, navigate])
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
@@ -153,7 +258,7 @@ export default function Onboarding() {
       {/* Logo */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-black text-white tracking-tight">CONVOY</h1>
-        <p className="text-white/35 text-xs mt-0.5">Medical Courier Platform</p>
+        <p className="text-white/35 text-xs mt-0.5">Logistics Platform</p>
       </div>
 
       {/* Step indicator — hidden on step 0 */}
@@ -446,7 +551,7 @@ export default function Onboarding() {
               disabled={saving || !companyName.trim()}
               className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
             >
-              {saving ? 'Saving…' : <><span>Finish Setup</span> <ChevronRight size={17} /></>}
+              {saving ? 'Saving…' : <><span>Continue</span> <ChevronRight size={17} /></>}
             </button>
           </div>
 
@@ -454,8 +559,92 @@ export default function Onboarding() {
         </form>
       )}
 
-      {/* ── Step 3: Done ────────────────────────────────────────────────── */}
-      {step === 3 && (
+      {/* ── Step 3: Plan (admin only) ────────────────────────────────────── */}
+      {BILLING_ENABLED && step === 3 && path !== 'team' && (
+        <div className="w-full max-w-md space-y-5">
+          <div className="text-center space-y-1.5">
+            <div className="flex items-center justify-center mx-auto mb-3" style={{width:52,height:52,borderRadius:14,background:'rgba(4,35,145,0.2)',border:'1px solid rgba(4,35,145,0.35)'}}>
+              <DollarSign size={24} className="text-brand-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Choose Your Plan</h2>
+            <p className="text-white/45 text-sm">14 days free. No card required to start.</p>
+          </div>
+
+          <div className="flex bg-navy-800 rounded-2xl p-1 gap-1">
+            {[['monthly', 'Monthly'], ['yearly', 'Yearly']].map(([v, label]) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setSelectedInterval(v)}
+                className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all
+                  ${selectedInterval === v ? 'bg-brand-600 text-white shadow' : 'text-white/40 hover:text-white/60'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            {Object.entries(PLAN_META).map(([key, meta]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setSelectedPlan(key)}
+                className={`w-full text-left rounded-2xl p-5 border transition-all ${
+                  selectedPlan === key
+                    ? 'bg-navy-700 border-brand-600/60 ring-2 ring-brand-600/25'
+                    : 'bg-navy-700 border-white/[0.08] hover:border-white/20'
+                }`}
+              >
+                <div className="flex items-baseline justify-between mb-2">
+                  <p className="text-white font-bold text-base">{meta.label}</p>
+                  <p className="text-white font-bold text-lg">
+                    ${planPrice(key, selectedInterval)}
+                    <span className="text-white/40 text-xs font-medium">/{selectedInterval === 'yearly' ? 'yr' : 'mo'}</span>
+                  </p>
+                </div>
+                <ul className="space-y-1">
+                  {meta.features.map(f => (
+                    <li key={f} className="text-white/50 text-xs flex items-center gap-2">
+                      <CheckCircle size={12} className="text-brand-400 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </button>
+            ))}
+          </div>
+
+          {error && <p className="text-red-400 text-xs font-medium text-center">{error}</p>}
+
+          <div className="flex gap-3">
+            <button type="button" onClick={() => setStep(2)}
+              className="px-5 py-3.5 bg-white/8 hover:bg-white/12 text-white/60 font-semibold rounded-xl transition-colors">
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={handleStartTrial}
+              disabled={billingSaving}
+              className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
+            >
+              {billingSaving ? 'Saving…' : <><span>Start 14-Day Free Trial</span> <ChevronRight size={17} /></>}
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSubscribeNow}
+            disabled={billingSaving}
+            className="w-full text-center text-xs text-white/35 hover:text-white/60 transition-colors disabled:opacity-40"
+          >
+            Skip the trial and subscribe now instead
+          </button>
+        </div>
+      )}
+
+      {/* ── Step 4: Done ─────────────────────────────────────────────────── */}
+      {((step === 3 && path === 'team') || step === 4) && (
         <div className="w-full max-w-md space-y-5 text-center">
           <div className="space-y-3">
             <div className="w-20 h-20 rounded-full bg-green-500/15 border border-green-500/25 flex items-center justify-center mx-auto">

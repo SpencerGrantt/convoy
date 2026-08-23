@@ -7,13 +7,20 @@ import { requestNotificationPermission, scheduleOverdueRunCheck, checkContractRe
 import MetricCard from '../components/ui/MetricCard'
 import AlertBanner from '../components/ui/AlertBanner'
 import StatusPill from '../components/ui/StatusPill'
+import SegmentedToggle from '../components/ui/SegmentedToggle'
 import TopBar from '../components/layout/TopBar'
 import { Search } from 'lucide-react'
-import { differenceInMinutes, startOfMonth } from 'date-fns'
+import { differenceInMinutes, startOfMonth, startOfYear } from 'date-fns'
 import { safeFormatDate, safeDifferenceInDays } from '../lib/dates'
 import { useNavigate } from 'react-router-dom'
 
 const DISMISSED_KEY = 'convoy-dismissed-alerts'
+
+const PERIOD_OPTIONS = [
+  { value: 'mtd', label: 'MTD' },
+  { value: 'ytd', label: 'YTD' },
+  { value: 'all', label: 'All Time' },
+]
 
 // Keyed by a fingerprint of the alert's content (e.g. contract id + end_date,
 // not just contract id), not just the entity id — so if a dismissed
@@ -34,7 +41,12 @@ export default function Dashboard() {
   const { contracts } = useContracts()
   const navigate = useNavigate()
   const [anomalies, setAnomalies] = useState([])
-  const [mtdStats, setMtdStats] = useState({ totalMiles: 0, deadheadMiles: 0, contractRuns: 0, commercialRuns: 0 })
+  const [period, setPeriod] = useState(() => localStorage.getItem('convoy_dashboard_period') || 'mtd')
+  useEffect(() => { localStorage.setItem('convoy_dashboard_period', period) }, [period])
+  const periodLabel = PERIOD_OPTIONS.find(p => p.value === period)?.label ?? 'MTD'
+  const [periodStats, setPeriodStats] = useState({
+    activeRuns: 0, delivered: 0, totalMiles: 0, deadheadMiles: 0, contractRuns: 0, commercialRuns: 0,
+  })
   const [dismissed, setDismissed] = useState(loadDismissed)
 
   function dismiss(key) {
@@ -92,31 +104,36 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!profile?.company_id) return
-    // useRuns({ limit: 5 }) above is only for the "Recent Runs" list — miles
-    // and contract/commercial counts need every run this month, so this
-    // queries directly rather than widening that hook's limit for everyone.
-    async function loadMtdStats() {
-      const { data } = await supabase
+    // useRuns({ limit: 5 }) above is only for the "Recent Runs" list — every
+    // other Overview/Miles tile needs the full set of runs in the selected
+    // period, not just the 5 most recent, so this queries directly rather
+    // than widening that hook's limit for everyone. Previously Active Runs
+    // and Delivered MTD were (incorrectly) derived from that same 5-row
+    // array — fixed here to come from this properly period-scoped query.
+    async function loadPeriodStats() {
+      let query = supabase
         .from('runs')
-        .select('contract_id, loaded_miles, deadhead_miles')
+        .select('status, contract_id, loaded_miles, deadhead_miles')
         .eq('company_id', profile.company_id)
-        .gte('created_at', startOfMonth(new Date()).toISOString())
+      if (period === 'mtd') query = query.gte('created_at', startOfMonth(new Date()).toISOString())
+      else if (period === 'ytd') query = query.gte('created_at', startOfYear(new Date()).toISOString())
+      const { data } = await query
       const rows = data ?? []
-      setMtdStats({
+      setPeriodStats({
+        activeRuns: rows.filter(r => r.status === 'in_transit').length,
+        delivered: rows.filter(r => r.status === 'delivered').length,
         totalMiles: rows.reduce((s, r) => s + Number(r.loaded_miles ?? 0) + Number(r.deadhead_miles ?? 0), 0),
         deadheadMiles: rows.reduce((s, r) => s + Number(r.deadhead_miles ?? 0), 0),
         contractRuns: rows.filter(r => r.contract_id).length,
         commercialRuns: rows.filter(r => !r.contract_id).length,
       })
     }
-    loadMtdStats()
-  }, [profile?.company_id])
+    loadPeriodStats()
+  }, [profile?.company_id, period])
 
   const company = profile?.companies
   const today = new Date()
 
-  const activeRuns    = runs.filter(r => r.status === 'in_transit').length
-  const deliveredMTD  = runs.filter(r => r.status === 'delivered').length
   const openContracts = contracts.filter(c => c.status === 'active').length
 
   const samDaysLeft = company?.sam_expiry ? safeDifferenceInDays(company.sam_expiry, today) : null
@@ -187,9 +204,12 @@ export default function Dashboard() {
               <Search size={12} /> Find Backhaul
             </a>
           </div>
+          <div className="max-w-xs mb-3">
+            <SegmentedToggle options={PERIOD_OPTIONS} value={period} onChange={setPeriod} />
+          </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <MetricCard label="Active Runs"    value={activeRuns}    color="blue"   />
-            <MetricCard label="Delivered MTD"  value={deliveredMTD}  color="green"  />
+            <MetricCard label="Active Runs"    value={periodStats.activeRuns} color="blue"   />
+            <MetricCard label={`Delivered ${periodLabel}`}  value={periodStats.delivered}  color="green"  />
             <MetricCard label="Open Contracts" value={openContracts} color="yellow" />
             <MetricCard
               label="SAM Expiry"
@@ -201,12 +221,12 @@ export default function Dashboard() {
         </div>
 
         <div>
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Miles &amp; Run Type (MTD)</h2>
+          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Miles &amp; Run Type ({periodLabel})</h2>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <MetricCard label="Total Miles"    value={mtdStats.totalMiles.toLocaleString()} color="navy" />
-            <MetricCard label="Deadhead Miles" value={mtdStats.deadheadMiles.toLocaleString()} sub={mtdStats.totalMiles ? `${Math.round(mtdStats.deadheadMiles / mtdStats.totalMiles * 100)}% of total` : undefined} color="red" />
-            <MetricCard label="Contract Runs"  value={mtdStats.contractRuns}  color="blue" />
-            <MetricCard label="Commercial Runs" value={mtdStats.commercialRuns} color="yellow" />
+            <MetricCard label="Total Miles"    value={periodStats.totalMiles.toLocaleString()} color="navy" />
+            <MetricCard label="Deadhead Miles" value={periodStats.deadheadMiles.toLocaleString()} sub={periodStats.totalMiles ? `${Math.round(periodStats.deadheadMiles / periodStats.totalMiles * 100)}% of total` : undefined} color="red" />
+            <MetricCard label="Contract Runs"  value={periodStats.contractRuns}  color="blue" />
+            <MetricCard label="Commercial Runs" value={periodStats.commercialRuns} color="yellow" />
           </div>
         </div>
 

@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import MetricCard from '../components/ui/MetricCard'
 import StatusPill from '../components/ui/StatusPill'
+import SegmentedToggle from '../components/ui/SegmentedToggle'
 import TopBar from '../components/layout/TopBar'
 import FuelCardImportSheet from '../components/finance/FuelCardImportSheet'
 import ExcelTrackerImportSheet from '../components/finance/ExcelTrackerImportSheet'
@@ -474,24 +475,6 @@ function bucketize(entries, granularity) {
   return map
 }
 
-function ChartTypeToggle({ options, value, onChange }) {
-  return (
-    <div className="flex gap-1 bg-navy-800 rounded-xl p-1">
-      {options.map(opt => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          className={`flex-1 py-1 px-2.5 text-xs font-semibold rounded-lg capitalize transition-colors ${
-            value === opt.value ? 'bg-brand-600 text-white' : 'text-white/40'
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
 function AnalyticsTab() {
   const { preset, setPreset, customStart, setCustomStart, customEnd, setCustomEnd, range } = useDateRange()
   const { loading, revenue, expenses, runs } = useAnalyticsData(range)
@@ -618,7 +601,7 @@ function AnalyticsTab() {
             <div className="flex items-center justify-between gap-3 mb-3">
               <p className="text-xs font-semibold text-white/40 uppercase tracking-wide">Revenue vs Expenses</p>
               <div className="w-40">
-                <ChartTypeToggle
+                <SegmentedToggle
                   options={[{ value: 'line', label: 'Line' }, { value: 'bar', label: 'Bar' }, { value: 'area', label: 'Area' }]}
                   value={trendChartType}
                   onChange={setTrendChartType}
@@ -687,7 +670,7 @@ function AnalyticsTab() {
               <div className="flex items-center justify-between gap-3 mb-3">
                 <p className="text-xs font-semibold text-white/40 uppercase tracking-wide">Expenses by Category</p>
                 <div className="w-28">
-                  <ChartTypeToggle
+                  <SegmentedToggle
                     options={[{ value: 'bar', label: 'Bar' }, { value: 'pie', label: 'Pie' }]}
                     value={categoryChartType}
                     onChange={setCategoryChartType}
@@ -766,9 +749,18 @@ function AnalyticsTab() {
 
 // ─────────────────────────────────────────────────────────────────────────
 
+const PERIOD_OPTIONS = [
+  { value: 'mtd', label: 'MTD' },
+  { value: 'ytd', label: 'YTD' },
+  { value: 'all', label: 'All Time' },
+]
+
 export default function Finances() {
   const { profile } = useAuth()
-  const { revenue, expenses, invoices, contracts, totalRevenue, totalExpenses, netProfit, outstanding, refresh } = useFinances()
+  const [period, setPeriod] = useState(() => localStorage.getItem('convoy_finances_period') || 'mtd')
+  useEffect(() => { localStorage.setItem('convoy_finances_period', period) }, [period])
+  const periodLabel = PERIOD_OPTIONS.find(p => p.value === period)?.label ?? 'MTD'
+  const { revenue, expenses, invoices, contracts, totalRevenue, totalExpenses, netProfit, outstanding, refresh } = useFinances(period)
   const [sheet, setSheet] = useState(null)
   const [editingEntry, setEditingEntry] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
@@ -802,9 +794,13 @@ export default function Finances() {
 
         {activeTab === 'overview' && (
           <>
+            <div className="w-full max-w-xs">
+              <SegmentedToggle options={PERIOD_OPTIONS} value={period} onChange={setPeriod} />
+            </div>
+
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              <MetricCard label="Revenue MTD"  value={fmt(totalRevenue)}  color="green"  />
-              <MetricCard label="Expenses MTD" value={fmt(totalExpenses)} color="yellow" />
+              <MetricCard label={`Revenue ${periodLabel}`}  value={fmt(totalRevenue)}  color="green"  />
+              <MetricCard label={`Expenses ${periodLabel}`} value={fmt(totalExpenses)} color="yellow" />
               <MetricCard label="Net Profit"   value={fmt(netProfit)}     color={netProfit >= 0 ? 'green' : 'red'} />
               <MetricCard label="Outstanding"  value={fmt(outstanding)}   color="red"    />
             </div>

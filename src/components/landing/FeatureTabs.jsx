@@ -1,13 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Radio, Camera, FileSearch, Calculator, Sparkles, Smartphone,
-  MessageSquare, Wrench, FileSpreadsheet, Users, BarChart3, Map, Maximize2,
+  MessageSquare, Wrench, FileSpreadsheet, Users, Maximize2, X,
 } from 'lucide-react'
 import Reveal from './Reveal'
 import dispatchImg from '../../assets/landing/feature-dispatch.jpg'
 import custodyImg from '../../assets/landing/feature-custody.jpg'
 import contractsImg from '../../assets/landing/feature-contracts.jpg'
 import financesImg from '../../assets/landing/feature-finances.jpg'
+import analyticsImg from '../../assets/landing/feature-analytics.jpg'
+import iftaImg from '../../assets/landing/feature-ifta.jpg'
 import aiImg from '../../assets/landing/feature-ai.jpg'
 import driverImg from '../../assets/landing/feature-driver.jpg'
 
@@ -17,56 +19,50 @@ const TABS = [
     label: 'Dispatch & Tracking',
     title: 'Real-Time Dispatch & Tracking',
     description: 'Send run details straight to a driver\'s phone and follow every pickup and delivery live, with automatic status updates along the way.',
-    image: dispatchImg,
+    images: [{ src: dispatchImg, label: 'Runs' }],
   },
   {
     icon: Camera,
     label: 'Chain-of-Custody',
     title: 'Photo-Verified Chain-of-Custody',
     description: 'Every handoff is documented with timestamped photos and signatures, so cargo, specimen, and document custody is provable end to end.',
-    image: custodyImg,
+    images: [{ src: custodyImg, label: 'Run Detail' }],
   },
   {
     icon: FileSearch,
     label: 'Contracts',
     title: 'Contracts & SAM.gov Matching',
     description: 'Surface active government contract opportunities directly from SAM.gov, matched to your NAICS codes and service area.',
-    image: contractsImg,
+    images: [{ src: contractsImg, label: 'Contracts' }],
   },
   {
     icon: Calculator,
     label: 'Finances',
-    title: 'Finances, Mileage & IFTA',
-    description: 'Track cost-per-mile and profit-per-run, log mileage automatically, and generate IFTA reports in minutes instead of hours.',
-    image: financesImg,
+    title: 'Finances, Analytics & IFTA',
+    description: 'Track cost-per-mile and profit-per-run, switch between chart views on every revenue and expense breakdown, and generate IFTA reports in minutes instead of hours.',
+    images: [
+      { src: financesImg, label: 'Overview' },
+      { src: analyticsImg, label: 'Analytics' },
+      { src: iftaImg, label: 'IFTA Report' },
+    ],
   },
   {
     icon: Sparkles,
     label: 'AI Assistant',
     title: 'AI Assistant & Anomaly Detection',
     description: 'An AI assistant watches your operations for anomalies, like missed pickups, compliance gaps, and unusual costs, and flags them before they become problems.',
-    image: aiImg,
+    images: [{ src: aiImg, label: 'Assistant' }],
   },
   {
     icon: Smartphone,
     label: 'Driver Tools',
     title: 'Driver Mobile Tools',
     description: 'Drivers get pre/post-trip vehicle inspections, compliance status, and their full run history, all from one mobile-first app.',
-    image: driverImg,
+    images: [{ src: driverImg, label: 'Inspection' }],
   },
 ]
 
 const MORE_FEATURES = [
-  {
-    icon: BarChart3,
-    label: 'Custom Analytics',
-    description: 'Switch between line, bar, area, and pie views on every revenue and expense breakdown.',
-  },
-  {
-    icon: Map,
-    label: 'IFTA Reporting',
-    description: 'Quarterly mileage by jurisdiction, ready to export straight to your filing software.',
-  },
   {
     icon: MessageSquare,
     label: 'Team Messaging',
@@ -89,9 +85,52 @@ const MORE_FEATURES = [
   },
 ]
 
+function Lightbox({ src, alt, onClose }) {
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-10 cursor-zoom-out"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+        aria-label="Close"
+      >
+        <X size={20} className="text-white" />
+      </button>
+      <img
+        src={src}
+        alt={alt}
+        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl cursor-default"
+        onClick={e => e.stopPropagation()}
+      />
+    </div>
+  )
+}
+
 export default function FeatureTabs() {
   const [active, setActive] = useState(0)
+  const [imageIndex, setImageIndex] = useState(0)
+  const [lightbox, setLightbox] = useState(false)
   const current = TABS[active]
+  const currentImage = current.images[imageIndex] ?? current.images[0]
+
+  function selectTab(i) {
+    setActive(i)
+    setImageIndex(0)
+  }
 
   return (
     <div className="px-5 py-16 md:py-24">
@@ -113,7 +152,7 @@ export default function FeatureTabs() {
             return (
               <button
                 key={tab.label}
-                onClick={() => setActive(i)}
+                onClick={() => selectTab(i)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all
                   ${isActive ? 'bg-brand-600 text-white shadow scale-[1.03]' : 'text-white/40 hover:text-white/60 hover:scale-[1.03] bg-navy-800'}`}
               >
@@ -129,17 +168,39 @@ export default function FeatureTabs() {
             key={active}
             className="bg-navy-700 rounded-2xl border border-white/[0.08] max-w-5xl mx-auto overflow-hidden animate-fadeIn grid grid-cols-1 md:grid-cols-2"
           >
-            <div className="group relative aspect-[16/10] md:aspect-auto bg-navy-800 md:order-1 overflow-hidden cursor-zoom-in">
-              <img
-                src={current.image}
-                alt={current.title}
-                className="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
-                <div className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <Maximize2 size={15} className="text-white" />
+            <div className="md:order-1 flex flex-col">
+              <button
+                onClick={() => setLightbox(true)}
+                className="group relative aspect-[16/10] md:aspect-auto md:flex-1 bg-navy-800 overflow-hidden cursor-zoom-in block w-full"
+              >
+                <img
+                  key={currentImage.src}
+                  src={currentImage.src}
+                  alt={currentImage.label}
+                  className="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Maximize2 size={15} className="text-white" />
+                  </div>
                 </div>
-              </div>
+              </button>
+
+              {current.images.length > 1 && (
+                <div className="flex items-center gap-1.5 px-4 py-3 bg-navy-800 border-t border-white/[0.06]">
+                  {current.images.map((img, i) => (
+                    <button
+                      key={img.label}
+                      onClick={() => setImageIndex(i)}
+                      className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-colors ${
+                        imageIndex === i ? 'bg-brand-600 text-white' : 'text-white/40 hover:text-white/70 bg-navy-900/60'
+                      }`}
+                    >
+                      {img.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="p-6 md:p-10 md:order-2 flex flex-col justify-center">
               <current.icon size={24} className="text-brand-300 mb-3" />
@@ -156,7 +217,7 @@ export default function FeatureTabs() {
           <p className="text-center text-xs font-semibold text-white/40 uppercase tracking-wide mb-6">
             Also Built In
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-5xl mx-auto">
             {MORE_FEATURES.map(f => {
               const Icon = f.icon
               return (
@@ -175,6 +236,10 @@ export default function FeatureTabs() {
           </div>
         </Reveal>
       </div>
+
+      {lightbox && (
+        <Lightbox src={currentImage.src} alt={currentImage.label} onClose={() => setLightbox(false)} />
+      )}
     </div>
   )
 }

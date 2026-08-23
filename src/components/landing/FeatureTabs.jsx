@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
   Radio, Camera, FileSearch, Calculator, Sparkles, Smartphone,
-  MessageSquare, Wrench, FileSpreadsheet, Users, BarChart3, Map,
+  MessageSquare, Wrench, FileSpreadsheet, Users, BarChart3, Map, Maximize2,
 } from 'lucide-react'
 import Reveal from './Reveal'
 import dispatchImg from '../../assets/landing/feature-dispatch.jpg'
@@ -10,8 +10,6 @@ import contractsImg from '../../assets/landing/feature-contracts.jpg'
 import financesImg from '../../assets/landing/feature-finances.jpg'
 import aiImg from '../../assets/landing/feature-ai.jpg'
 import driverImg from '../../assets/landing/feature-driver.jpg'
-import analyticsImg from '../../assets/landing/feature-analytics.jpg'
-import iftaImg from '../../assets/landing/feature-ifta.jpg'
 
 const TABS = [
   {
@@ -63,13 +61,11 @@ const MORE_FEATURES = [
     icon: BarChart3,
     label: 'Custom Analytics',
     description: 'Switch between line, bar, area, and pie views on every revenue and expense breakdown.',
-    image: analyticsImg,
   },
   {
     icon: Map,
     label: 'IFTA Reporting',
     description: 'Quarterly mileage by jurisdiction, ready to export straight to your filing software.',
-    image: iftaImg,
   },
   {
     icon: MessageSquare,
@@ -133,12 +129,17 @@ export default function FeatureTabs() {
             key={active}
             className="bg-navy-700 rounded-2xl border border-white/[0.08] max-w-5xl mx-auto overflow-hidden animate-fadeIn grid grid-cols-1 md:grid-cols-2"
           >
-            <div className="aspect-[16/10] md:aspect-auto bg-navy-800 md:order-1">
+            <div className="group relative aspect-[16/10] md:aspect-auto bg-navy-800 md:order-1 overflow-hidden cursor-zoom-in">
               <img
                 src={current.image}
                 alt={current.title}
-                className="w-full h-full object-cover object-top"
+                className="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
               />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Maximize2 size={15} className="text-white" />
+                </div>
+              </div>
             </div>
             <div className="p-6 md:p-10 md:order-2 flex flex-col justify-center">
               <current.icon size={24} className="text-brand-300 mb-3" />
@@ -146,6 +147,9 @@ export default function FeatureTabs() {
               <p className="text-white/60 leading-relaxed">{current.description}</p>
             </div>
           </div>
+          <p className="text-center text-white/30 text-xs mt-3">
+            Screenshots show sample data for demonstration purposes only.
+          </p>
         </Reveal>
 
         <Reveal delay={250} className="mt-14">
@@ -158,20 +162,13 @@ export default function FeatureTabs() {
               return (
                 <div
                   key={f.label}
-                  className="bg-navy-800 rounded-xl border border-white/[0.07] overflow-hidden flex flex-col"
+                  className="bg-navy-800 rounded-xl border border-white/[0.07] p-4"
                 >
-                  {f.image && (
-                    <div className="aspect-[16/9] bg-navy-900">
-                      <img src={f.image} alt={f.label} className="w-full h-full object-cover object-top" />
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <Icon size={15} className="text-brand-300 shrink-0" />
-                      <p className="text-sm font-semibold text-white">{f.label}</p>
-                    </div>
-                    <p className="text-xs text-white/50 leading-relaxed">{f.description}</p>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Icon size={15} className="text-brand-300 shrink-0" />
+                    <p className="text-sm font-semibold text-white">{f.label}</p>
                   </div>
+                  <p className="text-xs text-white/50 leading-relaxed">{f.description}</p>
                 </div>
               )
             })}

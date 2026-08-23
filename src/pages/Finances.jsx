@@ -8,7 +8,7 @@ import TopBar from '../components/layout/TopBar'
 import FuelCardImportSheet from '../components/finance/FuelCardImportSheet'
 import ExcelTrackerImportSheet from '../components/finance/ExcelTrackerImportSheet'
 import {
-  BarChart, Bar, LineChart, Line, Legend,
+  BarChart, Bar, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell, Legend,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts'
 import { safeFormatDate } from '../lib/dates'
@@ -338,6 +338,18 @@ const RANGE_PRESETS = [
 // as a good/bad status signal.
 const TREND_COLORS = { revenue: '#3987e5', expenses: '#d95926' }
 
+// Fixed per-category colors so switching the Expenses by Category chart
+// between Bar and Pie never reshuffles which color means which category.
+const CATEGORY_COLORS = {
+  fuel: '#d95926',
+  driver_pay: '#3987e5',
+  insurance: '#7c6ae8',
+  maintenance: '#3aa66b',
+  tolls: '#d4a72c',
+  supplies: '#3ab6c9',
+  other: '#8b8f9a',
+}
+
 function formatDuration(ms) {
   if (ms == null || !Number.isFinite(ms) || ms < 0) return '—'
   const totalMinutes = Math.round(ms / 60000)
@@ -462,9 +474,41 @@ function bucketize(entries, granularity) {
   return map
 }
 
+function ChartTypeToggle({ options, value, onChange }) {
+  return (
+    <div className="flex gap-1 bg-navy-800 rounded-xl p-1">
+      {options.map(opt => (
+        <button
+          key={opt.value}
+          onClick={() => onChange(opt.value)}
+          className={`flex-1 py-1 px-2.5 text-xs font-semibold rounded-lg capitalize transition-colors ${
+            value === opt.value ? 'bg-brand-600 text-white' : 'text-white/40'
+          }`}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function AnalyticsTab() {
   const { preset, setPreset, customStart, setCustomStart, customEnd, setCustomEnd, range } = useDateRange()
   const { loading, revenue, expenses, runs } = useAnalyticsData(range)
+
+  // Per-device display preference, not company data — doesn't belong in the DB.
+  const [trendChartType, setTrendChartType] = useState(
+    () => localStorage.getItem('convoy_analytics_trend_chart') || 'line'
+  )
+  const [categoryChartType, setCategoryChartType] = useState(
+    () => localStorage.getItem('convoy_analytics_category_chart') || 'bar'
+  )
+  useEffect(() => {
+    localStorage.setItem('convoy_analytics_trend_chart', trendChartType)
+  }, [trendChartType])
+  useEffect(() => {
+    localStorage.setItem('convoy_analytics_category_chart', categoryChartType)
+  }, [categoryChartType])
 
   const completedCount = runs.length
   const periodRevenue = revenue.reduce((s, r) => s + Number(r.amount), 0)
@@ -571,44 +615,118 @@ function AnalyticsTab() {
           </div>
 
           <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07]">
-            <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3">Revenue vs Expenses</p>
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <p className="text-xs font-semibold text-white/40 uppercase tracking-wide">Revenue vs Expenses</p>
+              <div className="w-40">
+                <ChartTypeToggle
+                  options={[{ value: 'line', label: 'Line' }, { value: 'bar', label: 'Bar' }, { value: 'area', label: 'Area' }]}
+                  value={trendChartType}
+                  onChange={setTrendChartType}
+                />
+              </div>
+            </div>
             {trendData.length === 0 ? (
               <p className="text-sm text-white/40 text-center py-6">No revenue or expense entries in this range</p>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={trendData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                  <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} interval={xInterval} />
-                  <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} />
-                  <Tooltip
-                    formatter={v => fmt(v)}
-                    contentStyle={{ background: '#1A0B47', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff' }}
-                  />
-                  <Legend
-                    wrapperStyle={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}
-                    formatter={v => v === 'revenue' ? 'Revenue' : 'Expenses'}
-                  />
-                  <Line type="monotone" dataKey="revenue" stroke={TREND_COLORS.revenue} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                  <Line type="monotone" dataKey="expenses" stroke={TREND_COLORS.expenses} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                </LineChart>
+                {trendChartType === 'bar' ? (
+                  <BarChart data={trendData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} interval={xInterval} />
+                    <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} />
+                    <Tooltip
+                      formatter={v => fmt(v)}
+                      contentStyle={{ background: '#1A0B47', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff' }}
+                    />
+                    <Legend
+                      wrapperStyle={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}
+                      formatter={v => v === 'revenue' ? 'Revenue' : 'Expenses'}
+                    />
+                    <Bar dataKey="revenue" fill={TREND_COLORS.revenue} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="expenses" fill={TREND_COLORS.expenses} radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                ) : trendChartType === 'area' ? (
+                  <AreaChart data={trendData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} interval={xInterval} />
+                    <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} />
+                    <Tooltip
+                      formatter={v => fmt(v)}
+                      contentStyle={{ background: '#1A0B47', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff' }}
+                    />
+                    <Legend
+                      wrapperStyle={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}
+                      formatter={v => v === 'revenue' ? 'Revenue' : 'Expenses'}
+                    />
+                    <Area type="monotone" dataKey="revenue" stroke={TREND_COLORS.revenue} fill={TREND_COLORS.revenue} fillOpacity={0.25} strokeWidth={2} />
+                    <Area type="monotone" dataKey="expenses" stroke={TREND_COLORS.expenses} fill={TREND_COLORS.expenses} fillOpacity={0.25} strokeWidth={2} />
+                  </AreaChart>
+                ) : (
+                  <LineChart data={trendData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} interval={xInterval} />
+                    <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} />
+                    <Tooltip
+                      formatter={v => fmt(v)}
+                      contentStyle={{ background: '#1A0B47', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff' }}
+                    />
+                    <Legend
+                      wrapperStyle={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}
+                      formatter={v => v === 'revenue' ? 'Revenue' : 'Expenses'}
+                    />
+                    <Line type="monotone" dataKey="revenue" stroke={TREND_COLORS.revenue} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                    <Line type="monotone" dataKey="expenses" stroke={TREND_COLORS.expenses} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                  </LineChart>
+                )}
               </ResponsiveContainer>
             )}
           </div>
 
           {expenseByCategory.length > 0 && (
             <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07]">
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3">Expenses by Category</p>
-              <ResponsiveContainer width="100%" height={160}>
-                <BarChart data={expenseByCategory} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} />
-                  <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} />
-                  <Tooltip
-                    formatter={v => fmt(v)}
-                    contentStyle={{ background: '#1A0B47', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff' }}
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <p className="text-xs font-semibold text-white/40 uppercase tracking-wide">Expenses by Category</p>
+                <div className="w-28">
+                  <ChartTypeToggle
+                    options={[{ value: 'bar', label: 'Bar' }, { value: 'pie', label: 'Pie' }]}
+                    value={categoryChartType}
+                    onChange={setCategoryChartType}
                   />
-                  <Bar dataKey="amount" fill="#3393E8" radius={[4, 4, 0, 0]} />
-                </BarChart>
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={categoryChartType === 'pie' ? 220 : 160}>
+                {categoryChartType === 'pie' ? (
+                  <PieChart>
+                    <Tooltip
+                      formatter={v => fmt(v)}
+                      contentStyle={{ background: '#1A0B47', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff' }}
+                    />
+                    <Legend
+                      wrapperStyle={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}
+                      formatter={v => v.replace('_', ' ')}
+                    />
+                    <Pie data={expenseByCategory} dataKey="amount" nameKey="name" cx="50%" cy="50%" outerRadius={75} label={false}>
+                      {expenseByCategory.map(entry => (
+                        <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name] ?? '#8b8f9a'} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                ) : (
+                  <BarChart data={expenseByCategory} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <XAxis dataKey="name" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} />
+                    <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} />
+                    <Tooltip
+                      formatter={v => fmt(v)}
+                      contentStyle={{ background: '#1A0B47', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff' }}
+                    />
+                    <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
+                      {expenseByCategory.map(entry => (
+                        <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name] ?? '#3393E8'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                )}
               </ResponsiveContainer>
             </div>
           )}

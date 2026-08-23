@@ -27,9 +27,6 @@ export default function Hero() {
             <button onClick={scrollToPricing} className="text-white/60 text-sm font-medium hover:text-white transition-colors">
               Pricing
             </button>
-            <button onClick={scrollToDemoForm} className="text-white/60 text-sm font-medium hover:text-white transition-colors">
-              Request a Demo
-            </button>
           </div>
           <div className="flex items-center gap-4">
             <Link to="/login" className="text-white/60 text-sm font-medium hover:text-white transition-colors">
@@ -64,7 +61,7 @@ export default function Hero() {
               onClick={scrollToDemoForm}
               className="bg-brand-600 text-white font-bold px-8 py-3 rounded-xl transition-all hover:bg-brand-700 hover:scale-[1.03] active:scale-[0.98]"
             >
-              Schedule a Demo
+              Request a Demo
             </button>
           </div>
         </div>

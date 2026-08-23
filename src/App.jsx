@@ -5,6 +5,7 @@ import { useAuth } from './hooks/useAuth'
 import Sidebar from './components/layout/Sidebar'
 import MobileNav from './components/layout/MobileNav'
 import AiFloatingWidget from './components/AiFloatingWidget'
+import RoleSwitcher from './components/dev/RoleSwitcher'
 import LoadingSpinner from './components/ui/LoadingSpinner'
 import ErrorBoundary from './components/ui/ErrorBoundary'
 
@@ -179,6 +180,7 @@ function AppRoutes() {
         </ErrorBoundary>
       )}
       {showNav && <AiFloatingWidget />}
+      {showNav && <RoleSwitcher />}
     </div>
   )
 }

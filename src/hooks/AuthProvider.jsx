@@ -1,12 +1,26 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { AuthContext } from './AuthContext'
+import { isDevUser } from '../lib/devMode'
+
+const VIEW_ROLE_KEY = 'convoy_dev_view_role'
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [authError, setAuthError] = useState(null)
+  // Dev-only role preview (see src/lib/devMode.js) — never touches the real
+  // profile row or the session's JWT, so RLS still enforces the account's
+  // actual role regardless of what this is set to.
+  const [viewRole, setViewRoleState] = useState(() => localStorage.getItem(VIEW_ROLE_KEY) || null)
+  function setViewRole(role) {
+    setViewRoleState(role)
+    if (role) localStorage.setItem(VIEW_ROLE_KEY, role)
+    else localStorage.removeItem(VIEW_ROLE_KEY)
+  }
+  const devUser = isDevUser(session)
+  const effectiveProfile = (devUser && viewRole && profile) ? { ...profile, role: viewRole } : profile
   // supabase-js re-validates the session (and re-fires this listener with a
   // SIGNED_IN event) every time the tab regains focus, not just on an actual
   // sign-in — see GoTrueClient's visibilitychange -> _recoverAndRefresh().
@@ -195,7 +209,10 @@ export function AuthProvider({ children }) {
   function setProfileDirect(p) { setProfile(p) }
 
   return (
-    <AuthContext.Provider value={{ session, profile, loading, authError, signOut, refreshProfile, setProfileDirect }}>
+    <AuthContext.Provider value={{
+      session, profile: effectiveProfile, loading, authError, signOut, refreshProfile, setProfileDirect,
+      isDevUser: devUser, viewRole, setViewRole, realRole: profile?.role,
+    }}>
       {children}
     </AuthContext.Provider>
   )

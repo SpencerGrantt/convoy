@@ -5,6 +5,10 @@ function scrollToDemoForm() {
   document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth' })
 }
 
+function scrollToPricing() {
+  document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })
+}
+
 export default function Hero() {
   // Above the fold, so this animates in on mount rather than on scroll
   // (Reveal.jsx, used by the rest of the page, is scroll-triggered).
@@ -19,6 +23,14 @@ export default function Hero() {
       <div className="max-w-6xl mx-auto">
         <nav className="flex items-center justify-between mb-14 md:mb-20">
           <h1 className="text-2xl font-black text-white tracking-tight">CONVOY</h1>
+          <div className="hidden md:flex items-center gap-8">
+            <button onClick={scrollToPricing} className="text-white/60 text-sm font-medium hover:text-white transition-colors">
+              Pricing
+            </button>
+            <button onClick={scrollToDemoForm} className="text-white/60 text-sm font-medium hover:text-white transition-colors">
+              Request a Demo
+            </button>
+          </div>
           <div className="flex items-center gap-4">
             <Link to="/login" className="text-white/60 text-sm font-medium hover:text-white transition-colors">
               Log In

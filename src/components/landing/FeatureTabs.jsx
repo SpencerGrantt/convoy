@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { Radio, Camera, FileSearch, Calculator, Sparkles, Smartphone } from 'lucide-react'
+import {
+  Radio, Camera, FileSearch, Calculator, Sparkles, Smartphone,
+  MessageSquare, Wrench, FileSpreadsheet, Users, BarChart3, Map,
+} from 'lucide-react'
 import Reveal from './Reveal'
 import dispatchImg from '../../assets/landing/feature-dispatch.jpg'
 import custodyImg from '../../assets/landing/feature-custody.jpg'
@@ -7,6 +10,8 @@ import contractsImg from '../../assets/landing/feature-contracts.jpg'
 import financesImg from '../../assets/landing/feature-finances.jpg'
 import aiImg from '../../assets/landing/feature-ai.jpg'
 import driverImg from '../../assets/landing/feature-driver.jpg'
+import analyticsImg from '../../assets/landing/feature-analytics.jpg'
+import iftaImg from '../../assets/landing/feature-ifta.jpg'
 
 const TABS = [
   {
@@ -53,6 +58,41 @@ const TABS = [
   },
 ]
 
+const MORE_FEATURES = [
+  {
+    icon: BarChart3,
+    label: 'Custom Analytics',
+    description: 'Switch between line, bar, area, and pie views on every revenue and expense breakdown.',
+    image: analyticsImg,
+  },
+  {
+    icon: Map,
+    label: 'IFTA Reporting',
+    description: 'Quarterly mileage by jurisdiction, ready to export straight to your filing software.',
+    image: iftaImg,
+  },
+  {
+    icon: MessageSquare,
+    label: 'Team Messaging',
+    description: 'Keep dispatch and drivers on the same page without leaving the app.',
+  },
+  {
+    icon: Wrench,
+    label: 'Fleet Controls',
+    description: 'Track vehicles, registrations, and maintenance history in one place.',
+  },
+  {
+    icon: FileSpreadsheet,
+    label: 'CSV Import & Export',
+    description: 'Bring in fuel cards and mileage trackers, export reports whenever you need them.',
+  },
+  {
+    icon: Users,
+    label: 'Team Roles',
+    description: 'Owner, dispatcher, and driver permissions, scoped to what each person needs.',
+  },
+]
+
 export default function FeatureTabs() {
   const [active, setActive] = useState(0)
   const current = TABS[active]
@@ -91,20 +131,50 @@ export default function FeatureTabs() {
         <Reveal delay={200}>
           <div
             key={active}
-            className="bg-navy-700 rounded-2xl border border-white/[0.08] max-w-4xl mx-auto overflow-hidden animate-fadeIn"
+            className="bg-navy-700 rounded-2xl border border-white/[0.08] max-w-5xl mx-auto overflow-hidden animate-fadeIn grid grid-cols-1 md:grid-cols-2"
           >
-            <div className="aspect-[16/9] bg-navy-800">
+            <div className="aspect-[16/10] md:aspect-auto bg-navy-800 md:order-1">
               <img
                 src={current.image}
                 alt={current.title}
                 className="w-full h-full object-cover object-top"
               />
             </div>
-            <div className="p-6 md:p-8 text-center">
-              <current.icon size={24} className="text-brand-300 mx-auto mb-3" />
-              <h4 className="text-xl font-bold text-white mb-2">{current.title}</h4>
-              <p className="text-white/60 leading-relaxed max-w-xl mx-auto">{current.description}</p>
+            <div className="p-6 md:p-10 md:order-2 flex flex-col justify-center">
+              <current.icon size={24} className="text-brand-300 mb-3" />
+              <h4 className="text-xl md:text-2xl font-bold text-white mb-2">{current.title}</h4>
+              <p className="text-white/60 leading-relaxed">{current.description}</p>
             </div>
+          </div>
+        </Reveal>
+
+        <Reveal delay={250} className="mt-14">
+          <p className="text-center text-xs font-semibold text-white/40 uppercase tracking-wide mb-6">
+            Also Built In
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-5xl mx-auto">
+            {MORE_FEATURES.map(f => {
+              const Icon = f.icon
+              return (
+                <div
+                  key={f.label}
+                  className="bg-navy-800 rounded-xl border border-white/[0.07] overflow-hidden flex flex-col"
+                >
+                  {f.image && (
+                    <div className="aspect-[16/9] bg-navy-900">
+                      <img src={f.image} alt={f.label} className="w-full h-full object-cover object-top" />
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Icon size={15} className="text-brand-300 shrink-0" />
+                      <p className="text-sm font-semibold text-white">{f.label}</p>
+                    </div>
+                    <p className="text-xs text-white/50 leading-relaxed">{f.description}</p>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </Reveal>
       </div>

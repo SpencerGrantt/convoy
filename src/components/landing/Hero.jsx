@@ -23,12 +23,13 @@ export default function Hero() {
       <div className="max-w-6xl mx-auto">
         <nav className="flex items-center justify-between mb-14 md:mb-20">
           <h1 className="text-2xl font-black text-white tracking-tight">CONVOY</h1>
-          <div className="hidden md:flex items-center gap-8">
-            <button onClick={scrollToPricing} className="text-white/60 text-sm font-medium hover:text-white transition-colors">
+          <div className="flex items-center gap-4 md:gap-6">
+            <button onClick={scrollToPricing} className="hidden md:inline text-white/60 text-sm font-medium hover:text-white transition-colors">
               Pricing
             </button>
-          </div>
-          <div className="flex items-center gap-4">
+            <button onClick={scrollToDemoForm} className="hidden md:inline text-white/60 text-sm font-medium hover:text-white transition-colors">
+              Request a Demo
+            </button>
             <Link to="/login" className="text-white/60 text-sm font-medium hover:text-white transition-colors">
               Log In
             </Link>

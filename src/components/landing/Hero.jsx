@@ -27,18 +27,12 @@ export default function Hero() {
             <button onClick={scrollToPricing} className="hidden md:inline text-white/60 text-sm font-medium hover:text-white transition-colors">
               Pricing
             </button>
-            <button onClick={scrollToDemoForm} className="hidden md:inline text-white/60 text-sm font-medium hover:text-white transition-colors">
+            <button
+              onClick={scrollToDemoForm}
+              className="bg-brand-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all hover:bg-brand-700 hover:scale-[1.03] active:scale-[0.98]"
+            >
               Request a Demo
             </button>
-            <Link to="/login" className="text-white/60 text-sm font-medium hover:text-white transition-colors">
-              Log In
-            </Link>
-            <Link
-              to="/login"
-              className="bg-navy-700 border border-white/10 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all hover:bg-navy-800 hover:scale-[1.03] active:scale-[0.98]"
-            >
-              Sign Up
-            </Link>
           </div>
         </nav>
 
@@ -57,13 +51,16 @@ export default function Hero() {
             matching built in for teams that need it.
           </p>
 
-          <div className="flex justify-center mt-9">
+          <div className="flex flex-col items-center gap-3 mt-9">
             <button
               onClick={scrollToDemoForm}
               className="bg-brand-600 text-white font-bold px-8 py-3 rounded-xl transition-all hover:bg-brand-700 hover:scale-[1.03] active:scale-[0.98]"
             >
               Request a Demo
             </button>
+            <Link to="/login" className="text-white/50 text-sm hover:text-white transition-colors">
+              Already have an account? <span className="font-semibold">Login Here</span>
+            </Link>
           </div>
         </div>
       </div>

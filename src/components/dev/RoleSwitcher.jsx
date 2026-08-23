@@ -11,7 +11,7 @@ export default function RoleSwitcher() {
   const active = viewRole ?? realRole
 
   return (
-    <div className="fixed bottom-20 md:bottom-6 left-4 md:left-6 z-40">
+    <div className="fixed bottom-20 md:bottom-6 left-4 md:left-64 z-40">
       <div className="bg-navy-800 border border-amber-500/30 rounded-xl p-1.5 shadow-xl flex items-center gap-1">
         <span className="text-[9px] font-bold text-amber-400 uppercase tracking-wide px-1.5 hidden md:inline">
           Dev

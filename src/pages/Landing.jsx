@@ -4,6 +4,7 @@ import FeatureTabs from '../components/landing/FeatureTabs'
 import HowItWorks from '../components/landing/HowItWorks'
 import Pricing from '../components/landing/Pricing'
 import DemoForm from '../components/landing/DemoForm'
+import Footer from '../components/landing/Footer'
 
 export default function Landing() {
   return (
@@ -14,6 +15,7 @@ export default function Landing() {
       <HowItWorks />
       <Pricing />
       <DemoForm />
+      <Footer />
     </div>
   )
 }

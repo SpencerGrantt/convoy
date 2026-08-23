@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   Radio, Camera, FileSearch, Calculator, Sparkles, Smartphone,
-  MessageSquare, Wrench, FileSpreadsheet, Users, Maximize2, X,
+  MessageSquare, Wrench, FileSpreadsheet, Users,
 } from 'lucide-react'
 import Reveal from './Reveal'
 import dispatchImg from '../../assets/landing/feature-dispatch.jpg'
@@ -85,51 +85,17 @@ const MORE_FEATURES = [
   },
 ]
 
-function Lightbox({ src, alt, onClose }) {
-  useEffect(() => {
-    function onKeyDown(e) {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKeyDown)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = ''
-    }
-  }, [onClose])
-
-  return (
-    <div
-      className="fixed inset-0 z-[100] bg-navy-900 flex items-center justify-center p-6 md:p-16 cursor-zoom-out animate-fadeIn"
-      onClick={onClose}
-    >
-      <button
-        onClick={onClose}
-        className="absolute top-5 right-5 md:top-8 md:right-8 w-10 h-10 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center transition-colors"
-        aria-label="Close"
-      >
-        <X size={20} className="text-white/70" />
-      </button>
-      <img
-        src={src}
-        alt={alt}
-        className="max-w-full max-h-full object-contain cursor-default"
-        onClick={e => e.stopPropagation()}
-      />
-    </div>
-  )
-}
-
 export default function FeatureTabs() {
   const [active, setActive] = useState(0)
   const [imageIndex, setImageIndex] = useState(0)
-  const [lightbox, setLightbox] = useState(false)
+  const [hovering, setHovering] = useState(false)
   const current = TABS[active]
   const currentImage = current.images[imageIndex] ?? current.images[0]
 
   function selectTab(i) {
     setActive(i)
     setImageIndex(0)
+    setHovering(false)
   }
 
   return (
@@ -166,25 +132,25 @@ export default function FeatureTabs() {
         <Reveal delay={200}>
           <div
             key={active}
-            className="bg-navy-700 rounded-2xl border border-white/[0.08] max-w-5xl mx-auto overflow-hidden animate-fadeIn grid grid-cols-1 md:grid-cols-2"
+            className="bg-navy-700 rounded-2xl border border-white/[0.08] max-w-5xl mx-auto animate-fadeIn grid grid-cols-1 md:grid-cols-2"
           >
-            <div className="md:order-1 flex flex-col">
-              <button
-                onClick={() => setLightbox(true)}
-                className="group relative aspect-[16/10] md:aspect-auto md:flex-1 bg-navy-800 overflow-hidden cursor-zoom-in block w-full"
+            <div className="md:order-1 flex flex-col relative">
+              <div
+                onMouseEnter={() => setHovering(true)}
+                onMouseLeave={() => setHovering(false)}
+                className={`relative aspect-[16/10] md:aspect-auto md:flex-1 bg-navy-800 rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl ${
+                  hovering ? 'overflow-visible z-30' : 'overflow-hidden z-0'
+                }`}
               >
                 <img
                   key={currentImage.src}
                   src={currentImage.src}
                   alt={currentImage.label}
-                  className="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover:scale-110"
+                  className={`w-full h-full object-cover object-top rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl shadow-2xl transition-transform duration-300 ease-out ${
+                    hovering ? 'scale-[1.35]' : 'scale-100'
+                  }`}
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
-                  <div className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <Maximize2 size={15} className="text-white" />
-                  </div>
-                </div>
-              </button>
+              </div>
 
               {current.images.length > 1 && (
                 <div className="flex items-center gap-1.5 px-4 py-3 bg-navy-800 border-t border-white/[0.06]">
@@ -236,10 +202,6 @@ export default function FeatureTabs() {
           </div>
         </Reveal>
       </div>
-
-      {lightbox && (
-        <Lightbox src={currentImage.src} alt={currentImage.label} onClose={() => setLightbox(false)} />
-      )}
     </div>
   )
 }

@@ -100,20 +100,20 @@ function Lightbox({ src, alt, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-10 cursor-zoom-out"
+      className="fixed inset-0 z-[100] bg-navy-900 flex items-center justify-center p-6 md:p-16 cursor-zoom-out animate-fadeIn"
       onClick={onClose}
     >
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+        className="absolute top-5 right-5 md:top-8 md:right-8 w-10 h-10 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center transition-colors"
         aria-label="Close"
       >
-        <X size={20} className="text-white" />
+        <X size={20} className="text-white/70" />
       </button>
       <img
         src={src}
         alt={alt}
-        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl cursor-default"
+        className="max-w-full max-h-full object-contain cursor-default"
         onClick={e => e.stopPropagation()}
       />
     </div>

@@ -21,6 +21,14 @@ export function AuthProvider({ children }) {
   }
   const devUser = isDevUser(session)
   const effectiveProfile = (devUser && viewRole && profile) ? { ...profile, role: viewRole } : profile
+  // aal2 required = this account has a verified MFA factor and this
+  // particular session hasn't completed the step-up challenge yet. See
+  // App.jsx's AuthGate, which redirects to VerifyMfa while that's true.
+  const [aal, setAal] = useState({ currentLevel: null, nextLevel: null })
+  async function refreshAal() {
+    const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (!error && data) setAal({ currentLevel: data.currentLevel, nextLevel: data.nextLevel })
+  }
   // supabase-js re-validates the session (and re-fires this listener with a
   // SIGNED_IN event) every time the tab regains focus, not just on an actual
   // sign-in — see GoTrueClient's visibilitychange -> _recoverAndRefresh().
@@ -38,10 +46,12 @@ export function AuthProvider({ children }) {
         setSession(session)
         if (!session) {
           setProfile(null)
+          setAal({ currentLevel: null, nextLevel: null })
           loadedUserId.current = null
           setLoading(false)
           return
         }
+        refreshAal()
         if (loadedUserId.current === session.user.id) return
         // A new session (e.g. just signed in) means profile is stale/null
         // until this resolves — without this, AuthGate briefly sees
@@ -201,6 +211,7 @@ export function AuthProvider({ children }) {
     } finally {
       setSession(null)
       setProfile(null)
+      setAal({ currentLevel: null, nextLevel: null })
       loadedUserId.current = null
       setLoading(false)
     }
@@ -212,6 +223,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       session, profile: effectiveProfile, loading, authError, signOut, refreshProfile, setProfileDirect,
       isDevUser: devUser, viewRole, setViewRole, realRole: profile?.role,
+      aal, refreshAal,
     }}>
       {children}
     </AuthContext.Provider>

@@ -147,7 +147,7 @@ export default function FeatureTabs() {
                   src={currentImage.src}
                   alt={currentImage.label}
                   className={`w-full h-full object-cover object-top rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl shadow-2xl transition-transform duration-300 ease-out ${
-                    hovering ? 'scale-[1.35]' : 'scale-100'
+                    hovering ? 'scale-[1.5]' : 'scale-100'
                   }`}
                 />
               </div>

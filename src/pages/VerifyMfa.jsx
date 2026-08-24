@@ -37,7 +37,7 @@ export default function VerifyMfa() {
 
   async function handleVerify(e) {
     e.preventDefault()
-    if (!email || code.length < 6) return
+    if (!email || code.length < 8) return
     setVerifying(true)
     setError('')
     const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' })
@@ -81,10 +81,10 @@ export default function VerifyMfa() {
                 type="text"
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                maxLength={6}
+                maxLength={8}
                 value={code}
                 onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
-                placeholder="000000"
+                placeholder="00000000"
                 className={inputBase}
                 autoFocus
               />
@@ -92,7 +92,7 @@ export default function VerifyMfa() {
               {resent && !error && <p className="text-green-400 text-sm">New code sent.</p>}
               <button
                 type="submit"
-                disabled={verifying || code.length < 6}
+                disabled={verifying || code.length < 8}
                 className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50 transition-all hover:bg-brand-700"
               >
                 {verifying ? 'Verifying…' : 'Verify'}

@@ -39,7 +39,7 @@ function SecurityTab({ profile, setProfileDirect, email }) {
   }
 
   async function confirmCode() {
-    if (code.length < 6) return
+    if (code.length < 8) return
     setBusy(true); setError('')
     const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' })
     if (error) {
@@ -93,14 +93,14 @@ function SecurityTab({ profile, setProfileDirect, email }) {
           <input
             type="text"
             inputMode="numeric"
-            maxLength={6}
+            maxLength={8}
             value={code}
             onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
-            placeholder="000000"
+            placeholder="00000000"
             className={`${fieldClass} text-center tracking-[0.3em] font-semibold`}
           />
           {error && <p className="text-red-400 text-xs font-medium">{error}</p>}
-          <button onClick={confirmCode} disabled={busy || code.length < 6} className="w-full bg-brand-600 text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-50">
+          <button onClick={confirmCode} disabled={busy || code.length < 8} className="w-full bg-brand-600 text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-50">
             {busy ? 'Verifying…' : 'Verify & Activate'}
           </button>
         </div>

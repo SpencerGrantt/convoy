@@ -130,11 +130,15 @@ function RootRoute() {
 }
 
 function AppRoutes() {
-  const { session, profile } = useAuth()
+  const { session, profile, emailMfaVerified } = useAuth()
   const location = useLocation()
+  const mfaPending = !!(profile?.mfa_email_enabled && !emailMfaVerified)
   // Nav chrome only once onboarding is actually complete — not just logged
   // in, since a mid-onboarding user has no company/runs/etc. to navigate to.
-  const showNav = !!(session && profile?.onboarding_complete)
+  // Also withheld while an MFA-enabled account hasn't verified this session
+  // yet — VerifyMfa (rendered by AuthGate below) is a full-screen gate like
+  // Login, same as onboarding, not a page with app chrome around it.
+  const showNav = !!(session && profile?.onboarding_complete && !mfaPending)
 
   return (
     <div className="min-h-screen bg-navy-900">

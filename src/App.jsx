@@ -55,15 +55,15 @@ const IftaReport       = lazy(() => import('./pages/IftaReport'))
 // canceled screen below — Settings needs this, or an owner whose trial
 // just expired could never reach the billing tab to fix it.
 function AuthGate({ children, roles, requiresPlan, allowBillingBlocked }) {
-  const { session, profile, loading, aal } = useAuth()
+  const { session, profile, loading, emailMfaVerified } = useAuth()
   if (loading) return <LoadingSpinner />
   if (!session) return <Navigate to="/login" replace />
   if (!profile || profile.onboarding_complete === false) return <Navigate to="/onboarding" replace />
 
-  // A verified phone factor exists but this session hasn't completed the
-  // step-up challenge yet — block everything behind a code-entry screen
-  // until it does, same shape as the onboarding-incomplete redirect above.
-  if (aal.nextLevel === 'aal2' && aal.currentLevel === 'aal1') return <VerifyMfa />
+  // Email 2FA is enabled but this session hasn't verified the code yet —
+  // block everything behind a code-entry screen until it does, same shape
+  // as the onboarding-incomplete redirect above.
+  if (profile.mfa_email_enabled && !emailMfaVerified) return <VerifyMfa />
 
   const company = profile.companies
   const billingBlocked = BILLING_ENABLED && company && (

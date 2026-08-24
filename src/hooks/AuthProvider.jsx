@@ -21,13 +21,18 @@ export function AuthProvider({ children }) {
   }
   const devUser = isDevUser(session)
   const effectiveProfile = (devUser && viewRole && profile) ? { ...profile, role: viewRole } : profile
-  // aal2 required = this account has a verified MFA factor and this
-  // particular session hasn't completed the step-up challenge yet. See
-  // App.jsx's AuthGate, which redirects to VerifyMfa while that's true.
-  const [aal, setAal] = useState({ currentLevel: null, nextLevel: null })
-  async function refreshAal() {
-    const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-    if (!error && data) setAal({ currentLevel: data.currentLevel, nextLevel: data.nextLevel })
+  // Email 2FA step-up (see profiles.mfa_email_enabled + App.jsx's AuthGate,
+  // which redirects to VerifyMfa while an enabled account hasn't verified
+  // yet this session). This doesn't use Supabase's native MFA/AAL system —
+  // email isn't a supported factor type there — so "verified" is tracked
+  // here instead, in sessionStorage keyed by user id: persists across a
+  // page reload within the same tab (so it doesn't re-prompt on every
+  // navigation) but clears when the tab closes or on sign-out, so a fresh
+  // sign-in always requires the step-up again.
+  const [emailMfaVerified, setEmailMfaVerifiedState] = useState(false)
+  function markEmailMfaVerified() {
+    if (session?.user?.id) sessionStorage.setItem(`convoy_mfa_verified_${session.user.id}`, '1')
+    setEmailMfaVerifiedState(true)
   }
   // supabase-js re-validates the session (and re-fires this listener with a
   // SIGNED_IN event) every time the tab regains focus, not just on an actual
@@ -46,12 +51,12 @@ export function AuthProvider({ children }) {
         setSession(session)
         if (!session) {
           setProfile(null)
-          setAal({ currentLevel: null, nextLevel: null })
+          setEmailMfaVerifiedState(false)
           loadedUserId.current = null
           setLoading(false)
           return
         }
-        refreshAal()
+        setEmailMfaVerifiedState(sessionStorage.getItem(`convoy_mfa_verified_${session.user.id}`) === '1')
         if (loadedUserId.current === session.user.id) return
         // A new session (e.g. just signed in) means profile is stale/null
         // until this resolves — without this, AuthGate briefly sees
@@ -209,9 +214,12 @@ export function AuthProvider({ children }) {
     } catch {
       // ignore — clear local state regardless of timeout or real error
     } finally {
+      // Cleared (not just left stale) so a fresh sign-in as the same user
+      // in this same tab still requires the step-up again.
+      if (session?.user?.id) sessionStorage.removeItem(`convoy_mfa_verified_${session.user.id}`)
       setSession(null)
       setProfile(null)
-      setAal({ currentLevel: null, nextLevel: null })
+      setEmailMfaVerifiedState(false)
       loadedUserId.current = null
       setLoading(false)
     }
@@ -223,7 +231,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       session, profile: effectiveProfile, loading, authError, signOut, refreshProfile, setProfileDirect,
       isDevUser: devUser, viewRole, setViewRole, realRole: profile?.role,
-      aal, refreshAal,
+      emailMfaVerified, markEmailMfaVerified,
     }}>
       {children}
     </AuthContext.Provider>

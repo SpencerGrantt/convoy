@@ -8,92 +8,66 @@ import { safeFormatDate } from '../lib/dates'
 import { roleLabel } from '../lib/roles'
 import { PLAN_META, planLabel, planPrice } from '../lib/plans'
 import { BILLING_ENABLED } from '../lib/billing'
-import { Shield, Users, Calendar, Hash, Building2, ShieldCheck, Smartphone } from 'lucide-react'
-import { listFactors, enrollPhoneFactor, verifyEnrollment, unenrollFactor } from '../lib/mfa'
+import { Shield, Users, Calendar, Hash, Building2, ShieldCheck } from 'lucide-react'
 
 const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
 
-// Phone/SMS 2FA — a personal account-security setting, not company data,
-// so it's kept self-contained here rather than threading its state through
+// Email 2FA — a personal account-security setting, not company data, so
+// it's kept self-contained here rather than threading its state through
 // the parent form's save flow (which the "Save Changes" button below still
-// handles for account/company fields).
-function SecurityTab({ profile, setProfileDirect }) {
-  const [status, setStatus] = useState('loading') // 'loading' | 'none' | 'enrolled' | 'enrolling-phone' | 'enrolling-code'
-  const [factorId, setFactorId] = useState(null)
-  const [phone, setPhone] = useState(profile?.phone ?? '')
+// handles for account/company fields). Uses Supabase's own built-in OTP
+// email sending (same mechanism as "sign in with magic link"), so there's
+// no phone number or third-party SMS provider involved — enabling it is
+// just a flag on profiles.mfa_email_enabled, and the actual code send/
+// verify happens on VerifyMfa.jsx at the next sign-in.
+function SecurityTab({ profile, setProfileDirect, email }) {
+  const [status, setStatus] = useState(profile?.mfa_email_enabled ? 'enrolled' : 'none')
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
-  const load = useCallback(async () => {
-    const { data, error } = await listFactors()
-    const factor = data?.phone?.[0]
-    if (error) {
-      setError(error.message)
-      setStatus('none')
-      return
-    }
-    if (factor) {
-      setFactorId(factor.id)
-      setStatus('enrolled')
-    } else {
-      setStatus('none')
-    }
-  }, [])
-
-  useEffect(() => { load() }, [load])
-
   async function startEnroll() {
     setError('')
-    setStatus('enrolling-phone')
-  }
-
-  async function sendCode() {
-    if (!phone.trim()) return
-    setBusy(true); setError('')
-    const { data, error } = await enrollPhoneFactor(phone.trim())
+    setBusy(true)
+    const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } })
+    setBusy(false)
     if (error) {
       setError(error.message)
-      setBusy(false)
       return
     }
-    setFactorId(data.id)
-    // Saved now (rather than only after verification) so VerifyMfa's
-    // "ending in ####" hint has a number to read even if this exact tab
-    // session doesn't stick around to see the enrollment through —
-    // listFactors() never returns the phone number itself.
-    await supabase.from('profiles').update({ phone: phone.trim() }).eq('id', profile.id)
-    setProfileDirect({ ...profile, phone: phone.trim() })
-    setStatus('enrolling-code')
-    setBusy(false)
+    setStatus('confirming')
   }
 
   async function confirmCode() {
-    if (!factorId || code.length < 6) return
+    if (code.length < 6) return
     setBusy(true); setError('')
-    const { error } = await verifyEnrollment(factorId, code)
+    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' })
     if (error) {
       setError(error.message)
       setBusy(false)
       return
     }
-    setCode('')
+    const { error: updateErr } = await supabase.from('profiles').update({ mfa_email_enabled: true }).eq('id', profile.id)
     setBusy(false)
+    if (updateErr) {
+      setError(updateErr.message)
+      return
+    }
+    setProfileDirect({ ...profile, mfa_email_enabled: true })
+    setCode('')
     setStatus('enrolled')
   }
 
   async function remove() {
-    if (!factorId) return
     if (!window.confirm('Remove two-factor authentication? Future sign-ins will only require your password.')) return
     setBusy(true); setError('')
-    const { error } = await unenrollFactor(factorId)
+    const { error } = await supabase.from('profiles').update({ mfa_email_enabled: false }).eq('id', profile.id)
+    setBusy(false)
     if (error) {
       setError(error.message)
-      setBusy(false)
       return
     }
-    setFactorId(null)
-    setBusy(false)
+    setProfileDirect({ ...profile, mfa_email_enabled: false })
     setStatus('none')
   }
 
@@ -101,42 +75,21 @@ function SecurityTab({ profile, setProfileDirect }) {
     <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
       <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Two-Factor Authentication</h2>
 
-      {status === 'loading' && <p className="text-sm text-white/40">Loading…</p>}
-
       {status === 'none' && (
         <>
           <p className="text-sm text-white/60 leading-relaxed">
-            Add a phone number so signing in also requires a text-message code, not just your password.
+            Add an extra check at sign-in: a code emailed to {email}, on top of your password. No app to install.
           </p>
-          <button onClick={startEnroll} className="w-full bg-brand-600 text-white font-bold py-2.5 rounded-xl text-sm">
-            Set Up 2FA
+          {error && <p className="text-red-400 text-xs font-medium">{error}</p>}
+          <button onClick={startEnroll} disabled={busy} className="w-full bg-brand-600 text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-50">
+            {busy ? 'Sending…' : 'Set Up 2FA'}
           </button>
         </>
       )}
 
-      {status === 'enrolling-phone' && (
+      {status === 'confirming' && (
         <div className="space-y-3">
-          <div>
-            <label className="block text-xs text-white/50 mb-1">Phone Number</label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-              placeholder="+15551234567"
-              className={fieldClass}
-            />
-            <p className="text-[11px] text-white/30 mt-1">Include the country code, e.g. +1 for the US.</p>
-          </div>
-          {error && <p className="text-red-400 text-xs font-medium">{error}</p>}
-          <button onClick={sendCode} disabled={busy || !phone.trim()} className="w-full bg-brand-600 text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-50">
-            {busy ? 'Sending…' : 'Send Code'}
-          </button>
-        </div>
-      )}
-
-      {status === 'enrolling-code' && (
-        <div className="space-y-3">
-          <p className="text-sm text-white/60">Enter the code we texted to {phone}.</p>
+          <p className="text-sm text-white/60">Enter the code we sent to {email}.</p>
           <input
             type="text"
             inputMode="numeric"
@@ -157,9 +110,7 @@ function SecurityTab({ profile, setProfileDirect }) {
         <>
           <div className="flex items-center gap-2.5 bg-green-500/10 border border-green-500/20 rounded-xl px-3 py-2.5">
             <ShieldCheck size={16} className="text-green-400 shrink-0" />
-            <p className="text-sm text-green-300">
-              2FA is active{profile?.phone ? <> — texting ****{profile.phone.slice(-4)}</> : null}.
-            </p>
+            <p className="text-sm text-green-300">2FA is active — codes go to {email}.</p>
           </div>
           {error && <p className="text-red-400 text-xs font-medium">{error}</p>}
           <button
@@ -176,7 +127,7 @@ function SecurityTab({ profile, setProfileDirect }) {
 }
 
 export default function Settings() {
-  const { profile, loading: authLoading, signOut, setProfileDirect } = useAuth()
+  const { profile, session, loading: authLoading, signOut, setProfileDirect } = useAuth()
   const company = profile?.companies
   const [searchParams] = useSearchParams()
 
@@ -532,7 +483,7 @@ export default function Settings() {
 
         {/* ── Security tab ── */}
         {activeTab === 'security' && (
-          <SecurityTab profile={profile} setProfileDirect={setProfileDirect} />
+          <SecurityTab profile={profile} setProfileDirect={setProfileDirect} email={session?.user?.email} />
         )}
 
         {/* ── Company tab ── */}

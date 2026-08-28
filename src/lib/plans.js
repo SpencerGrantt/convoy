@@ -19,10 +19,15 @@ export const PLAN_META = {
     label: 'Government',
     monthlyPrice: 99,
     yearlyPrice: 990,
+    // Pricing.jsx-only value framing, shown above the feature list. The
+    // point is that this tier pays for itself, not that it has more
+    // checkboxes. Kept out of `features` since Settings.jsx joins that
+    // array into one sentence; a pitch line would read oddly stitched in.
+    pitch: 'One new contract, or one registration renewed on time, pays for years of this plan.',
     features: [
       'Everything in Standard',
-      'SAM.gov contract matching',
-      'Federal contract tracking and renewal alerts',
+      'Get matched to new SAM.gov opportunities automatically',
+      'Never miss a bid deadline or registration renewal',
     ],
   },
 }

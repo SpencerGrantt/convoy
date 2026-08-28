@@ -31,6 +31,11 @@ export default function Pricing() {
                 <p className="text-fg/40 text-xs mt-1">
                   or ${meta.yearlyPrice}/yr, save ${meta.monthlyPrice * 12 - meta.yearlyPrice}
                 </p>
+                {meta.pitch && (
+                  <p className="text-brand-300 text-sm font-medium mt-4 leading-relaxed">
+                    {meta.pitch}
+                  </p>
+                )}
                 <ul className="mt-5 space-y-2.5">
                   {meta.features.map(f => (
                     <li key={f} className="flex items-start gap-2.5 text-fg/70 text-sm">

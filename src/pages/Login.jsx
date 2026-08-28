@@ -14,8 +14,10 @@ export default function Login() {
   // Stripe webhook, never from signup metadata directly.
   const rawPlan = searchParams.get('plan')
   const intendedPlan = rawPlan === 'standard' || rawPlan === 'government' ? rawPlan : null
+  // The landing page's "Sign Up" link lands here as /login?view=signup.
+  const requestedSignup = intendedPlan || searchParams.get('view') === 'signup'
 
-  const [view, setView]       = useState(intendedPlan ? 'signup' : 'signin') // 'signin' | 'signup' | 'forgot'
+  const [view, setView]       = useState(requestedSignup ? 'signup' : 'signin') // 'signin' | 'signup' | 'forgot'
   const [magicLink, setMagicLink] = useState(false)
   const [step, setStep]       = useState('form')   // 'form' | 'sent' | 'reset-sent' | 'confirm-sent'
 

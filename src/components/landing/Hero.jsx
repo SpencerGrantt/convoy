@@ -64,9 +64,15 @@ export default function Hero() {
             >
               Request a Demo
             </button>
-            <Link to="/login" className="text-fg/50 text-sm hover:text-fg transition-colors">
-              Already have an account? <span className="font-semibold">Login Here</span>
-            </Link>
+            <p className="text-fg/50 text-sm flex items-center gap-2">
+              <Link to="/login" className="hover:text-fg transition-colors">
+                Already have an account? <span className="font-semibold underline">Login Here</span>
+              </Link>
+              <span className="text-fg/25">·</span>
+              <Link to="/login?view=signup" className="hover:text-fg transition-colors">
+                New here? <span className="font-semibold underline">Sign Up</span>
+              </Link>
+            </p>
           </div>
         </div>
       </div>

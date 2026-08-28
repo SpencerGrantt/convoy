@@ -1,5 +1,6 @@
 import Hero from '../components/landing/Hero'
 import CredentialsStrip from '../components/landing/CredentialsStrip'
+import Mission from '../components/landing/Mission'
 import FeatureTabs from '../components/landing/FeatureTabs'
 import HowItWorks from '../components/landing/HowItWorks'
 import Pricing from '../components/landing/Pricing'
@@ -11,6 +12,7 @@ export default function Landing() {
     <div className="bg-navy-900 min-h-screen">
       <Hero />
       <CredentialsStrip />
+      <Mission />
       <FeatureTabs />
       <HowItWorks />
       <Pricing />

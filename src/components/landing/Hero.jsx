@@ -57,22 +57,21 @@ export default function Hero() {
             matching built in for teams that need it.
           </p>
 
-          <div className="flex flex-col items-center gap-3 mt-9">
+          <div className="flex flex-col items-center gap-2 mt-9">
             <button
               onClick={scrollToDemoForm}
               className="bg-brand-600 text-white font-bold px-8 py-3 rounded-xl shadow-md shadow-brand-900/20 transition-all hover:bg-brand-700 hover:shadow-brand-900/25 hover:scale-[1.03] active:scale-[0.98]"
             >
               Request a Demo
             </button>
-            <p className="text-fg/50 text-sm flex items-center gap-2">
-              <Link to="/login" className="hover:text-fg transition-colors">
-                Already have an account? <span className="font-semibold underline">Login Here</span>
-              </Link>
-              <span className="text-fg/25">·</span>
+            <div className="text-fg/50 text-sm flex flex-col items-center gap-1 mt-6">
               <Link to="/login?view=signup" className="hover:text-fg transition-colors">
                 New here? <span className="font-semibold underline">Sign Up</span>
               </Link>
-            </p>
+              <Link to="/login" className="hover:text-fg transition-colors">
+                Already have an account? <span className="font-semibold underline">Login Here</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

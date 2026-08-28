@@ -10,7 +10,6 @@ import { useTeamMembers } from '../../hooks/useTeamMembers'
 import { useUnreadMessageCount } from '../../hooks/useUnreadCounts'
 import { invokeFn } from '../../lib/supabase'
 import { roleLabel } from '../../lib/roles'
-import { BILLING_ENABLED } from '../../lib/billing'
 
 const allNavItems = [
   { to: '/',            icon: Home,          label: 'Dashboard',   roles: ['owner', 'dispatcher', 'driver'] },
@@ -104,7 +103,7 @@ function DriverItem({ driver, onClick, onMessage }) {
 }
 
 export default function Sidebar() {
-  const { profile, isDevUser, viewPlan } = useAuth()
+  const { profile } = useAuth()
   const { members } = useTeamMembers()
   // Everyone but yourself — this is a "your teammates" list, not a roster
   // of the whole company including the viewer (MyTeam.jsx's fuller page
@@ -114,11 +113,7 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const role = profile?.role ?? 'owner'
   const companyPlan = profile?.companies?.plan ?? 'standard'
-  // See App.jsx's AuthGate for why this also checks the dev plan preview,
-  // not just BILLING_ENABLED — keeps the nav item in sync with the route
-  // it links to.
-  const planGateActive = BILLING_ENABLED || (isDevUser && viewPlan)
-  const items = allNavItems.filter(item => item.roles.includes(role) && (!planGateActive || !item.plan || item.plan === companyPlan))
+  const items = allNavItems.filter(item => item.roles.includes(role) && (!item.plan || item.plan === companyPlan))
   const showDrivers = role === 'owner' || role === 'dispatcher'
   const showDriverTools = role === 'owner' || role === 'driver'
 

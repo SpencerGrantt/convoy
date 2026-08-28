@@ -2,7 +2,6 @@ import { NavLink } from 'react-router-dom'
 import { Home, Truck, FileText, DollarSign, MessageCircle, MapPinned, Wrench } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useUnreadMessageCount } from '../../hooks/useUnreadCounts'
-import { BILLING_ENABLED } from '../../lib/billing'
 
 const allTabs = [
   { to: '/',            icon: Home,          label: 'Home',        roles: ['owner', 'dispatcher', 'driver'] },
@@ -15,12 +14,11 @@ const allTabs = [
 ]
 
 export default function MobileNav() {
-  const { profile, isDevUser, viewPlan } = useAuth()
+  const { profile } = useAuth()
   const unreadMessages = useUnreadMessageCount()
   const role = profile?.role ?? 'owner'
   const companyPlan = profile?.companies?.plan ?? 'standard'
-  const planGateActive = BILLING_ENABLED || (isDevUser && viewPlan)
-  const tabs = allTabs.filter(t => t.roles.includes(role) && (!planGateActive || !t.plan || t.plan === companyPlan))
+  const tabs = allTabs.filter(t => t.roles.includes(role) && (!t.plan || t.plan === companyPlan))
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-navy-900 border-t border-fg/[0.08] safe-bottom z-20">

@@ -20,13 +20,12 @@ export function AuthProvider({ children }) {
     if (role) localStorage.setItem(VIEW_ROLE_KEY, role)
     else localStorage.removeItem(VIEW_ROLE_KEY)
   }
-  // Dev-only plan preview — same idea as viewRole above, for AuthGate's
-  // requiresPlan check and Sidebar's plan-gated nav items (Contracts is
-  // Government-only). Both currently short-circuit on BILLING_ENABLED,
-  // which is off, so real users always see everything regardless of
-  // company.plan — this override also flips the gate live for the dev
-  // account specifically, so Standard vs Government behavior is actually
-  // previewable before billing goes live.
+  // Dev-only plan preview - same idea as viewRole above. AuthGate's
+  // requiresPlan check and Sidebar/MobileNav's plan-gated nav items
+  // (Contracts is Government-only) enforce the real company.plan for
+  // everyone regardless of BILLING_ENABLED; this just lets the dev account
+  // preview the other plan's experience without needing a second real
+  // account or touching the real company row.
   const [viewPlan, setViewPlanState] = useState(() => localStorage.getItem(VIEW_PLAN_KEY) || null)
   function setViewPlan(plan) {
     setViewPlanState(plan)

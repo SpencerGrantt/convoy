@@ -57,7 +57,7 @@ const IftaReport       = lazy(() => import('./pages/IftaReport'))
 // canceled screen below — Settings needs this, or an owner whose trial
 // just expired could never reach the billing tab to fix it.
 function AuthGate({ children, roles, requiresPlan, allowBillingBlocked }) {
-  const { session, profile, loading, emailMfaVerified, isDevUser, viewPlan } = useAuth()
+  const { session, profile, loading, emailMfaVerified } = useAuth()
   if (loading) return <LoadingSpinner />
   if (!session) return <Navigate to="/login" replace />
   if (!profile || profile.onboarding_complete === false) return <Navigate to="/onboarding" replace />
@@ -78,10 +78,11 @@ function AuthGate({ children, roles, requiresPlan, allowBillingBlocked }) {
   }
 
   if (roles && !roles.includes(profile.role)) return <Navigate to="/" replace />
-  // Plan gating is dormant for real users until BILLING_ENABLED goes live,
-  // but stays live for the dev account whenever a plan preview is set (see
-  // AuthProvider's viewPlan) so Standard vs Government is previewable now.
-  if ((BILLING_ENABLED || (isDevUser && viewPlan)) && requiresPlan && company?.plan !== requiresPlan) {
+  // Unlike billingBlocked above, plan-based feature gating isn't tied to
+  // BILLING_ENABLED — it's "what does your plan include", not "is your
+  // subscription in good standing", and stays enforced regardless of
+  // whether Stripe is live yet.
+  if (requiresPlan && company?.plan !== requiresPlan) {
     return <RequiresGovernmentPlan isOwner={profile.role === 'owner'} />
   }
   return children

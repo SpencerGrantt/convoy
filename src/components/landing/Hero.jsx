@@ -19,8 +19,14 @@ export default function Hero() {
   }, [])
 
   return (
-    <div className="px-5 pt-6 pb-16 md:pt-8 md:pb-24">
-      <div className="max-w-6xl mx-auto">
+    <div className="relative overflow-hidden px-5 pt-6 pb-16 md:pt-8 md:pb-24">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(51,92,255,0.14), transparent 55%)',
+        }}
+      />
+      <div className="relative max-w-6xl mx-auto">
         <nav className="flex items-center justify-between mb-14 md:mb-20">
           <h1 className="text-2xl font-black text-fg tracking-tight">VANTAR</h1>
           <div className="flex items-center gap-4 md:gap-6">
@@ -29,7 +35,7 @@ export default function Hero() {
             </button>
             <button
               onClick={scrollToDemoForm}
-              className="bg-brand-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all hover:bg-brand-700 hover:scale-[1.03] active:scale-[0.98]"
+              className="bg-brand-600 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-sm shadow-brand-900/20 transition-all hover:bg-brand-700 hover:shadow-brand-900/25 hover:scale-[1.03] active:scale-[0.98]"
             >
               Request a Demo
             </button>
@@ -54,7 +60,7 @@ export default function Hero() {
           <div className="flex flex-col items-center gap-3 mt-9">
             <button
               onClick={scrollToDemoForm}
-              className="bg-brand-600 text-white font-bold px-8 py-3 rounded-xl transition-all hover:bg-brand-700 hover:scale-[1.03] active:scale-[0.98]"
+              className="bg-brand-600 text-white font-bold px-8 py-3 rounded-xl shadow-md shadow-brand-900/20 transition-all hover:bg-brand-700 hover:shadow-brand-900/25 hover:scale-[1.03] active:scale-[0.98]"
             >
               Request a Demo
             </button>

@@ -9,12 +9,20 @@ import AlertBanner from '../components/ui/AlertBanner'
 import StatusPill from '../components/ui/StatusPill'
 import SegmentedToggle from '../components/ui/SegmentedToggle'
 import TopBar from '../components/layout/TopBar'
-import { Search } from 'lucide-react'
+import { Search, Truck, PackageCheck, FileText, ShieldCheck, Route, ArrowLeftRight, FileSignature, Briefcase } from 'lucide-react'
 import { differenceInMinutes, startOfMonth, startOfYear } from 'date-fns'
 import { safeFormatDate, safeDifferenceInDays } from '../lib/dates'
 import { useNavigate } from 'react-router-dom'
 
 const DISMISSED_KEY = 'vantar-dismissed-alerts'
+
+const RUN_BADGE_COLORS = {
+  pending:    'bg-yellow-500/15 text-yellow-300',
+  assigned:   'bg-brand-500/15 text-brand-300',
+  in_transit: 'bg-blue-500/15 text-blue-300',
+  delivered:  'bg-green-500/15 text-green-300',
+  cancelled:  'bg-fg/10 text-fg/40',
+}
 
 const PERIOD_OPTIONS = [
   { value: 'mtd', label: 'MTD' },
@@ -27,6 +35,13 @@ const PERIOD_OPTIONS = [
 // "expiring in 12 days" alert later becomes "expired 3 days ago", that's a
 // materially different warning and reappears rather than staying silenced
 // forever from one earlier dismissal.
+function greeting() {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 18) return 'Good afternoon'
+  return 'Good evening'
+}
+
 function loadDismissed() {
   try {
     return new Set(JSON.parse(localStorage.getItem(DISMISSED_KEY) ?? '[]'))
@@ -160,6 +175,11 @@ export default function Dashboard() {
     <div className="pb-24 md:pb-8">
       <TopBar title="Dashboard" />
       <div className="px-4 pt-4 space-y-4 md:px-8 md:pt-8">
+        <p className="text-fg/50 text-sm">
+          {greeting()}{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}
+          <span className="hidden sm:inline"> — here's what's happening today.</span>
+        </p>
+
         {samDaysLeft !== null && samDaysLeft <= 30 && !dismissed.has(samKey) && (
           <AlertBanner
             type={samDaysLeft <= 7 ? 'error' : 'warning'}
@@ -208,14 +228,15 @@ export default function Dashboard() {
             <SegmentedToggle options={PERIOD_OPTIONS} value={period} onChange={setPeriod} />
           </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <MetricCard label="Active Runs"    value={periodStats.activeRuns} color="blue"   />
-            <MetricCard label={`Delivered ${periodLabel}`}  value={periodStats.delivered}  color="green"  />
-            <MetricCard label="Open Contracts" value={openContracts} color="yellow" />
+            <MetricCard label="Active Runs"    value={periodStats.activeRuns} color="blue" icon={Truck} />
+            <MetricCard label={`Delivered ${periodLabel}`}  value={periodStats.delivered}  color="green" icon={PackageCheck} />
+            <MetricCard label="Open Contracts" value={openContracts} color="yellow" icon={FileText} />
             <MetricCard
               label="SAM Expiry"
               value={samDaysLeft !== null ? `${samDaysLeft}d` : '—'}
               sub={company?.sam_expiry ? safeFormatDate(company.sam_expiry, 'MMM d, yyyy') : 'Not set'}
               color={samDaysLeft !== null && samDaysLeft <= 30 ? 'red' : 'navy'}
+              icon={ShieldCheck}
             />
           </div>
         </div>
@@ -223,10 +244,10 @@ export default function Dashboard() {
         <div>
           <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide mb-2">Miles &amp; Run Type ({periodLabel})</h2>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <MetricCard label="Total Miles"    value={periodStats.totalMiles.toLocaleString()} color="navy" />
-            <MetricCard label="Deadhead Miles" value={periodStats.deadheadMiles.toLocaleString()} sub={periodStats.totalMiles ? `${Math.round(periodStats.deadheadMiles / periodStats.totalMiles * 100)}% of total` : undefined} color="red" />
-            <MetricCard label="Contract Runs"  value={periodStats.contractRuns}  color="blue" />
-            <MetricCard label="Commercial Runs" value={periodStats.commercialRuns} color="yellow" />
+            <MetricCard label="Total Miles"    value={periodStats.totalMiles.toLocaleString()} color="navy" icon={Route} />
+            <MetricCard label="Deadhead Miles" value={periodStats.deadheadMiles.toLocaleString()} sub={periodStats.totalMiles ? `${Math.round(periodStats.deadheadMiles / periodStats.totalMiles * 100)}% of total` : undefined} color="red" icon={ArrowLeftRight} />
+            <MetricCard label="Contract Runs"  value={periodStats.contractRuns}  color="blue" icon={FileSignature} />
+            <MetricCard label="Commercial Runs" value={periodStats.commercialRuns} color="yellow" icon={Briefcase} />
           </div>
         </div>
 
@@ -243,8 +264,11 @@ export default function Dashboard() {
               <div
                 key={run.id}
                 onClick={() => navigate(`/runs/${run.id}`)}
-                className="bg-navy-700 rounded-xl p-3 border border-fg/[0.07] flex items-center gap-3 active:bg-navy-600 cursor-pointer"
+                className="bg-navy-700 rounded-xl p-3 border border-fg/[0.07] shadow-sm shadow-black/5 hover:shadow-md hover:shadow-black/10 transition-all flex items-center gap-3 active:bg-navy-600 cursor-pointer"
               >
+                <span className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${RUN_BADGE_COLORS[run.status] ?? 'bg-fg/10 text-fg/40'}`}>
+                  <Truck size={15} strokeWidth={2.25} />
+                </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-fg truncate">{run.dropoff_address}</p>
                   <p className="text-xs text-fg/40 truncate">{run.profiles?.full_name ?? 'Unassigned'}</p>

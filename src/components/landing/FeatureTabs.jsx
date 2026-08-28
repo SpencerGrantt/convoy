@@ -120,7 +120,7 @@ export default function FeatureTabs() {
                 key={tab.label}
                 onClick={() => selectTab(i)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all
-                  ${isActive ? 'bg-brand-600 text-white shadow scale-[1.03]' : 'text-fg/40 hover:text-fg/60 hover:scale-[1.03] bg-navy-800'}`}
+                  ${isActive ? 'bg-brand-600 text-white shadow-sm shadow-brand-900/20 scale-[1.03]' : 'text-fg/40 hover:text-fg/60 hover:scale-[1.03] bg-navy-800'}`}
               >
                 <Icon size={16} className={isActive ? 'text-white' : 'text-fg/40'} />
                 {tab.label}
@@ -132,7 +132,7 @@ export default function FeatureTabs() {
         <Reveal delay={200}>
           <div
             key={active}
-            className="bg-navy-700 rounded-2xl border border-fg/[0.08] max-w-5xl mx-auto animate-fadeIn grid grid-cols-1 md:grid-cols-2"
+            className="bg-navy-700 rounded-2xl border border-fg/[0.08] shadow-xl shadow-black/[0.06] max-w-5xl mx-auto animate-fadeIn grid grid-cols-1 md:grid-cols-2"
           >
             <div className="md:order-1 flex flex-col relative">
               <div
@@ -189,7 +189,7 @@ export default function FeatureTabs() {
               return (
                 <div
                   key={f.label}
-                  className="bg-navy-800 rounded-xl border border-fg/[0.07] p-4"
+                  className="bg-navy-800 rounded-xl border border-fg/[0.07] p-4 shadow-sm shadow-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/10 hover:border-brand-600/25"
                 >
                   <div className="flex items-center gap-2 mb-1.5">
                     <Icon size={15} className="text-brand-300 shrink-0" />

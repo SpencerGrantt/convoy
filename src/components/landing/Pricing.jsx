@@ -41,7 +41,7 @@ export default function Pricing() {
                 </ul>
                 <button
                   onClick={scrollToDemoForm}
-                  className="w-full mt-8 bg-brand-600 text-white font-bold px-8 py-3 rounded-xl transition-all hover:bg-brand-700 hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full mt-8 bg-brand-600 text-white font-bold px-8 py-3 rounded-xl shadow-sm shadow-brand-900/20 transition-all hover:bg-brand-700 hover:shadow-brand-900/25 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Request a Demo
                 </button>

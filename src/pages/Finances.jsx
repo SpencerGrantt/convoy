@@ -10,8 +10,9 @@ import FuelCardImportSheet from '../components/finance/FuelCardImportSheet'
 import ExcelTrackerImportSheet from '../components/finance/ExcelTrackerImportSheet'
 import {
   BarChart, Bar, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell, Legend,
-  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LabelList,
 } from 'recharts'
+import { TrendingUp, TrendingDown, DollarSign, Route as RouteIcon, AlertCircle } from 'lucide-react'
 import { safeFormatDate } from '../lib/dates'
 import { haversineMiles } from '../lib/geo'
 import {
@@ -575,24 +576,28 @@ function AnalyticsTab() {
               label="Avg Revenue / Completed Run"
               value={avgRevenuePerRun != null ? fmt(avgRevenuePerRun) : '—'}
               color="green"
+              icon={TrendingUp}
               sub="Blended average — total revenue ÷ completed runs, not tracked per-run"
             />
             <MetricCard
               label="Avg Cost / Completed Run"
               value={avgCostPerRun != null ? fmt(avgCostPerRun) : '—'}
               color="yellow"
+              icon={TrendingDown}
               sub="Blended average — total expenses ÷ completed runs, not tracked per-run"
             />
             <MetricCard
               label="Avg Profit / Completed Run"
               value={avgProfitPerRun != null ? fmt(avgProfitPerRun) : '—'}
               color={avgProfitPerRun != null && avgProfitPerRun < 0 ? 'red' : 'green'}
+              icon={DollarSign}
               sub="Blended average — total revenue minus expenses, not tracked per-run"
             />
             <MetricCard
               label="Est. Cost / Mile"
               value={estCostPerMile != null ? fmt(estCostPerMile) : '—'}
               color="blue"
+              icon={RouteIcon}
               sub="Estimated from straight-line pickup→dropoff distance, not actual route mileage"
             />
           </div>
@@ -619,6 +624,7 @@ function AnalyticsTab() {
                     <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} />
                     <Tooltip
                       formatter={v => fmt(v)}
+                      cursor={false}
                       contentStyle={{ background: '#1A0B47', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff' }}
                     />
                     <Legend
@@ -683,6 +689,7 @@ function AnalyticsTab() {
                     <Tooltip
                       formatter={v => fmt(v)}
                       contentStyle={{ background: '#1A0B47', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff' }}
+                      itemStyle={{ color: '#fff' }}
                     />
                     <Legend
                       wrapperStyle={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}
@@ -695,15 +702,23 @@ function AnalyticsTab() {
                     </Pie>
                   </PieChart>
                 ) : (
-                  <BarChart data={expenseByCategory} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                  <BarChart data={expenseByCategory} margin={{ top: 16, right: 0, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                     <XAxis dataKey="name" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} />
                     <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} />
                     <Tooltip
                       formatter={v => fmt(v)}
+                      cursor={false}
                       contentStyle={{ background: '#1A0B47', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff' }}
+                      itemStyle={{ color: '#fff' }}
                     />
                     <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
+                      <LabelList
+                        dataKey="amount"
+                        position="top"
+                        formatter={v => fmt(v)}
+                        style={{ fill: 'rgba(255,255,255,0.65)', fontSize: 10, fontWeight: 600 }}
+                      />
                       {expenseByCategory.map(entry => (
                         <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name] ?? '#3393E8'} />
                       ))}
@@ -799,10 +814,10 @@ export default function Finances() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              <MetricCard label={`Revenue ${periodLabel}`}  value={fmt(totalRevenue)}  color="green"  />
-              <MetricCard label={`Expenses ${periodLabel}`} value={fmt(totalExpenses)} color="yellow" />
-              <MetricCard label="Net Profit"   value={fmt(netProfit)}     color={netProfit >= 0 ? 'green' : 'red'} />
-              <MetricCard label="Outstanding"  value={fmt(outstanding)}   color="red"    />
+              <MetricCard label={`Revenue ${periodLabel}`}  value={fmt(totalRevenue)}  color="green"  icon={TrendingUp} />
+              <MetricCard label={`Expenses ${periodLabel}`} value={fmt(totalExpenses)} color="yellow" icon={TrendingDown} />
+              <MetricCard label="Net Profit"   value={fmt(netProfit)}     color={netProfit >= 0 ? 'green' : 'red'} icon={DollarSign} />
+              <MetricCard label="Outstanding"  value={fmt(outstanding)}   color="red"    icon={AlertCircle} />
             </div>
 
             <div className="grid grid-cols-3 gap-2">

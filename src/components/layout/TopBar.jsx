@@ -40,7 +40,7 @@ function NotificationDropdown({ navigate }) {
     <div ref={rootRef} className="relative shrink-0">
       <button
         onClick={() => setOpen(v => !v)}
-        className="relative w-8 h-8 rounded-full bg-fg/[0.06] hover:bg-fg/[0.1] flex items-center justify-center transition-colors"
+        className="relative w-8 h-8 rounded-full bg-fg/[0.06] hover:bg-fg/[0.1] hover:scale-105 flex items-center justify-center transition-all"
         aria-label={unread > 0 ? `${unread} unread messages` : 'Notifications'}
       >
         <Bell size={15} className="text-fg/60" />
@@ -104,7 +104,7 @@ function ProfileButton({ profile, navigate }) {
       onClick={() => navigate('/settings')}
       className="flex items-center gap-2.5 shrink-0 min-w-0 active:opacity-70 transition-opacity"
     >
-      <div className="h-8 w-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 shadow-sm shadow-brand-900/30 flex items-center justify-center text-white text-xs font-bold shrink-0">
         {initial}
       </div>
       <div className="text-left min-w-0">
@@ -125,7 +125,7 @@ export default function TopBar({ title }) {
   const company = profile?.companies
 
   return (
-    <header className="bg-navy-900 border-b border-fg/[0.08] px-4 pt-5 pb-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3 sticky top-0 z-10 safe-top">
+    <header className="bg-navy-900 border-b border-fg/[0.08] shadow-sm shadow-black/[0.04] px-4 pt-5 pb-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3 sticky top-0 z-10 safe-top">
 
       {/* Left — brand identity only; the page title now lives in the
           center column instead of being tucked under/after it here */}

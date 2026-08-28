@@ -44,16 +44,21 @@ function NavItem({ to, icon: Icon, label, end, showDot }) {
       to={to}
       end={end}
       className={({ isActive }) =>
-        `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+        `relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
           isActive
-            ? 'bg-fg/[0.08] text-fg'
-            : 'text-fg/50 hover:text-fg hover:bg-fg/[0.05]'
+            ? 'bg-gradient-to-r from-fg/[0.09] to-fg/[0.04] text-fg shadow-sm shadow-black/5'
+            : 'text-fg/50 hover:text-fg hover:bg-fg/[0.05] hover:translate-x-0.5'
         }`
       }
     >
-      <Icon size={18} />
-      <span className="flex-1">{label}</span>
-      {showDot && <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0" />}
+      {({ isActive }) => (
+        <>
+          {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-full bg-brand-500" />}
+          <Icon size={18} />
+          <span className="flex-1">{label}</span>
+          {showDot && <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0" />}
+        </>
+      )}
     </NavLink>
   )
 }
@@ -138,7 +143,7 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full w-60 bg-navy-900 border-r border-fg/[0.08] z-50">
+    <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full w-60 bg-navy-900 border-r border-fg/[0.08] shadow-lg shadow-black/[0.03] z-50">
 
       {/* Logo */}
       <div className="px-5 py-5 border-b border-fg/[0.08] shrink-0">
@@ -224,7 +229,7 @@ export default function Sidebar() {
         <NavItem to="/settings" icon={Settings} label="Settings" />
         {profile && (
           <div className="flex items-center gap-3 px-2 py-2 mt-1">
-            <div className="h-7 w-7 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            <div className="h-7 w-7 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 shadow-sm shadow-brand-900/30 flex items-center justify-center text-white text-xs font-bold shrink-0">
               {profile.full_name?.charAt(0)?.toUpperCase() ?? '?'}
             </div>
             <div className="min-w-0">

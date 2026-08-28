@@ -15,11 +15,12 @@ const allTabs = [
 ]
 
 export default function MobileNav() {
-  const { profile } = useAuth()
+  const { profile, isDevUser, viewPlan } = useAuth()
   const unreadMessages = useUnreadMessageCount()
   const role = profile?.role ?? 'owner'
   const companyPlan = profile?.companies?.plan ?? 'standard'
-  const tabs = allTabs.filter(t => t.roles.includes(role) && (!BILLING_ENABLED || !t.plan || t.plan === companyPlan))
+  const planGateActive = BILLING_ENABLED || (isDevUser && viewPlan)
+  const tabs = allTabs.filter(t => t.roles.includes(role) && (!planGateActive || !t.plan || t.plan === companyPlan))
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-navy-900 border-t border-fg/[0.08] safe-bottom z-20">

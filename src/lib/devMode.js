@@ -15,3 +15,8 @@ export const VIEW_ROLES = [
   { value: 'driver', label: 'Driver' },
   { value: 'dispatcher', label: 'Dispatch' },
 ]
+
+export const VIEW_PLANS = [
+  { value: 'standard', label: 'Standard' },
+  { value: 'government', label: 'Government' },
+]

@@ -4,6 +4,7 @@ import { AuthContext } from './AuthContext'
 import { isDevUser } from '../lib/devMode'
 
 const VIEW_ROLE_KEY = 'vantar_dev_view_role'
+const VIEW_PLAN_KEY = 'vantar_dev_view_plan'
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
@@ -19,8 +20,24 @@ export function AuthProvider({ children }) {
     if (role) localStorage.setItem(VIEW_ROLE_KEY, role)
     else localStorage.removeItem(VIEW_ROLE_KEY)
   }
+  // Dev-only plan preview — same idea as viewRole above, for AuthGate's
+  // requiresPlan check and Sidebar's plan-gated nav items (Contracts is
+  // Government-only). Both currently short-circuit on BILLING_ENABLED,
+  // which is off, so real users always see everything regardless of
+  // company.plan — this override also flips the gate live for the dev
+  // account specifically, so Standard vs Government behavior is actually
+  // previewable before billing goes live.
+  const [viewPlan, setViewPlanState] = useState(() => localStorage.getItem(VIEW_PLAN_KEY) || null)
+  function setViewPlan(plan) {
+    setViewPlanState(plan)
+    if (plan) localStorage.setItem(VIEW_PLAN_KEY, plan)
+    else localStorage.removeItem(VIEW_PLAN_KEY)
+  }
   const devUser = isDevUser(session)
-  const effectiveProfile = (devUser && viewRole && profile) ? { ...profile, role: viewRole } : profile
+  let effectiveProfile = (devUser && viewRole && profile) ? { ...profile, role: viewRole } : profile
+  if (devUser && viewPlan && effectiveProfile?.companies) {
+    effectiveProfile = { ...effectiveProfile, companies: { ...effectiveProfile.companies, plan: viewPlan } }
+  }
   // Email 2FA step-up (see profiles.mfa_email_enabled + App.jsx's AuthGate,
   // which redirects to VerifyMfa while an enabled account hasn't verified
   // yet this session). This doesn't use Supabase's native MFA/AAL system —
@@ -231,6 +248,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       session, profile: effectiveProfile, loading, authError, signOut, refreshProfile, setProfileDirect,
       isDevUser: devUser, viewRole, setViewRole, realRole: profile?.role,
+      viewPlan, setViewPlan, realPlan: profile?.companies?.plan,
       emailMfaVerified, markEmailMfaVerified,
     }}>
       {children}

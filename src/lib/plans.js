@@ -4,8 +4,8 @@
 export const PLAN_META = {
   standard: {
     label: 'Standard',
-    monthlyPrice: 79,
-    yearlyPrice: 790,
+    monthlyPrice: 49,
+    yearlyPrice: 490,
     features: [
       'Dispatch and real-time run tracking',
       'Photo-verified chain-of-custody',
@@ -17,8 +17,8 @@ export const PLAN_META = {
   },
   government: {
     label: 'Government',
-    monthlyPrice: 149,
-    yearlyPrice: 1490,
+    monthlyPrice: 99,
+    yearlyPrice: 990,
     features: [
       'Everything in Standard',
       'SAM.gov contract matching',

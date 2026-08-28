@@ -125,7 +125,10 @@ export default function TopBar({ title }) {
   const company = profile?.companies
 
   return (
-    <header className="bg-navy-900 border-b border-fg/[0.08] shadow-sm shadow-black/[0.04] px-4 pt-5 pb-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3 sticky top-0 z-10 safe-top">
+    <header
+      className="bg-navy-900 border-b border-fg/[0.08] shadow-sm shadow-black/[0.04] px-4 pb-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3 sticky top-0 z-10"
+      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1.25rem)' }}
+    >
 
       {/* Left — brand identity only; the page title now lives in the
           center column instead of being tucked under/after it here */}

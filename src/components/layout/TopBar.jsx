@@ -5,6 +5,7 @@ import { useUnreadMessageCount, useRecentNotifications } from '../../hooks/useUn
 import { roleLabel } from '../../lib/roles'
 import { safeFormatDate } from '../../lib/dates'
 import { Building2, Bell } from 'lucide-react'
+import Logo from '../ui/Logo'
 
 function NotificationDropdown({ navigate }) {
   const [open, setOpen] = useState(false)
@@ -133,7 +134,7 @@ export default function TopBar({ title }) {
       {/* Left — brand identity only; the page title now lives in the
           center column instead of being tucked under/after it here */}
       <div className="flex items-center gap-2 min-w-0 justify-self-start">
-        <span className="md:hidden text-fg font-black text-lg tracking-tight shrink-0">VANTAR</span>
+        <Logo size="sm" className="md:hidden shrink-0" />
 
         {company ? (
           <div className="hidden md:flex items-center gap-2.5">

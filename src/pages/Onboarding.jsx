@@ -5,6 +5,7 @@ import { supabase, invokeFn } from '../lib/supabase'
 import { roleLabel } from '../lib/roles'
 import { PLAN_META, planPrice } from '../lib/plans'
 import { BILLING_ENABLED } from '../lib/billing'
+import Logo from '../components/ui/Logo'
 import {
   CheckCircle, ChevronRight, Building2, User, Shield,
   Users, Crown, Mail, DollarSign,
@@ -257,7 +258,7 @@ export default function Onboarding() {
 
       {/* Logo */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-black text-fg tracking-tight">VANTAR</h1>
+        <h1 className="inline-block"><Logo size="xl" /></h1>
         <p className="text-fg/35 text-xs mt-0.5">Logistics Platform</p>
       </div>
 

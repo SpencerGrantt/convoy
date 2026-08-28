@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Logo from '../ui/Logo'
 import dashboardMockup from '../../assets/landing/hero-dashboard-mockup.png'
 
 function scrollToDemoForm() {
@@ -29,7 +30,7 @@ export default function Hero() {
       />
       <div className="relative max-w-6xl mx-auto">
         <nav className="flex items-center justify-between mb-14 md:mb-20">
-          <h1 className="text-2xl font-black text-fg tracking-tight">VANTAR</h1>
+          <h1><Logo size="lg" /></h1>
           <div className="flex items-center gap-4 md:gap-6">
             <button onClick={scrollToPricing} className="hidden md:inline text-fg/60 text-sm font-medium hover:text-fg transition-colors">
               Pricing

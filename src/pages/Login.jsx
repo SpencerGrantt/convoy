@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import Logo from '../components/ui/Logo'
 
 const inputBase = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/25 transition-colors'
 
@@ -270,7 +271,7 @@ function Screen({ children }) {
     <div className="bg-navy-900 min-h-screen flex flex-col items-center justify-center px-5">
       <div className="w-full max-w-sm space-y-3">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-fg tracking-tight">VANTAR</h1>
+          <h1 className="inline-block"><Logo size="2xl" /></h1>
           <p className="text-fg/40 text-sm mt-1">Logistics Platform</p>
         </div>
         {children}

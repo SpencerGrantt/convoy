@@ -4,6 +4,7 @@ import {
   Home, Truck, FileText, DollarSign, MessageCircle, Settings, Plus, X, MapPinned, Wrench, Send,
   ClipboardCheck, ShieldCheck, Users, Wallet, Route, ChevronDown,
 } from 'lucide-react'
+import Logo from '../ui/Logo'
 import { useAuth } from '../../hooks/useAuth'
 import { useTeamMembers } from '../../hooks/useTeamMembers'
 import { useUnreadMessageCount } from '../../hooks/useUnreadCounts'
@@ -147,7 +148,7 @@ export default function Sidebar() {
 
       {/* Logo */}
       <div className="px-5 py-5 border-b border-fg/[0.08] shrink-0">
-        <span className="text-fg font-black text-xl tracking-tight">VANTAR</span>
+        <Logo size="md" />
       </div>
 
       {/* Scrollable middle: nav + drivers */}

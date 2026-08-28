@@ -75,7 +75,7 @@ export default function RunDetailPage() {
   function downloadPDF() {
     try {
       const doc = generateCustodyPDF(run, photos, signatures, custody)
-      doc.save(`convoy-run-${id.slice(0, 8)}.pdf`)
+      doc.save(`vantar-run-${id.slice(0, 8)}.pdf`)
       setPdfMsg('success')
     } catch (err) {
       setPdfMsg(`Error: ${err.message}`)
@@ -90,49 +90,49 @@ export default function RunDetailPage() {
     <div className="pb-24 md:pb-8">
       <TopBar title="Run Detail" />
       <div className="px-4 pt-4 space-y-4 md:px-8 md:pt-6">
-        <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
+        <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
           <div className="flex items-center justify-between">
             <StatusPill status={run?.status} />
             {run?.temp_sensitive && <span className="text-xs bg-brand-500/20 text-brand-300 px-2 py-1 rounded-lg">❄️ Temp Sensitive</span>}
           </div>
           <div className="space-y-1">
-            <p className="text-xs text-white/40">Pickup</p>
-            <p className="font-medium text-white">{run?.pickup_address}</p>
+            <p className="text-xs text-fg/40">Pickup</p>
+            <p className="font-medium text-fg">{run?.pickup_address}</p>
           </div>
           <div className="space-y-1">
-            <p className="text-xs text-white/40">Dropoff</p>
-            <p className="font-medium text-white">{run?.dropoff_address}</p>
+            <p className="text-xs text-fg/40">Dropoff</p>
+            <p className="font-medium text-fg">{run?.dropoff_address}</p>
           </div>
           {run?.cargo_description && (
             <div className="space-y-1">
-              <p className="text-xs text-white/40">Cargo</p>
-              <p className="text-sm text-white/70">{run.cargo_description}</p>
+              <p className="text-xs text-fg/40">Cargo</p>
+              <p className="text-sm text-fg/70">{run.cargo_description}</p>
             </div>
           )}
-          <div className="flex gap-4 text-xs text-white/50 pt-1 border-t border-white/[0.06]">
-            <span>Crew: <strong className="text-white/80">{run?.profiles?.full_name ?? '—'}</strong></span>
-            <span>Vehicle: <strong className="text-white/80">{run?.vehicles?.name ?? '—'}</strong></span>
+          <div className="flex gap-4 text-xs text-fg/50 pt-1 border-t border-fg/[0.06]">
+            <span>Crew: <strong className="text-fg/80">{run?.profiles?.full_name ?? '—'}</strong></span>
+            <span>Vehicle: <strong className="text-fg/80">{run?.vehicles?.name ?? '—'}</strong></span>
           </div>
         </div>
 
         {(run?.contracts?.name || run?.broker_name || run?.bol_number || run?.rate_per_mile || run?.loaded_miles || run?.deadhead_miles) && (
-          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-2">
-            <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Load Details</h3>
+          <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-2">
+            <h3 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Load Details</h3>
             {run?.contracts?.name ? (
-              <div className="flex justify-between text-sm"><span className="text-white/40">Contract</span><span className="text-white font-medium">{run.contracts.name}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-fg/40">Contract</span><span className="text-fg font-medium">{run.contracts.name}</span></div>
             ) : run?.broker_name ? (
-              <div className="flex justify-between text-sm"><span className="text-white/40">Broker/Customer</span><span className="text-white font-medium">{run.broker_name}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-fg/40">Broker/Customer</span><span className="text-fg font-medium">{run.broker_name}</span></div>
             ) : null}
             {run?.bol_number && (
-              <div className="flex justify-between text-sm"><span className="text-white/40">BOL #</span><span className="text-white font-medium">{run.bol_number}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-fg/40">BOL #</span><span className="text-fg font-medium">{run.bol_number}</span></div>
             )}
             {run?.rate_per_mile != null && (
-              <div className="flex justify-between text-sm"><span className="text-white/40">Rate/mile</span><span className="text-white font-medium">${Number(run.rate_per_mile).toFixed(2)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-fg/40">Rate/mile</span><span className="text-fg font-medium">${Number(run.rate_per_mile).toFixed(2)}</span></div>
             )}
             {(run?.loaded_miles != null || run?.deadhead_miles != null) && (
               <div className="flex justify-between text-sm">
-                <span className="text-white/40">Miles (loaded / deadhead)</span>
-                <span className="text-white font-medium">{run?.loaded_miles ?? 0} / {run?.deadhead_miles ?? 0}</span>
+                <span className="text-fg/40">Miles (loaded / deadhead)</span>
+                <span className="text-fg font-medium">{run?.loaded_miles ?? 0} / {run?.deadhead_miles ?? 0}</span>
               </div>
             )}
           </div>
@@ -152,29 +152,29 @@ export default function RunDetailPage() {
 
         <button
           onClick={() => navigate(`/photos?runId=${id}`)}
-          className="w-full bg-white/10 text-white/80 font-semibold py-3 rounded-xl active:bg-white/15 transition-colors"
+          className="w-full bg-fg/10 text-fg/80 font-semibold py-3 rounded-xl active:bg-fg/15 transition-colors"
         >
           📸 View / Add Photos
         </button>
 
         <button
           onClick={downloadPDF}
-          className={`w-full font-semibold py-3 rounded-xl transition-colors ${pdfMsg === 'success' ? 'bg-green-500/20 text-green-300' : pdfMsg ? 'bg-red-500/20 text-red-300' : 'bg-white/10 text-white/80 active:bg-white/15'}`}
+          className={`w-full font-semibold py-3 rounded-xl transition-colors ${pdfMsg === 'success' ? 'bg-green-500/20 text-green-300' : pdfMsg ? 'bg-red-500/20 text-red-300' : 'bg-fg/10 text-fg/80 active:bg-fg/15'}`}
         >
           {pdfMsg === 'success' ? '✓ PDF Downloaded' : pdfMsg || '📄 Download Chain of Custody PDF'}
         </button>
 
         {custody.length > 0 && (
           <div>
-            <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Chain of Custody</h3>
+            <h3 className="text-xs font-semibold text-fg/40 uppercase tracking-wide mb-2">Chain of Custody</h3>
             <div className="space-y-2">
               {custody.map(event => (
                 <div key={event.id} className="flex gap-3 items-start">
                   <div className="w-2 h-2 rounded-full bg-brand-400 mt-1.5 shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-white/80 capitalize">{event.event_type.replace('_', ' ')}</p>
-                    <p className="text-xs text-white/40">{safeFormatDate(event.created_at, 'MMM d, h:mm a')} · {event.profiles?.full_name ?? 'System'}</p>
-                    {event.note && <p className="text-xs text-white/50 mt-0.5">{event.note}</p>}
+                    <p className="text-sm font-medium text-fg/80 capitalize">{event.event_type.replace('_', ' ')}</p>
+                    <p className="text-xs text-fg/40">{safeFormatDate(event.created_at, 'MMM d, h:mm a')} · {event.profiles?.full_name ?? 'System'}</p>
+                    {event.note && <p className="text-xs text-fg/50 mt-0.5">{event.note}</p>}
                   </div>
                 </div>
               ))}

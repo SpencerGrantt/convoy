@@ -10,8 +10,8 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ['icons/*.png'],
       manifest: {
-        name: 'Convoy — Medical Courier',
-        short_name: 'Convoy',
+        name: 'Vantar — Medical Courier',
+        short_name: 'Vantar',
         description: 'Mobile logistics platform for veteran-owned medical courier operations',
         theme_color: '#131313',
         background_color: '#131313',

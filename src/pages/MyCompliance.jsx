@@ -49,21 +49,21 @@ export default function MyCompliance() {
       <div className="px-4 pt-4 space-y-3 md:px-8 md:pt-6">
 
         {docs.length === 0 && (
-          <div className="bg-navy-700 rounded-2xl border border-white/[0.07] p-8 text-center space-y-2">
-            <ShieldCheck size={32} className="text-white/20 mx-auto" />
-            <p className="text-white font-semibold">No documents on file</p>
-            <p className="text-white/40 text-sm">Your dispatcher or admin adds compliance documents for you.</p>
+          <div className="bg-navy-700 rounded-2xl border border-fg/[0.07] p-8 text-center space-y-2">
+            <ShieldCheck size={32} className="text-fg/20 mx-auto" />
+            <p className="text-fg font-semibold">No documents on file</p>
+            <p className="text-fg/40 text-sm">Your dispatcher or admin adds compliance documents for you.</p>
           </div>
         )}
 
         {docs.map(doc => (
-          <div key={doc.id} className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] flex items-center justify-between gap-3">
+          <div key={doc.id} className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="font-semibold text-white text-sm">{DOC_LABELS[doc.doc_type] ?? doc.doc_type.replace('_', ' ')}</p>
-              <p className="text-xs text-white/40 mt-0.5">
+              <p className="font-semibold text-fg text-sm">{DOC_LABELS[doc.doc_type] ?? doc.doc_type.replace('_', ' ')}</p>
+              <p className="text-xs text-fg/40 mt-0.5">
                 {doc.expiry_date ? `Expires ${safeFormatDate(doc.expiry_date, 'MMM d, yyyy')}` : 'No expiry set'}
               </p>
-              {doc.notes && <p className="text-xs text-white/30 mt-1 line-clamp-2">{doc.notes}</p>}
+              {doc.notes && <p className="text-xs text-fg/30 mt-1 line-clamp-2">{doc.notes}</p>}
             </div>
             <ExpiryBadge date={doc.expiry_date} />
           </div>

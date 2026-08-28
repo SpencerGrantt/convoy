@@ -17,10 +17,10 @@ export default function CameraCapture({
   doneIcon = '✅',
 }) {
   return (
-    <div className="bg-navy-700 rounded-2xl border border-white/[0.07] overflow-hidden">
-      <div className="px-4 py-3 flex items-center gap-2 border-b border-white/[0.06]">
+    <div className="bg-navy-700 rounded-2xl border border-fg/[0.07] overflow-hidden">
+      <div className="px-4 py-3 flex items-center gap-2 border-b border-fg/[0.06]">
         <span className="text-lg">{icon}</span>
-        <span className="text-sm font-semibold text-white">{title}</span>
+        <span className="text-sm font-semibold text-fg">{title}</span>
         {mode === 'done' && <span className="ml-auto text-xs text-green-400 font-medium">✓ Captured</span>}
       </div>
 
@@ -54,7 +54,7 @@ export default function CameraCapture({
 
         {mode === 'preview' && (
           <div className="flex gap-2">
-            <button onClick={onRetake} className="flex-1 bg-white/10 text-white/70 font-semibold py-2.5 rounded-xl text-sm">
+            <button onClick={onRetake} className="flex-1 bg-fg/10 text-fg/70 font-semibold py-2.5 rounded-xl text-sm">
               Retake
             </button>
             <button onClick={onConfirm} disabled={uploading} className="flex-1 bg-brand-600 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50">
@@ -64,7 +64,7 @@ export default function CameraCapture({
         )}
 
         {mode === 'done' && (
-          <button onClick={onRetake} className="w-full bg-white/10 text-white/50 font-medium py-2 rounded-xl text-xs">
+          <button onClick={onRetake} className="w-full bg-fg/10 text-fg/50 font-medium py-2 rounded-xl text-xs">
             Retake
           </button>
         )}

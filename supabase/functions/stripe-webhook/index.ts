@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@17?target=deno'
 
 // Unlike every other function here, this one is called directly by
-// Stripe's servers, not by the Convoy frontend — there's no Supabase
+// Stripe's servers, not by the Vantar frontend — there's no Supabase
 // session, so there's no Authorization header to check. Trust is
 // established entirely by verifying the Stripe-Signature header below.
 // Deploy with `supabase functions deploy stripe-webhook --no-verify-jwt`

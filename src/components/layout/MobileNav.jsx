@@ -22,7 +22,7 @@ export default function MobileNav() {
   const tabs = allTabs.filter(t => t.roles.includes(role) && (!BILLING_ENABLED || !t.plan || t.plan === companyPlan))
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-navy-900 border-t border-white/[0.08] safe-bottom z-20">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-navy-900 border-t border-fg/[0.08] safe-bottom z-20">
       <div className="flex items-center justify-around px-1 py-1">
         {tabs.map(({ to, icon: Icon, label }) => (
           <NavLink
@@ -31,7 +31,7 @@ export default function MobileNav() {
             end={to === '/'}
             className={({ isActive }) =>
               `flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl min-w-0 transition-colors ${
-                isActive ? 'text-white' : 'text-white/40'
+                isActive ? 'text-fg' : 'text-fg/40'
               }`
             }
           >

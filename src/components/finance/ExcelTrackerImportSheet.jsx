@@ -237,7 +237,7 @@ export default function ExcelTrackerImportSheet({ companyId, onSaved, onClose })
     return (
       <div className="space-y-4 text-center py-4">
         <p className="text-3xl">📊</p>
-        <p className="text-white font-semibold">
+        <p className="text-fg font-semibold">
           Imported {result.revenue} revenue {result.revenue === 1 ? 'entry' : 'entries'} and {result.expenses} expense {result.expenses === 1 ? 'entry' : 'entries'}
         </p>
         <button onClick={onClose} className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl">
@@ -250,15 +250,15 @@ export default function ExcelTrackerImportSheet({ companyId, onSaved, onClose })
   if (step === 'upload') {
     return (
       <div className="space-y-3">
-        <p className="text-xs text-white/50">
+        <p className="text-xs text-fg/50">
           Upload your Miles &amp; Expense Tracker (.xlsx). Loads become revenue + fuel/driver pay/tolls
           expenses, and tracked expenses are added as expenses — you'll review everything before it's saved.
           Mileage totals aren't logged to the IFTA mileage report since this file doesn't break miles out by state.
         </p>
-        <label className="block border-2 border-dashed border-white/15 rounded-xl px-4 py-8 text-center cursor-pointer hover:border-white/25 transition-colors">
+        <label className="block border-2 border-dashed border-fg/15 rounded-xl px-4 py-8 text-center cursor-pointer hover:border-fg/25 transition-colors">
           <input type="file" accept=".xlsx,.xls" onChange={handleFile} className="hidden" />
-          <p className="text-white/60 text-sm font-medium">Tap to choose an Excel file</p>
-          <p className="text-white/30 text-xs mt-1">{fileName || 'No file selected'}</p>
+          <p className="text-fg/60 text-sm font-medium">Tap to choose an Excel file</p>
+          <p className="text-fg/30 text-xs mt-1">{fileName || 'No file selected'}</p>
         </label>
         {parseErr && <p className="text-red-400 text-xs font-medium">{parseErr}</p>}
       </div>
@@ -268,20 +268,20 @@ export default function ExcelTrackerImportSheet({ companyId, onSaved, onClose })
   // step === 'preview'
   return (
     <div className="space-y-4">
-      <p className="text-xs text-white/50">{fileName}</p>
+      <p className="text-xs text-fg/50">{fileName}</p>
 
       {parsed.loadsSheetName && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-white/60 uppercase tracking-wide">Loads — {includedLoads.length} of {validLoads.length}</p>
-            <p className="text-xs text-white/40">+{`$${loadsRevenueTotal.toFixed(0)}`} rev / −{`$${loadsCostTotal.toFixed(0)}`} cost</p>
+            <p className="text-xs font-semibold text-fg/60 uppercase tracking-wide">Loads — {includedLoads.length} of {validLoads.length}</p>
+            <p className="text-xs text-fg/40">+{`$${loadsRevenueTotal.toFixed(0)}`} rev / −{`$${loadsCostTotal.toFixed(0)}`} cost</p>
           </div>
           <div className="bg-navy-800 rounded-xl max-h-48 overflow-y-auto divide-y divide-white/[0.06]">
             {validLoads.map(r => (
               <label key={r.i} className="flex items-center gap-2.5 px-3 py-2 cursor-pointer">
                 <input type="checkbox" checked={!excludedLoads.has(r.i)} onChange={() => toggleLoad(r.i)} className="shrink-0 accent-brand-500" />
-                <span className="flex-1 min-w-0 text-xs text-white/70 truncate">{r.origin} → {r.destination}</span>
-                <span className="text-xs text-white/40 shrink-0">{r.entryDate}</span>
+                <span className="flex-1 min-w-0 text-xs text-fg/70 truncate">{r.origin} → {r.destination}</span>
+                <span className="text-xs text-fg/40 shrink-0">{r.entryDate}</span>
                 <span className="text-xs font-semibold text-green-400 shrink-0 w-14 text-right">${r.revenue.toFixed(0)}</span>
               </label>
             ))}
@@ -292,16 +292,16 @@ export default function ExcelTrackerImportSheet({ companyId, onSaved, onClose })
       {parsed.expenseSheetName && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-white/60 uppercase tracking-wide">Expenses — {includedExpenses.length} of {validExpenses.length}</p>
-            <p className="text-xs text-white/40">−${expensesTotal.toFixed(0)}</p>
+            <p className="text-xs font-semibold text-fg/60 uppercase tracking-wide">Expenses — {includedExpenses.length} of {validExpenses.length}</p>
+            <p className="text-xs text-fg/40">−${expensesTotal.toFixed(0)}</p>
           </div>
           <div className="bg-navy-800 rounded-xl max-h-48 overflow-y-auto divide-y divide-white/[0.06]">
             {validExpenses.map(r => (
               <label key={r.i} className="flex items-center gap-2.5 px-3 py-2 cursor-pointer">
                 <input type="checkbox" checked={!excludedExpenses.has(r.i)} onChange={() => toggleExpense(r.i)} className="shrink-0 accent-brand-500" />
-                <span className="flex-1 min-w-0 text-xs text-white/70 truncate">{r.rawCategory ?? r.category} — {r.description || 'Expense'}</span>
-                <span className="text-xs text-white/40 shrink-0">{r.entryDate}</span>
-                <span className="text-xs font-semibold text-white shrink-0 w-14 text-right">${r.amount.toFixed(0)}</span>
+                <span className="flex-1 min-w-0 text-xs text-fg/70 truncate">{r.rawCategory ?? r.category} — {r.description || 'Expense'}</span>
+                <span className="text-xs text-fg/40 shrink-0">{r.entryDate}</span>
+                <span className="text-xs font-semibold text-fg shrink-0 w-14 text-right">${r.amount.toFixed(0)}</span>
               </label>
             ))}
           </div>

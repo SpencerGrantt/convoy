@@ -35,7 +35,7 @@ export default function HowItWorks() {
       <div className="relative px-5 py-16 md:py-24">
         <div className="max-w-5xl mx-auto">
           <Reveal className="text-center mb-12">
-            <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+            <h3 className="text-2xl md:text-3xl font-black text-fg tracking-tight">
               From Dispatch to Compliance Report
             </h3>
           </Reveal>
@@ -46,8 +46,8 @@ export default function HowItWorks() {
                 <span className="block text-6xl font-black text-brand-400/20 leading-none mb-2 transition-colors group-hover:text-brand-400/35">
                   {step.n}
                 </span>
-                <h4 className="text-white font-bold text-lg mb-1.5">{step.title}</h4>
-                <p className="text-white/60 text-sm leading-relaxed">{step.body}</p>
+                <h4 className="text-fg font-bold text-lg mb-1.5">{step.title}</h4>
+                <p className="text-fg/60 text-sm leading-relaxed">{step.body}</p>
               </Reveal>
             ))}
           </div>

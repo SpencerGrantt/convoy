@@ -5,8 +5,8 @@ export default function RequiresGovernmentPlan({ isOwner }) {
 
   return (
     <div className="min-h-screen bg-navy-900 flex flex-col items-center justify-center px-4 text-center gap-4">
-      <p className="text-white font-bold text-lg">Contracts is a Government-plan feature</p>
-      <p className="text-white/50 text-sm max-w-sm">
+      <p className="text-fg font-bold text-lg">Contracts is a Government-plan feature</p>
+      <p className="text-fg/50 text-sm max-w-sm">
         SAM.gov contract matching and the Contracts page are included on the
         Government plan. Your company is currently on Standard.
       </p>
@@ -18,7 +18,7 @@ export default function RequiresGovernmentPlan({ isOwner }) {
           Upgrade to Government
         </button>
       ) : (
-        <p className="text-white/40 text-sm">Ask your company owner to upgrade the plan.</p>
+        <p className="text-fg/40 text-sm">Ask your company owner to upgrade the plan.</p>
       )}
     </div>
   )

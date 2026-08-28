@@ -6,7 +6,7 @@ export default function SegmentedToggle({ options, value, onChange }) {
           key={opt.value}
           onClick={() => onChange(opt.value)}
           className={`flex-1 py-1 px-2.5 text-xs font-semibold rounded-lg capitalize transition-colors ${
-            value === opt.value ? 'bg-brand-600 text-white' : 'text-white/40'
+            value === opt.value ? 'bg-brand-600 text-white' : 'text-fg/40'
           }`}
         >
           {opt.label}

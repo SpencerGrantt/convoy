@@ -3,7 +3,7 @@ import Papa from 'papaparse'
 import { supabase } from '../../lib/supabase'
 import { parseISO, isValid, format as formatDateFns } from 'date-fns'
 
-const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
+const fieldClass = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/30'
 
 function guessColumn(headers, pattern) {
   return headers.find(h => pattern.test(h)) ?? ''
@@ -134,7 +134,7 @@ export default function FuelCardImportSheet({ companyId, onSaved, onClose }) {
     return (
       <div className="space-y-4 text-center py-4">
         <p className="text-3xl">⛽</p>
-        <p className="text-white font-semibold">Imported {importedCount} fuel expense{importedCount === 1 ? '' : 's'}</p>
+        <p className="text-fg font-semibold">Imported {importedCount} fuel expense{importedCount === 1 ? '' : 's'}</p>
         <button onClick={onClose} className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl">
           Done
         </button>
@@ -145,14 +145,14 @@ export default function FuelCardImportSheet({ companyId, onSaved, onClose }) {
   if (step === 'upload') {
     return (
       <div className="space-y-3">
-        <p className="text-xs text-white/50">
+        <p className="text-xs text-fg/50">
           Upload a CSV export from your fuel card provider (WEX, Fuelman, Comdata, etc). Each row is
           added as a fuel expense — you'll map columns and preview before anything is saved.
         </p>
-        <label className="block border-2 border-dashed border-white/15 rounded-xl px-4 py-8 text-center cursor-pointer hover:border-white/25 transition-colors">
+        <label className="block border-2 border-dashed border-fg/15 rounded-xl px-4 py-8 text-center cursor-pointer hover:border-fg/25 transition-colors">
           <input type="file" accept=".csv,text/csv" onChange={handleFile} className="hidden" />
-          <p className="text-white/60 text-sm font-medium">Tap to choose a CSV file</p>
-          <p className="text-white/30 text-xs mt-1">{fileName || 'No file selected'}</p>
+          <p className="text-fg/60 text-sm font-medium">Tap to choose a CSV file</p>
+          <p className="text-fg/30 text-xs mt-1">{fileName || 'No file selected'}</p>
         </label>
         {parseErr && <p className="text-red-400 text-xs font-medium">{parseErr}</p>}
       </div>
@@ -162,30 +162,30 @@ export default function FuelCardImportSheet({ companyId, onSaved, onClose }) {
   if (step === 'map') {
     return (
       <div className="space-y-3">
-        <p className="text-xs text-white/50">{rawRows.length} rows found in {fileName}. Match the columns below.</p>
+        <p className="text-xs text-fg/50">{rawRows.length} rows found in {fileName}. Match the columns below.</p>
         <div>
-          <label className="block text-xs text-white/50 mb-1">Date column *</label>
+          <label className="block text-xs text-fg/50 mb-1">Date column *</label>
           <select value={dateCol} onChange={e => setDateCol(e.target.value)} className={fieldClass}>
             <option value="">Select column</option>
             {headers.map(h => <option key={h} value={h}>{h}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-xs text-white/50 mb-1">Amount column *</label>
+          <label className="block text-xs text-fg/50 mb-1">Amount column *</label>
           <select value={amountCol} onChange={e => setAmountCol(e.target.value)} className={fieldClass}>
             <option value="">Select column</option>
             {headers.map(h => <option key={h} value={h}>{h}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-xs text-white/50 mb-1">Vehicle / unit column (optional)</label>
+          <label className="block text-xs text-fg/50 mb-1">Vehicle / unit column (optional)</label>
           <select value={vehicleCol} onChange={e => setVehicleCol(e.target.value)} className={fieldClass}>
             <option value="">None</option>
             {headers.map(h => <option key={h} value={h}>{h}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-xs text-white/50 mb-1">Merchant / location column (optional)</label>
+          <label className="block text-xs text-fg/50 mb-1">Merchant / location column (optional)</label>
           <select value={merchantCol} onChange={e => setMerchantCol(e.target.value)} className={fieldClass}>
             <option value="">None</option>
             {headers.map(h => <option key={h} value={h}>{h}</option>)}
@@ -206,7 +206,7 @@ export default function FuelCardImportSheet({ companyId, onSaved, onClose }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-white/50">{includedRows.length} of {validRows.length} rows selected · {errorRows.length} skipped (unreadable)</p>
+        <p className="text-xs text-fg/50">{includedRows.length} of {validRows.length} rows selected · {errorRows.length} skipped (unreadable)</p>
         <button onClick={() => setStep('map')} className="text-xs font-semibold text-brand-300">Edit mapping</button>
       </div>
 
@@ -219,9 +219,9 @@ export default function FuelCardImportSheet({ companyId, onSaved, onClose }) {
               onChange={() => toggleRow(r.i)}
               className="shrink-0 accent-brand-500"
             />
-            <span className="flex-1 min-w-0 text-xs text-white/70 truncate">{r.description}</span>
-            <span className="text-xs text-white/40 shrink-0">{r.entry_date}</span>
-            <span className="text-xs font-semibold text-white shrink-0 w-14 text-right">${r.amount.toFixed(2)}</span>
+            <span className="flex-1 min-w-0 text-xs text-fg/70 truncate">{r.description}</span>
+            <span className="text-xs text-fg/40 shrink-0">{r.entry_date}</span>
+            <span className="text-xs font-semibold text-fg shrink-0 w-14 text-right">${r.amount.toFixed(2)}</span>
           </label>
         ))}
       </div>
@@ -233,8 +233,8 @@ export default function FuelCardImportSheet({ companyId, onSaved, onClose }) {
       )}
 
       <div className="flex items-center justify-between bg-navy-800 rounded-xl px-3 py-2.5">
-        <span className="text-xs font-semibold text-white/60">Total to import</span>
-        <span className="text-sm font-bold text-white">${includedTotal.toFixed(2)}</span>
+        <span className="text-xs font-semibold text-fg/60">Total to import</span>
+        <span className="text-sm font-bold text-fg">${includedTotal.toFixed(2)}</span>
       </div>
 
       {saveErr && <p className="text-red-400 text-xs font-medium">{saveErr}</p>}

@@ -14,11 +14,11 @@ function Bubble({ message, isOwn }) {
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
       <div className={`max-w-[80%] rounded-xl px-3 py-2 ${
-        isOwn ? 'bg-brand-600 text-white' : 'bg-navy-700 border border-white/[0.07] text-white'
+        isOwn ? 'theme-dark bg-brand-600 text-white' : 'bg-navy-700 border border-fg/[0.07] text-fg'
       }`}>
         {!isOwn && <p className="text-[10px] font-semibold text-brand-300 mb-0.5">{senderName}</p>}
         <p className="text-sm whitespace-pre-wrap break-words">{message.body}</p>
-        <p className={`text-[10px] mt-1 ${isOwn ? 'text-white/70' : 'text-white/35'}`}>
+        <p className={`text-[10px] mt-1 ${isOwn ? 'text-fg/70' : 'text-fg/35'}`}>
           {safeFormatDate(message.created_at, 'MMM d, h:mm a')}
         </p>
       </div>
@@ -61,7 +61,7 @@ function ChatThread({ driverId, onBack, headerLabel }) {
       {onBack && (
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 px-4 py-2.5 text-sm text-white/60 hover:text-white shrink-0 md:px-8"
+          className="flex items-center gap-1.5 px-4 py-2.5 text-sm text-fg/60 hover:text-fg shrink-0 md:px-8"
         >
           <ChevronLeft size={16} />
           {headerLabel}
@@ -71,7 +71,7 @@ function ChatThread({ driverId, onBack, headerLabel }) {
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 md:px-8">
         {loading && <LoadingSpinner />}
         {!loading && messages.length === 0 && (
-          <p className="text-sm text-white/40 text-center py-8">No messages yet — say hello.</p>
+          <p className="text-sm text-fg/40 text-center py-8">No messages yet — say hello.</p>
         )}
         {messages.map(m => (
           <Bubble key={m.id} message={m} isOwn={m.sender_id === profile?.id} />
@@ -79,7 +79,7 @@ function ChatThread({ driverId, onBack, headerLabel }) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="shrink-0 border-t border-white/[0.08] px-4 py-3 flex items-end gap-2 md:px-8 safe-bottom">
+      <div className="shrink-0 border-t border-fg/[0.08] px-4 py-3 flex items-end gap-2 md:px-8 safe-bottom">
         <textarea
           value={draft}
           onChange={e => setDraft(e.target.value)}
@@ -91,7 +91,7 @@ function ChatThread({ driverId, onBack, headerLabel }) {
           }}
           placeholder="Type a message…"
           rows={1}
-          className="flex-1 resize-none bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30"
+          className="flex-1 resize-none bg-navy-800 border border-fg/10 text-fg rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/30"
         />
         <button
           onClick={handleSend}
@@ -114,7 +114,7 @@ function DriverListItem({ driver, unreadCount, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 bg-navy-700 rounded-xl p-3 border border-white/[0.07] active:bg-navy-600 transition-colors text-left"
+      className="w-full flex items-center gap-3 bg-navy-700 rounded-xl p-3 border border-fg/[0.07] active:bg-navy-600 transition-colors text-left"
     >
       {driver.avatar_url ? (
         <img src={driver.avatar_url} alt={name} className="h-9 w-9 rounded-full object-cover shrink-0" />
@@ -123,7 +123,7 @@ function DriverListItem({ driver, unreadCount, onClick }) {
           {initials}
         </div>
       )}
-      <span className="flex-1 min-w-0 text-sm font-medium text-white truncate">{name}</span>
+      <span className="flex-1 min-w-0 text-sm font-medium text-fg truncate">{name}</span>
       {unreadCount > 0 && (
         <span className="shrink-0 bg-brand-600 text-white text-[10px] font-bold rounded-full h-5 min-w-5 px-1.5 flex items-center justify-center">
           {unreadCount > 99 ? '99+' : unreadCount}
@@ -165,8 +165,8 @@ function ManagementView({ initialDriverId }) {
       {loading && <LoadingSpinner />}
       {!loading && drivers.length === 0 && (
         <div className="text-center py-12">
-          <MessageCircle size={28} className="mx-auto text-white/20 mb-2" />
-          <p className="text-sm text-white/40">No drivers yet</p>
+          <MessageCircle size={28} className="mx-auto text-fg/20 mb-2" />
+          <p className="text-sm text-fg/40">No drivers yet</p>
         </div>
       )}
       {drivers.map(driver => (
@@ -203,12 +203,12 @@ function DriverChatListView({ profile, autoOpen }) {
     <div className="px-4 pt-4 pb-24 space-y-2 md:px-8 md:pt-6 md:pb-8">
       <button
         onClick={() => setOpened(true)}
-        className="w-full flex items-center gap-3 bg-navy-700 rounded-xl p-3 border border-white/[0.07] active:bg-navy-600 transition-colors text-left"
+        className="w-full flex items-center gap-3 bg-navy-700 rounded-xl p-3 border border-fg/[0.07] active:bg-navy-600 transition-colors text-left"
       >
         <div className="h-9 w-9 rounded-full bg-brand-600/30 flex items-center justify-center text-brand-300 shrink-0">
           <Headset size={16} />
         </div>
-        <span className="flex-1 min-w-0 text-sm font-medium text-white truncate">Management</span>
+        <span className="flex-1 min-w-0 text-sm font-medium text-fg truncate">Management</span>
         {unread > 0 && (
           <span className="shrink-0 bg-brand-600 text-white text-[10px] font-bold rounded-full h-5 min-w-5 px-1.5 flex items-center justify-center">
             {unread > 99 ? '99+' : unread}

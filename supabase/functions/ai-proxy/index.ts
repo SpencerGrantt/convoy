@@ -131,7 +131,7 @@ serve(async (req) => {
   try {
     // This proxy previously had no authentication at all — anyone who found
     // the URL could spend this project's Anthropic budget on arbitrary
-    // completions unrelated to Convoy. Now that it can also query real
+    // completions unrelated to Vantar. Now that it can also query real
     // company data via tools, an unauthenticated caller would be far worse
     // than a cost leak — it'd be an open door to every company's business
     // data. Require and verify a session before anything else.

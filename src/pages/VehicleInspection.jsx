@@ -7,7 +7,7 @@ import TopBar from '../components/layout/TopBar'
 import CameraCapture from '../components/photos/CameraCapture'
 import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 
-const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
+const fieldClass = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/30'
 
 // Standard checklist for a medical courier vehicle — covers roadworthiness
 // (tires/lights/brakes/mirrors/fluids) plus the two items specific to this
@@ -25,15 +25,15 @@ const CHECKLIST_ITEMS = [
 ]
 
 const ANSWERS = [
-  { value: 'pass', label: 'Pass', on: 'bg-green-600 text-white', off: 'bg-navy-800 text-white/40' },
-  { value: 'fail', label: 'Fail', on: 'bg-red-600 text-white',   off: 'bg-navy-800 text-white/40' },
-  { value: 'na',   label: 'N/A',  on: 'bg-white/20 text-white',  off: 'bg-navy-800 text-white/40' },
+  { value: 'pass', label: 'Pass', on: 'bg-green-600 text-white', off: 'bg-navy-800 text-fg/40' },
+  { value: 'fail', label: 'Fail', on: 'bg-red-600 text-white',   off: 'bg-navy-800 text-fg/40' },
+  { value: 'na',   label: 'N/A',  on: 'bg-fg/20 text-fg',  off: 'bg-navy-800 text-fg/40' },
 ]
 
 function ChecklistRow({ item, value, onChange }) {
   return (
-    <div className="flex items-center justify-between gap-3 py-2.5 border-b border-white/[0.06] last:border-b-0">
-      <span className="text-sm text-white/80 flex-1 min-w-0">{item.label}</span>
+    <div className="flex items-center justify-between gap-3 py-2.5 border-b border-fg/[0.06] last:border-b-0">
+      <span className="text-sm text-fg/80 flex-1 min-w-0">{item.label}</span>
       <div className="flex gap-1 shrink-0">
         {ANSWERS.map(a => (
           <button
@@ -147,8 +147,8 @@ export default function VehicleInspection() {
         <TopBar title="Vehicle Inspection" />
         <div className="px-4 pt-16 text-center space-y-3">
           <CheckCircle2 size={40} className="text-green-400 mx-auto" />
-          <p className="text-white font-semibold text-lg">Inspection submitted</p>
-          <p className="text-white/40 text-sm">Returning to your dashboard…</p>
+          <p className="text-fg font-semibold text-lg">Inspection submitted</p>
+          <p className="text-fg/40 text-sm">Returning to your dashboard…</p>
         </div>
       </div>
     )
@@ -160,7 +160,7 @@ export default function VehicleInspection() {
       <div className="px-4 pt-4 space-y-4 md:px-8 md:pt-6">
 
         {/* Type toggle */}
-        <div className="bg-navy-700 rounded-2xl p-1.5 border border-white/[0.07] flex gap-1.5">
+        <div className="bg-navy-700 rounded-2xl p-1.5 border border-fg/[0.07] flex gap-1.5">
           {[
             { value: 'pre_trip',  label: 'Pre-Trip' },
             { value: 'post_trip', label: 'Post-Trip' },
@@ -169,7 +169,7 @@ export default function VehicleInspection() {
               key={t.value}
               onClick={() => setInspectionType(t.value)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                inspectionType === t.value ? 'bg-brand-600 text-white' : 'text-white/40'
+                inspectionType === t.value ? 'bg-brand-600 text-white' : 'text-fg/40'
               }`}
             >
               {t.label}
@@ -178,8 +178,8 @@ export default function VehicleInspection() {
         </div>
 
         {/* Vehicle picker */}
-        <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-2">
-          <label className="block text-xs text-white/50">Vehicle *</label>
+        <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-2">
+          <label className="block text-xs text-fg/50">Vehicle *</label>
           <select value={vehicleId} onChange={e => setVehicleId(e.target.value)} className={fieldClass}>
             <option value="">Select a vehicle…</option>
             {vehicles.map(v => (
@@ -189,8 +189,8 @@ export default function VehicleInspection() {
         </div>
 
         {/* Checklist */}
-        <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07]">
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-1">Checklist</h2>
+        <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07]">
+          <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide mb-1">Checklist</h2>
           {CHECKLIST_ITEMS.map(item => (
             <ChecklistRow key={item.key} item={item} value={checklist[item.key]} onChange={setAnswer} />
           ))}
@@ -204,8 +204,8 @@ export default function VehicleInspection() {
         )}
 
         {/* Notes */}
-        <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-2">
-          <label className="block text-xs text-white/50">Notes</label>
+        <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-2">
+          <label className="block text-xs text-fg/50">Notes</label>
           <textarea
             value={notes}
             onChange={e => setNotes(e.target.value)}

@@ -68,7 +68,7 @@ function DateRangeControl({ preset, setPreset, customStart, setCustomStart, cust
           key={p.key}
           onClick={() => setPreset(p.key)}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-            preset === p.key ? 'bg-brand-600 text-white' : 'bg-navy-800 text-white/50'
+            preset === p.key ? 'bg-brand-600 text-white' : 'bg-navy-800 text-fg/50'
           }`}
         >
           {p.label}
@@ -77,10 +77,10 @@ function DateRangeControl({ preset, setPreset, customStart, setCustomStart, cust
       {preset === 'custom' && (
         <div className="flex items-center gap-2">
           <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)}
-            className="bg-navy-800 border border-white/10 text-white rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
-          <span className="text-white/30 text-xs">to</span>
+            className="bg-navy-800 border border-fg/10 text-fg rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
+          <span className="text-fg/30 text-xs">to</span>
           <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)}
-            className="bg-navy-800 border border-white/10 text-white rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            className="bg-navy-800 border border-fg/10 text-fg rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
       )}
     </div>
@@ -145,10 +145,10 @@ export default function MyEarnings() {
       <div className="pb-24 md:pb-8">
         <TopBar title="My Earnings" />
         <div className="px-4 pt-4 md:px-8 md:pt-6">
-          <div className="bg-navy-700 rounded-2xl border border-white/[0.07] p-8 text-center space-y-2">
-            <DollarSign size={32} className="text-white/20 mx-auto" />
-            <p className="text-white font-semibold">Your pay rate hasn't been set yet</p>
-            <p className="text-white/40 text-sm">Ask your admin to set it in Settings.</p>
+          <div className="bg-navy-700 rounded-2xl border border-fg/[0.07] p-8 text-center space-y-2">
+            <DollarSign size={32} className="text-fg/20 mx-auto" />
+            <p className="text-fg font-semibold">Your pay rate hasn't been set yet</p>
+            <p className="text-fg/40 text-sm">Ask your admin to set it in Settings.</p>
           </div>
         </div>
       </div>
@@ -184,39 +184,39 @@ export default function MyEarnings() {
           />
         </div>
 
-        {loading && <p className="text-sm text-white/40 text-center py-6">Loading your earnings…</p>}
+        {loading && <p className="text-sm text-fg/40 text-center py-6">Loading your earnings…</p>}
 
         {!loading && rows.length === 0 && (
-          <div className="bg-navy-700 rounded-2xl border border-white/[0.07] p-8 text-center space-y-2">
-            <MapPin size={32} className="text-white/20 mx-auto" />
-            <p className="text-white font-semibold">No completed runs in this period</p>
-            <p className="text-white/40 text-sm">Delivered runs in the selected range will show up here.</p>
+          <div className="bg-navy-700 rounded-2xl border border-fg/[0.07] p-8 text-center space-y-2">
+            <MapPin size={32} className="text-fg/20 mx-auto" />
+            <p className="text-fg font-semibold">No completed runs in this period</p>
+            <p className="text-fg/40 text-sm">Delivered runs in the selected range will show up here.</p>
           </div>
         )}
 
         {!loading && rows.length > 0 && (
           <div className="space-y-2">
             {rows.map(({ run, hasRevenue, revenueAmount, earnings }) => (
-              <div key={run.id} className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07]">
+              <div key={run.id} className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07]">
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm text-white/80 truncate flex-1">{routeLabel(run)}</p>
-                  <p className="text-xs text-white/40 shrink-0">{safeFormatDate(run.delivered_at, 'MMM d, yyyy')}</p>
+                  <p className="text-sm text-fg/80 truncate flex-1">{routeLabel(run)}</p>
+                  <p className="text-xs text-fg/40 shrink-0">{safeFormatDate(run.delivered_at, 'MMM d, yyyy')}</p>
                 </div>
-                <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-white/[0.06]">
+                <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-fg/[0.06]">
                   <div>
-                    <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wide">Revenue</p>
+                    <p className="text-[10px] font-semibold text-fg/40 uppercase tracking-wide">Revenue</p>
                     {hasRevenue ? (
-                      <p className="text-sm text-white/70 mt-0.5">{fmt(revenueAmount)}</p>
+                      <p className="text-sm text-fg/70 mt-0.5">{fmt(revenueAmount)}</p>
                     ) : (
-                      <p className="text-sm text-white/30 italic mt-0.5">No revenue logged yet</p>
+                      <p className="text-sm text-fg/30 italic mt-0.5">No revenue logged yet</p>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wide">Your Earnings</p>
+                    <p className="text-[10px] font-semibold text-fg/40 uppercase tracking-wide">Your Earnings</p>
                     {hasRevenue ? (
                       <p className="text-sm font-bold text-green-400 mt-0.5">{fmt(earnings)}</p>
                     ) : (
-                      <p className="text-sm font-semibold text-white/30 mt-0.5">—</p>
+                      <p className="text-sm font-semibold text-fg/30 mt-0.5">—</p>
                     )}
                   </div>
                 </div>

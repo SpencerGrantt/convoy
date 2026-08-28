@@ -25,16 +25,16 @@ function fmt(n) {
   return `$${Number(n).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
 }
 
-const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
+const fieldClass = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/30'
 
 function Sheet({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative bg-navy-700 rounded-t-3xl px-4 pt-4 pb-8 space-y-4 max-h-[85vh] overflow-y-auto border-t border-white/[0.08]">
+      <div className="relative bg-navy-700 rounded-t-3xl px-4 pt-4 pb-8 space-y-4 max-h-[85vh] overflow-y-auto border-t border-fg/[0.08]">
         <div className="flex items-center justify-between mb-2">
-          <p className="font-bold text-white">{title}</p>
-          <button onClick={onClose} className="text-white/40 text-2xl leading-none">×</button>
+          <p className="font-bold text-fg">{title}</p>
+          <button onClick={onClose} className="text-fg/40 text-2xl leading-none">×</button>
         </div>
         {children}
       </div>
@@ -47,7 +47,7 @@ const PAYMENT_METHODS = ['cash', 'check', 'ach', 'credit_card', 'other']
 function EnteredOnNote({ entry }) {
   if (!entry?.created_at) return null
   return (
-    <p className="text-[10px] text-white/30">
+    <p className="text-[10px] text-fg/30">
       Entered {safeFormatDate(entry.created_at, "MMM d, yyyy 'at' h:mm a")}
     </p>
   )
@@ -106,26 +106,26 @@ function RevenueForm({ companyId, contracts, entry, onSave, onClose }) {
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-xs text-white/50 mb-1">Amount *</label>
+        <label className="block text-xs text-fg/50 mb-1">Amount *</label>
         <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className={fieldClass} />
       </div>
       <div>
-        <label className="block text-xs text-white/50 mb-1">Date</label>
+        <label className="block text-xs text-fg/50 mb-1">Date</label>
         <input type="date" value={entryDate} onChange={e => setEntryDate(e.target.value)} className={fieldClass} />
       </div>
       <div>
-        <label className="block text-xs text-white/50 mb-1">Description</label>
+        <label className="block text-xs text-fg/50 mb-1">Description</label>
         <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Lab specimen courier" className={fieldClass} />
       </div>
       <div>
-        <label className="block text-xs text-white/50 mb-1">Contract</label>
+        <label className="block text-xs text-fg/50 mb-1">Contract</label>
         <select value={contractId} onChange={e => setContractId(e.target.value)} className={fieldClass}>
           <option value="">None</option>
           {contracts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
       <div>
-        <label className="block text-xs text-white/50 mb-1">Payment Method</label>
+        <label className="block text-xs text-fg/50 mb-1">Payment Method</label>
         <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className={fieldClass}>
           <option value="">Unspecified</option>
           {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m.replace('_', ' ')}</option>)}
@@ -196,21 +196,21 @@ function ExpenseForm({ companyId, entry, onSave, onClose }) {
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-xs text-white/50 mb-1">Category *</label>
+        <label className="block text-xs text-fg/50 mb-1">Category *</label>
         <select value={category} onChange={e => setCategory(e.target.value)} className={fieldClass}>
           {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c.replace('_', ' ')}</option>)}
         </select>
       </div>
       <div>
-        <label className="block text-xs text-white/50 mb-1">Amount *</label>
+        <label className="block text-xs text-fg/50 mb-1">Amount *</label>
         <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className={fieldClass} />
       </div>
       <div>
-        <label className="block text-xs text-white/50 mb-1">Date</label>
+        <label className="block text-xs text-fg/50 mb-1">Date</label>
         <input type="date" value={entryDate} onChange={e => setEntryDate(e.target.value)} className={fieldClass} />
       </div>
       <div>
-        <label className="block text-xs text-white/50 mb-1">Description</label>
+        <label className="block text-xs text-fg/50 mb-1">Description</label>
         <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Gas — Van 01" className={fieldClass} />
       </div>
       {isEdit && <EnteredOnNote entry={entry} />}
@@ -278,7 +278,7 @@ function InvoiceForm({ companyId, contracts, onSave, onClose }) {
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-xs text-white/50 mb-1">Contract *</label>
+        <label className="block text-xs text-fg/50 mb-1">Contract *</label>
         <select value={contractId} onChange={e => setContractId(e.target.value)} className={fieldClass}>
           <option value="">Select contract</option>
           {contracts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -286,27 +286,27 @@ function InvoiceForm({ companyId, contracts, onSave, onClose }) {
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="block text-xs text-white/50 mb-1">Period Start</label>
+          <label className="block text-xs text-fg/50 mb-1">Period Start</label>
           <input type="date" value={periodStart} onChange={e => setPeriodStart(e.target.value)} className={fieldClass} />
         </div>
         <div>
-          <label className="block text-xs text-white/50 mb-1">Period End</label>
+          <label className="block text-xs text-fg/50 mb-1">Period End</label>
           <input type="date" value={periodEnd} onChange={e => setPeriodEnd(e.target.value)} className={fieldClass} />
         </div>
       </div>
-      <button onClick={fetchRuns} className="w-full bg-white/10 text-white/80 font-semibold py-2.5 rounded-xl text-sm">
+      <button onClick={fetchRuns} className="w-full bg-fg/10 text-fg/80 font-semibold py-2.5 rounded-xl text-sm">
         Load Completed Runs
       </button>
       {fetched && (
         <div className="bg-navy-800 rounded-xl p-3 space-y-1">
-          <p className="text-xs font-semibold text-white/50">{runs.length} runs found</p>
+          <p className="text-xs font-semibold text-fg/50">{runs.length} runs found</p>
           {runs.map(r => (
-            <div key={r.id} className="flex justify-between text-xs text-white/60">
+            <div key={r.id} className="flex justify-between text-xs text-fg/60">
               <span className="truncate flex-1">{r.dropoff_address}</span>
               <span className="shrink-0 ml-2">{fmt(r.revenue_entries?.[0]?.amount ?? 0)}</span>
             </div>
           ))}
-          <div className="border-t border-white/10 pt-1 flex justify-between text-sm font-bold text-white">
+          <div className="border-t border-fg/10 pt-1 flex justify-between text-sm font-bold text-fg">
             <span>Total</span><span>{fmt(total)}</span>
           </div>
         </div>
@@ -413,7 +413,7 @@ function DateRangeControl({ preset, setPreset, customStart, setCustomStart, cust
           key={p.key}
           onClick={() => setPreset(p.key)}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-            preset === p.key ? 'bg-brand-600 text-white' : 'bg-navy-800 text-white/50'
+            preset === p.key ? 'bg-brand-600 text-white' : 'bg-navy-800 text-fg/50'
           }`}
         >
           {p.label}
@@ -422,10 +422,10 @@ function DateRangeControl({ preset, setPreset, customStart, setCustomStart, cust
       {preset === 'custom' && (
         <div className="flex items-center gap-2">
           <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)}
-            className="bg-navy-800 border border-white/10 text-white rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
-          <span className="text-white/30 text-xs">to</span>
+            className="bg-navy-800 border border-fg/10 text-fg rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
+          <span className="text-fg/30 text-xs">to</span>
           <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)}
-            className="bg-navy-800 border border-white/10 text-white rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            className="bg-navy-800 border border-fg/10 text-fg rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
       )}
     </div>
@@ -481,16 +481,16 @@ function AnalyticsTab() {
 
   // Per-device display preference, not company data — doesn't belong in the DB.
   const [trendChartType, setTrendChartType] = useState(
-    () => localStorage.getItem('convoy_analytics_trend_chart') || 'line'
+    () => localStorage.getItem('vantar_analytics_trend_chart') || 'line'
   )
   const [categoryChartType, setCategoryChartType] = useState(
-    () => localStorage.getItem('convoy_analytics_category_chart') || 'bar'
+    () => localStorage.getItem('vantar_analytics_category_chart') || 'bar'
   )
   useEffect(() => {
-    localStorage.setItem('convoy_analytics_trend_chart', trendChartType)
+    localStorage.setItem('vantar_analytics_trend_chart', trendChartType)
   }, [trendChartType])
   useEffect(() => {
-    localStorage.setItem('convoy_analytics_category_chart', categoryChartType)
+    localStorage.setItem('vantar_analytics_category_chart', categoryChartType)
   }, [categoryChartType])
 
   const completedCount = runs.length
@@ -566,7 +566,7 @@ function AnalyticsTab() {
         customEnd={customEnd} setCustomEnd={setCustomEnd}
       />
 
-      {loading && <p className="text-sm text-white/40 text-center py-6">Loading analytics…</p>}
+      {loading && <p className="text-sm text-fg/40 text-center py-6">Loading analytics…</p>}
 
       {!loading && (
         <>
@@ -597,9 +597,9 @@ function AnalyticsTab() {
             />
           </div>
 
-          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07]">
+          <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07]">
             <div className="flex items-center justify-between gap-3 mb-3">
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-wide">Revenue vs Expenses</p>
+              <p className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Revenue vs Expenses</p>
               <div className="w-40">
                 <SegmentedToggle
                   options={[{ value: 'line', label: 'Line' }, { value: 'bar', label: 'Bar' }, { value: 'area', label: 'Area' }]}
@@ -609,7 +609,7 @@ function AnalyticsTab() {
               </div>
             </div>
             {trendData.length === 0 ? (
-              <p className="text-sm text-white/40 text-center py-6">No revenue or expense entries in this range</p>
+              <p className="text-sm text-fg/40 text-center py-6">No revenue or expense entries in this range</p>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 {trendChartType === 'bar' ? (
@@ -666,9 +666,9 @@ function AnalyticsTab() {
           </div>
 
           {expenseByCategory.length > 0 && (
-            <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07]">
+            <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07]">
               <div className="flex items-center justify-between gap-3 mb-3">
-                <p className="text-xs font-semibold text-white/40 uppercase tracking-wide">Expenses by Category</p>
+                <p className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Expenses by Category</p>
                 <div className="w-28">
                   <SegmentedToggle
                     options={[{ value: 'bar', label: 'Bar' }, { value: 'pie', label: 'Pie' }]}
@@ -714,15 +714,15 @@ function AnalyticsTab() {
             </div>
           )}
 
-          <div className="bg-navy-700 rounded-2xl border border-white/[0.07] overflow-hidden">
-            <p className="text-xs font-semibold text-white/40 uppercase tracking-wide px-4 pt-4 pb-3">Crew Utilization</p>
+          <div className="bg-navy-700 rounded-2xl border border-fg/[0.07] overflow-hidden">
+            <p className="text-xs font-semibold text-fg/40 uppercase tracking-wide px-4 pt-4 pb-3">Crew Utilization</p>
             {driverRows.length === 0 ? (
-              <p className="text-sm text-white/40 text-center py-6">No completed runs in this range</p>
+              <p className="text-sm text-fg/40 text-center py-6">No completed runs in this range</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-[10px] text-white/35 uppercase tracking-wide border-t border-white/[0.06]">
+                    <tr className="text-[10px] text-fg/35 uppercase tracking-wide border-t border-fg/[0.06]">
                       <th className="text-left font-semibold px-4 py-2">Crew</th>
                       <th className="text-right font-semibold px-4 py-2">Completed Runs</th>
                       <th className="text-right font-semibold px-4 py-2">Avg Turnaround</th>
@@ -730,10 +730,10 @@ function AnalyticsTab() {
                   </thead>
                   <tbody>
                     {driverRows.map(d => (
-                      <tr key={d.driverId} className="border-t border-white/[0.06]">
-                        <td className="px-4 py-2.5 text-white/80 truncate max-w-[10rem]">{d.name}</td>
-                        <td className="px-4 py-2.5 text-right text-white font-semibold">{d.count}</td>
-                        <td className="px-4 py-2.5 text-right text-white/60">{formatDuration(d.avgTurnaroundMs)}</td>
+                      <tr key={d.driverId} className="border-t border-fg/[0.06]">
+                        <td className="px-4 py-2.5 text-fg/80 truncate max-w-[10rem]">{d.name}</td>
+                        <td className="px-4 py-2.5 text-right text-fg font-semibold">{d.count}</td>
+                        <td className="px-4 py-2.5 text-right text-fg/60">{formatDuration(d.avgTurnaroundMs)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -757,8 +757,8 @@ const PERIOD_OPTIONS = [
 
 export default function Finances() {
   const { profile } = useAuth()
-  const [period, setPeriod] = useState(() => localStorage.getItem('convoy_finances_period') || 'mtd')
-  useEffect(() => { localStorage.setItem('convoy_finances_period', period) }, [period])
+  const [period, setPeriod] = useState(() => localStorage.getItem('vantar_finances_period') || 'mtd')
+  useEffect(() => { localStorage.setItem('vantar_finances_period', period) }, [period])
   const periodLabel = PERIOD_OPTIONS.find(p => p.value === period)?.label ?? 'MTD'
   const { revenue, expenses, invoices, contracts, totalRevenue, totalExpenses, netProfit, outstanding, refresh } = useFinances(period)
   const [sheet, setSheet] = useState(null)
@@ -780,11 +780,11 @@ export default function Finances() {
     <div className="pb-24 md:pb-8">
       <TopBar title="Finances" />
 
-      <div className="flex border-b border-white/[0.08] bg-navy-900 px-4 gap-4 md:px-8">
+      <div className="flex border-b border-fg/[0.08] bg-navy-900 px-4 gap-4 md:px-8">
         {tabs.map(t => (
           <button key={t} onClick={() => setActiveTab(t)}
             className={`py-3 text-xs font-semibold capitalize transition-colors border-b-2
-              ${activeTab === t ? 'border-white text-white' : 'border-transparent text-white/40'}`}>
+              ${activeTab === t ? 'border-fg text-fg' : 'border-transparent text-fg/40'}`}>
             {t}
           </button>
         ))}
@@ -810,21 +810,21 @@ export default function Finances() {
               <button onClick={() => openSheet('expense')} className="bg-yellow-500/20 text-yellow-300 font-semibold py-2.5 rounded-xl text-xs active:bg-yellow-500/30">+ Expense</button>
               <button onClick={() => openSheet('invoice')} className="bg-brand-500/20 text-brand-300 font-semibold py-2.5 rounded-xl text-xs active:bg-brand-500/30">+ Invoice</button>
             </div>
-            <button onClick={() => openSheet('fuel-import')} className="w-full bg-navy-700 border border-white/[0.08] text-white/70 font-semibold py-2.5 rounded-xl text-xs active:bg-navy-800">
+            <button onClick={() => openSheet('fuel-import')} className="w-full bg-navy-700 border border-fg/[0.08] text-fg/70 font-semibold py-2.5 rounded-xl text-xs active:bg-navy-800">
               ⛽ Import Fuel Card CSV
             </button>
-            <button onClick={() => openSheet('excel-import')} className="w-full bg-navy-700 border border-white/[0.08] text-white/70 font-semibold py-2.5 rounded-xl text-xs active:bg-navy-800">
+            <button onClick={() => openSheet('excel-import')} className="w-full bg-navy-700 border border-fg/[0.08] text-fg/70 font-semibold py-2.5 rounded-xl text-xs active:bg-navy-800">
               📊 Import Miles & Expense Tracker (.xlsx)
             </button>
 
             <div>
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Recent Revenue</p>
-              {revenue.length === 0 && <p className="text-sm text-white/40 text-center py-2">No entries this month</p>}
+              <p className="text-xs font-semibold text-fg/40 uppercase tracking-wide mb-2">Recent Revenue</p>
+              {revenue.length === 0 && <p className="text-sm text-fg/40 text-center py-2">No entries this month</p>}
               {revenue.slice(0, 5).map(r => (
-                <button key={r.id} onClick={() => openSheet('revenue', r)} className="w-full text-left bg-navy-700 rounded-xl px-4 py-3 border border-white/[0.07] flex items-center justify-between mb-2 active:bg-navy-800">
+                <button key={r.id} onClick={() => openSheet('revenue', r)} className="w-full text-left bg-navy-700 rounded-xl px-4 py-3 border border-fg/[0.07] flex items-center justify-between mb-2 active:bg-navy-800">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-white/80 truncate">{r.description || 'Revenue entry'}</p>
-                    <p className="text-[10px] text-white/30">
+                    <p className="text-sm text-fg/80 truncate">{r.description || 'Revenue entry'}</p>
+                    <p className="text-[10px] text-fg/30">
                       {safeFormatDate(r.entry_date, 'MMM d, yyyy')}
                       {r.payment_method && <span className="capitalize"> · {r.payment_method.replace('_', ' ')}</span>}
                     </p>
@@ -835,14 +835,14 @@ export default function Finances() {
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Recent Expenses</p>
-              {expenses.length === 0 && <p className="text-sm text-white/40 text-center py-2">No entries this month</p>}
+              <p className="text-xs font-semibold text-fg/40 uppercase tracking-wide mb-2">Recent Expenses</p>
+              {expenses.length === 0 && <p className="text-sm text-fg/40 text-center py-2">No entries this month</p>}
               {expenses.slice(0, 5).map(e => (
-                <button key={e.id} onClick={() => openSheet('expense', e)} className="w-full text-left bg-navy-700 rounded-xl px-4 py-3 border border-white/[0.07] flex items-center justify-between mb-2 active:bg-navy-800">
+                <button key={e.id} onClick={() => openSheet('expense', e)} className="w-full text-left bg-navy-700 rounded-xl px-4 py-3 border border-fg/[0.07] flex items-center justify-between mb-2 active:bg-navy-800">
                   <div>
-                    <p className="text-sm text-white/80">{e.description || e.category.replace('_', ' ')}</p>
-                    <p className="text-xs text-white/40 capitalize">{e.category.replace('_', ' ')}</p>
-                    <p className="text-[10px] text-white/30">{safeFormatDate(e.entry_date, 'MMM d, yyyy')}</p>
+                    <p className="text-sm text-fg/80">{e.description || e.category.replace('_', ' ')}</p>
+                    <p className="text-xs text-fg/40 capitalize">{e.category.replace('_', ' ')}</p>
+                    <p className="text-[10px] text-fg/30">{safeFormatDate(e.entry_date, 'MMM d, yyyy')}</p>
                   </div>
                   <p className="text-sm font-bold text-red-400 ml-3">{fmt(e.amount)}</p>
                 </button>
@@ -850,19 +850,19 @@ export default function Finances() {
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Invoices</p>
-              {invoices.length === 0 && <p className="text-sm text-white/40 text-center py-2">No invoices yet</p>}
+              <p className="text-xs font-semibold text-fg/40 uppercase tracking-wide mb-2">Invoices</p>
+              {invoices.length === 0 && <p className="text-sm text-fg/40 text-center py-2">No invoices yet</p>}
               {invoices.map(inv => (
-                <div key={inv.id} className="bg-navy-700 rounded-xl p-4 border border-white/[0.07] flex items-center justify-between mb-2">
+                <div key={inv.id} className="bg-navy-700 rounded-xl p-4 border border-fg/[0.07] flex items-center justify-between mb-2">
                   <div>
-                    <p className="text-sm font-semibold text-white">#{inv.invoice_number ?? inv.id.slice(0, 8)}</p>
-                    <p className="text-xs text-white/50">{inv.contracts?.name ?? '—'}</p>
+                    <p className="text-sm font-semibold text-fg">#{inv.invoice_number ?? inv.id.slice(0, 8)}</p>
+                    <p className="text-xs text-fg/50">{inv.contracts?.name ?? '—'}</p>
                     {inv.period_start && (
-                      <p className="text-xs text-white/40">{safeFormatDate(inv.period_start, 'MMM d')} – {safeFormatDate(inv.period_end, 'MMM d, yyyy')}</p>
+                      <p className="text-xs text-fg/40">{safeFormatDate(inv.period_start, 'MMM d')} – {safeFormatDate(inv.period_end, 'MMM d, yyyy')}</p>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-white">{fmt(inv.total_amount ?? 0)}</p>
+                    <p className="font-bold text-fg">{fmt(inv.total_amount ?? 0)}</p>
                     <StatusPill status={inv.status} />
                   </div>
                 </div>

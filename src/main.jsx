@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
 import './styles/index.css'
 import App from './App.jsx'
+import { migrateLegacyConvoyStorage } from './lib/migrateLegacyStorage.js'
+
+migrateLegacyConvoyStorage()
 
 const SW_UPDATE_CHECK_INTERVAL_MS = 60_000
 

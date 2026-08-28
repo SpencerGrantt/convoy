@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 
-const inputBase = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/25 transition-colors'
+const inputBase = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/25 transition-colors'
 
 export default function Login() {
   const [searchParams] = useSearchParams()
@@ -87,27 +87,27 @@ export default function Login() {
       sent: {
         icon: '📬',
         title: 'Check your email',
-        body: <>We sent a magic link to <strong className="text-white">{email}</strong>. Click it to sign in.</>,
+        body: <>We sent a magic link to <strong className="text-fg">{email}</strong>. Click it to sign in.</>,
       },
       'reset-sent': {
         icon: '🔑',
         title: 'Reset link sent',
-        body: <>We sent a password reset link to <strong className="text-white">{email}</strong>. Check your inbox.</>,
+        body: <>We sent a password reset link to <strong className="text-fg">{email}</strong>. Check your inbox.</>,
       },
       'confirm-sent': {
         icon: '✉️',
         title: 'Confirm your email',
-        body: <>We sent a confirmation link to <strong className="text-white">{email}</strong>. Click it to activate your account.</>,
+        body: <>We sent a confirmation link to <strong className="text-fg">{email}</strong>. Click it to activate your account.</>,
       },
     }[step]
 
     return (
       <Screen>
-        <div className="bg-navy-700 rounded-2xl p-6 border border-white/[0.08] text-center space-y-4 py-8">
+        <div className="bg-navy-700 rounded-2xl p-6 border border-fg/[0.08] text-center space-y-4 py-8">
           <div className="text-4xl">{config.icon}</div>
-          <p className="font-semibold text-white text-lg">{config.title}</p>
-          <p className="text-sm text-white/50 leading-relaxed">{config.body}</p>
-          <button onClick={() => setStep('form')} className="text-white/40 text-sm font-medium hover:text-white/60 transition-colors flex items-center gap-1 mx-auto">
+          <p className="font-semibold text-fg text-lg">{config.title}</p>
+          <p className="text-sm text-fg/50 leading-relaxed">{config.body}</p>
+          <button onClick={() => setStep('form')} className="text-fg/40 text-sm font-medium hover:text-fg/60 transition-colors flex items-center gap-1 mx-auto">
             <ArrowLeft size={14} /> Back
           </button>
         </div>
@@ -126,7 +126,7 @@ export default function Login() {
               key={v}
               onClick={() => switchView(v)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all
-                ${view === v ? 'bg-brand-600 text-white shadow' : 'text-white/40 hover:text-white/60'}`}
+                ${view === v ? 'bg-brand-600 text-white shadow' : 'text-fg/40 hover:text-fg/60'}`}
             >
               {label}
             </button>
@@ -134,7 +134,7 @@ export default function Login() {
         </div>
       )}
 
-      <div className="bg-navy-700 rounded-2xl p-6 border border-white/[0.08] space-y-4">
+      <div className="bg-navy-700 rounded-2xl p-6 border border-fg/[0.08] space-y-4">
 
         {/* ── Sign In ── */}
         {view === 'signin' && (
@@ -157,12 +157,12 @@ export default function Login() {
                       required
                     />
                     <button type="button" onClick={() => setShowPw(!showPw)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-fg/30 hover:text-fg/60 transition-colors">
                       {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                   <button type="button" onClick={() => switchView('forgot')}
-                    className="text-xs text-white/35 hover:text-white/60 transition-colors mt-1 text-right w-full">
+                    className="text-xs text-fg/35 hover:text-fg/60 transition-colors mt-1 text-right w-full">
                     Forgot password?
                   </button>
                 </Field>
@@ -176,9 +176,9 @@ export default function Login() {
               {loading ? 'Signing in…' : magicLink ? 'Send Magic Link' : 'Sign In'}
             </button>
 
-            <div className="pt-1 border-t border-white/[0.07] text-center">
+            <div className="pt-1 border-t border-fg/[0.07] text-center">
               <button type="button" onClick={() => { setMagicLink(!magicLink); setError('') }}
-                className="text-white/35 text-xs hover:text-white/60 transition-colors flex items-center gap-1.5 mx-auto">
+                className="text-fg/35 text-xs hover:text-fg/60 transition-colors flex items-center gap-1.5 mx-auto">
                 {magicLink ? <Lock size={12} /> : <Mail size={12} />}
                 {magicLink ? 'Sign in with password instead' : 'Sign in with magic link instead'}
               </button>
@@ -205,7 +205,7 @@ export default function Login() {
                     required
                   />
                   <button type="button" onClick={() => setShowPw(!showPw)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-fg/30 hover:text-fg/60 transition-colors">
                     {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -235,8 +235,8 @@ export default function Login() {
         {view === 'forgot' && (
           <form onSubmit={handleForgot} className="space-y-4">
             <div className="space-y-1">
-              <p className="text-white font-semibold">Reset your password</p>
-              <p className="text-white/50 text-sm">We'll email you a link to set a new one.</p>
+              <p className="text-fg font-semibold">Reset your password</p>
+              <p className="text-fg/50 text-sm">We'll email you a link to set a new one.</p>
             </div>
             <Field label="Email Address">
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
@@ -250,9 +250,9 @@ export default function Login() {
               {loading ? 'Sending…' : 'Send Reset Link'}
             </button>
 
-            <div className="pt-1 border-t border-white/[0.07] text-center">
+            <div className="pt-1 border-t border-fg/[0.07] text-center">
               <button type="button" onClick={() => switchView('signin')}
-                className="text-white/35 text-xs hover:text-white/60 transition-colors flex items-center gap-1.5 mx-auto">
+                className="text-fg/35 text-xs hover:text-fg/60 transition-colors flex items-center gap-1.5 mx-auto">
                 <ArrowLeft size={12} /> Back to Sign In
               </button>
             </div>
@@ -268,11 +268,11 @@ function Screen({ children }) {
     <div className="bg-navy-900 min-h-screen flex flex-col items-center justify-center px-5">
       <div className="w-full max-w-sm space-y-3">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-white tracking-tight">CONVOY</h1>
-          <p className="text-white/40 text-sm mt-1">Logistics Platform</p>
+          <h1 className="text-4xl font-black text-fg tracking-tight">VANTAR</h1>
+          <p className="text-fg/40 text-sm mt-1">Logistics Platform</p>
         </div>
         {children}
-        <p className="text-center text-white/25 text-xs pt-2">SAM.gov Compliant</p>
+        <p className="text-center text-fg/25 text-xs pt-2">SAM.gov Compliant</p>
       </div>
     </div>
   )
@@ -281,7 +281,7 @@ function Screen({ children }) {
 function Field({ label, children }) {
   return (
     <div className="space-y-1">
-      <label className="block text-xs font-semibold text-white/40 uppercase tracking-wide">{label}</label>
+      <label className="block text-xs font-semibold text-fg/40 uppercase tracking-wide">{label}</label>
       {children}
     </div>
   )

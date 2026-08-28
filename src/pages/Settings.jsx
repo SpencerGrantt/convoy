@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useTheme } from '../hooks/useTheme'
+import SegmentedToggle from '../components/ui/SegmentedToggle'
 import { supabase, invokeFn } from '../lib/supabase'
 import TopBar from '../components/layout/TopBar'
 import AlertBanner from '../components/ui/AlertBanner'
@@ -10,7 +12,7 @@ import { PLAN_META, planLabel, planPrice } from '../lib/plans'
 import { BILLING_ENABLED } from '../lib/billing'
 import { Shield, Users, Calendar, Hash, Building2, ShieldCheck } from 'lucide-react'
 
-const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
+const fieldClass = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/30'
 
 // Email 2FA — a personal account-security setting, not company data, so
 // it's kept self-contained here rather than threading its state through
@@ -72,12 +74,12 @@ function SecurityTab({ profile, setProfileDirect, email }) {
   }
 
   return (
-    <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
-      <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Two-Factor Authentication</h2>
+    <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
+      <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Two-Factor Authentication</h2>
 
       {status === 'none' && (
         <>
-          <p className="text-sm text-white/60 leading-relaxed">
+          <p className="text-sm text-fg/60 leading-relaxed">
             Add an extra check at sign-in: a code emailed to {email}, on top of your password. No app to install.
           </p>
           {error && <p className="text-red-400 text-xs font-medium">{error}</p>}
@@ -89,7 +91,7 @@ function SecurityTab({ profile, setProfileDirect, email }) {
 
       {status === 'confirming' && (
         <div className="space-y-3">
-          <p className="text-sm text-white/60">Enter the code we sent to {email}.</p>
+          <p className="text-sm text-fg/60">Enter the code we sent to {email}.</p>
           <input
             type="text"
             inputMode="numeric"
@@ -128,6 +130,7 @@ function SecurityTab({ profile, setProfileDirect, email }) {
 
 export default function Settings() {
   const { profile, session, loading: authLoading, signOut, setProfileDirect } = useAuth()
+  const { theme, setTheme } = useTheme()
   const company = profile?.companies
   const [searchParams] = useSearchParams()
 
@@ -377,6 +380,7 @@ export default function Settings() {
   const tabs = [
     'account',
     'security',
+    'theme',
     ...(canManage ? ['company'] : []),
     ...(BILLING_ENABLED && isOwner ? ['billing'] : []),
     'team',
@@ -426,11 +430,11 @@ export default function Settings() {
     <div className="pb-24 md:pb-8">
       <TopBar title="Settings" />
 
-      <div className="flex border-b border-white/[0.08] bg-navy-900 px-4 gap-4 md:px-8">
+      <div className="flex border-b border-fg/[0.08] bg-navy-900 px-4 gap-4 md:px-8">
         {tabs.map(t => (
           <button key={t} onClick={() => setActiveTab(t)}
             className={`py-3 text-xs font-semibold capitalize transition-colors border-b-2
-              ${activeTab === t ? 'border-white text-white' : 'border-transparent text-white/40'}`}>
+              ${activeTab === t ? 'border-fg text-fg' : 'border-transparent text-fg/40'}`}>
             {t}
           </button>
         ))}
@@ -440,32 +444,32 @@ export default function Settings() {
 
         {/* ── Account tab ── */}
         {activeTab === 'account' && (
-          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Account</h2>
+          <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
+            <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Account</h2>
             <div>
-              <label className="block text-xs text-white/50 mb-1">Your Name</label>
+              <label className="block text-xs text-fg/50 mb-1">Your Name</label>
               <input value={name} onChange={e => setName(e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label className="block text-xs text-white/50 mb-1">Phone Number</label>
+              <label className="block text-xs text-fg/50 mb-1">Phone Number</label>
               <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="(555) 123-4567" className={fieldClass} />
             </div>
             <div>
-              <label className="block text-xs text-white/50 mb-1">Role</label>
-              <p className="text-sm text-white/70">{roleLabel(profile?.role)}</p>
+              <label className="block text-xs text-fg/50 mb-1">Role</label>
+              <p className="text-sm text-fg/70">{roleLabel(profile?.role)}</p>
             </div>
             <div>
-              <label className="block text-xs text-white/50 mb-1">Email</label>
-              <p className="text-sm text-white/50">Managed by Auth</p>
+              <label className="block text-xs text-fg/50 mb-1">Email</label>
+              <p className="text-sm text-fg/50">Managed by Auth</p>
             </div>
-            <div className="pt-2 border-t border-white/[0.07] space-y-3">
-              <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Change Password</h3>
+            <div className="pt-2 border-t border-fg/[0.07] space-y-3">
+              <h3 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Change Password</h3>
               <div>
-                <label className="block text-xs text-white/50 mb-1">New Password</label>
+                <label className="block text-xs text-fg/50 mb-1">New Password</label>
                 <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="••••••••" className={fieldClass} />
               </div>
               <div>
-                <label className="block text-xs text-white/50 mb-1">Confirm Password</label>
+                <label className="block text-xs text-fg/50 mb-1">Confirm Password</label>
                 <input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} placeholder="••••••••" className={fieldClass} />
               </div>
               {pwMsg && (
@@ -486,21 +490,36 @@ export default function Settings() {
           <SecurityTab profile={profile} setProfileDirect={setProfileDirect} email={session?.user?.email} />
         )}
 
+        {/* ── Theme tab ── */}
+        {activeTab === 'theme' && (
+          <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
+            <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Appearance</h2>
+            <p className="text-sm text-fg/60">Choose how Vantar looks on this device.</p>
+            <div className="max-w-[240px]">
+              <SegmentedToggle
+                options={[{ value: 'dark', label: 'Dark' }, { value: 'light', label: 'Light' }]}
+                value={theme}
+                onChange={setTheme}
+              />
+            </div>
+          </div>
+        )}
+
         {/* ── Company tab ── */}
         {activeTab === 'company' && (
           <>
             {/* Company info card */}
             {company && (
-              <div className="bg-navy-700 rounded-2xl border border-white/[0.07] overflow-hidden">
-                <div className="bg-gradient-to-r from-brand-600/20 to-transparent px-4 py-4 border-b border-white/[0.06] flex items-start justify-between gap-3">
+              <div className="bg-navy-700 rounded-2xl border border-fg/[0.07] overflow-hidden">
+                <div className="bg-gradient-to-r from-brand-600/20 to-transparent px-4 py-4 border-b border-fg/[0.06] flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-brand-600/30 border border-brand-600/40 flex items-center justify-center shrink-0">
                       <Building2 size={18} className="text-brand-300" />
                     </div>
                     <div>
-                      <p className="text-white font-bold text-base leading-tight">{company.name}</p>
+                      <p className="text-fg font-bold text-base leading-tight">{company.name}</p>
                       {teamSize != null && (
-                        <p className="text-xs text-white/40 mt-0.5 flex items-center gap-1">
+                        <p className="text-xs text-fg/40 mt-0.5 flex items-center gap-1">
                           <Users size={10} />
                           {teamSize} team member{teamSize !== 1 ? 's' : ''}
                         </p>
@@ -515,34 +534,34 @@ export default function Settings() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-px bg-white/[0.04]">
+                <div className="grid grid-cols-2 gap-px bg-fg/[0.04]">
                   {[
                     { icon: Hash,     label: 'CAGE Code', value: company.cage_code },
                     { icon: Hash,     label: 'UEI',       value: company.uei },
                   ].map(({ icon: Icon, label, value }) => (
                     <div key={label} className="bg-navy-700 px-4 py-3">
-                      <p className="text-[10px] text-white/35 uppercase tracking-wide mb-1 flex items-center gap-1">
+                      <p className="text-[10px] text-fg/35 uppercase tracking-wide mb-1 flex items-center gap-1">
                         <Icon size={9} />{label}
                       </p>
-                      <p className="text-sm text-white font-medium">{value || <span className="text-white/25">—</span>}</p>
+                      <p className="text-sm text-fg font-medium">{value || <span className="text-fg/25">—</span>}</p>
                     </div>
                   ))}
                   <div className="bg-navy-700 px-4 py-3 col-span-2">
-                    <p className="text-[10px] text-white/35 uppercase tracking-wide mb-1">NAICS Codes</p>
-                    <p className="text-sm text-white font-medium">
+                    <p className="text-[10px] text-fg/35 uppercase tracking-wide mb-1">NAICS Codes</p>
+                    <p className="text-sm text-fg font-medium">
                       {company.naics_codes?.filter(Boolean).length
                         ? company.naics_codes.join(', ')
-                        : <span className="text-white/25">—</span>}
+                        : <span className="text-fg/25">—</span>}
                     </p>
                   </div>
                   <div className="bg-navy-700 px-4 py-3 col-span-2">
-                    <p className="text-[10px] text-white/35 uppercase tracking-wide mb-1 flex items-center gap-1">
+                    <p className="text-[10px] text-fg/35 uppercase tracking-wide mb-1 flex items-center gap-1">
                       <Calendar size={9} />SAM.gov Expiry
                     </p>
-                    <p className="text-sm text-white font-medium">
+                    <p className="text-sm text-fg font-medium">
                       {company.sam_expiry
                         ? safeFormatDate(company.sam_expiry, 'MMMM d, yyyy')
-                        : <span className="text-white/25">Not set</span>}
+                        : <span className="text-fg/25">Not set</span>}
                     </p>
                   </div>
                 </div>
@@ -550,38 +569,38 @@ export default function Settings() {
             )}
 
             {/* Edit form */}
-            <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
-              <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Edit Company</h2>
+            <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
+              <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Edit Company</h2>
               <div>
-                <label className="block text-xs text-white/50 mb-1">Company Name</label>
+                <label className="block text-xs text-fg/50 mb-1">Company Name</label>
                 <input value={companyName} onChange={e => setCompanyName(e.target.value)} className={fieldClass} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-white/50 mb-1">CAGE Code</label>
+                  <label className="block text-xs text-fg/50 mb-1">CAGE Code</label>
                   <input value={cageCode} onChange={e => setCageCode(e.target.value)} placeholder="8ABC1" className={fieldClass} />
                 </div>
                 <div>
-                  <label className="block text-xs text-white/50 mb-1">UEI</label>
+                  <label className="block text-xs text-fg/50 mb-1">UEI</label>
                   <input value={uei} onChange={e => setUei(e.target.value)} placeholder="ABCDEF123456" className={fieldClass} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-white/50 mb-1">NAICS Codes <span className="text-white/25">(comma separated)</span></label>
+                <label className="block text-xs text-fg/50 mb-1">NAICS Codes <span className="text-fg/25">(comma separated)</span></label>
                 <input value={naics} onChange={e => setNaics(e.target.value)} placeholder="492110, 621610" className={fieldClass} />
               </div>
               <div>
-                <label className="block text-xs text-white/50 mb-1">SAM.gov Expiry Date</label>
+                <label className="block text-xs text-fg/50 mb-1">SAM.gov Expiry Date</label>
                 <input type="date" value={samExpiry} onChange={e => setSamExpiry(e.target.value)} className={fieldClass} />
               </div>
               <label className="flex items-center gap-3 cursor-pointer select-none">
                 <div
-                  className={`w-12 h-6 rounded-full transition-colors ${sdvosb ? 'bg-brand-600' : 'bg-white/20'} relative`}
+                  className={`w-12 h-6 rounded-full transition-colors ${sdvosb ? 'bg-brand-600' : 'bg-fg/20'} relative`}
                   onClick={() => setSdvosb(!sdvosb)}
                 >
                   <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${sdvosb ? 'translate-x-6' : ''}`} />
                 </div>
-                <span className="text-sm text-white/70">SDVOSB Certified</span>
+                <span className="text-sm text-fg/70">SDVOSB Certified</span>
               </label>
             </div>
           </>
@@ -594,14 +613,14 @@ export default function Settings() {
               <AlertBanner type="error" message="There was a problem with your last payment. Update your payment method to avoid losing access." />
             )}
             {company.subscription_status === 'canceled' && (
-              <AlertBanner type="error" message="Your subscription was canceled. Reactivate to keep using Convoy." />
+              <AlertBanner type="error" message="Your subscription was canceled. Reactivate to keep using Vantar." />
             )}
 
-            <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
+            <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Current Plan</h2>
-                  <p className="text-white font-bold text-lg mt-1">{planLabel(company.plan)}</p>
+                  <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Current Plan</h2>
+                  <p className="text-fg font-bold text-lg mt-1">{planLabel(company.plan)}</p>
                 </div>
                 <span className={`text-[10px] font-bold px-2.5 py-1.5 rounded-full uppercase tracking-wide ${
                   company.subscription_status === 'active' ? 'bg-green-500/20 text-green-300 border border-green-500/30'
@@ -613,13 +632,13 @@ export default function Settings() {
               </div>
 
               {company.subscription_status === 'trialing' && (
-                <p className="text-sm text-white/50">
+                <p className="text-sm text-fg/50">
                   {Math.max(0, Math.ceil((new Date(company.trial_ends_at) - new Date()) / 86400000))} days left in your trial.
                   ${planPrice(company.plan, 'monthly')}/mo after your trial ends.
                 </p>
               )}
               {company.subscription_status === 'active' && company.current_period_end && (
-                <p className="text-sm text-white/50">
+                <p className="text-sm text-fg/50">
                   Renews {safeFormatDate(company.current_period_end, 'MMMM d, yyyy')}.
                 </p>
               )}
@@ -652,18 +671,18 @@ export default function Settings() {
               )}
             </div>
 
-            <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-2">
-              <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-1">Plans</h2>
+            <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-2">
+              <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide mb-1">Plans</h2>
               {Object.entries(PLAN_META).map(([key, meta]) => (
-                <div key={key} className={`rounded-xl p-3 border ${company.plan === key ? 'border-brand-600/50 bg-brand-600/5' : 'border-white/[0.07]'}`}>
+                <div key={key} className={`rounded-xl p-3 border ${company.plan === key ? 'border-brand-600/50 bg-brand-600/5' : 'border-fg/[0.07]'}`}>
                   <div className="flex items-baseline justify-between">
-                    <p className="text-sm text-white font-semibold">{meta.label}</p>
-                    <p className="text-sm text-white/70">${meta.monthlyPrice}/mo</p>
+                    <p className="text-sm text-fg font-semibold">{meta.label}</p>
+                    <p className="text-sm text-fg/70">${meta.monthlyPrice}/mo</p>
                   </div>
-                  <p className="text-xs text-white/40 mt-1">{meta.features.join(', ')}.</p>
+                  <p className="text-xs text-fg/40 mt-1">{meta.features.join(', ')}.</p>
                 </div>
               ))}
-              <p className="text-xs text-white/30 pt-1">
+              <p className="text-xs text-fg/30 pt-1">
                 To switch plans, use Manage Billing above. It opens Stripe's billing portal.
               </p>
             </div>
@@ -673,12 +692,12 @@ export default function Settings() {
         {/* ── Team tab ── */}
         {activeTab === 'team' && (
           <>
-          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Team Members</h2>
+          <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
+            <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Team Members</h2>
             {teamActionErr && <p className="text-red-400 text-xs font-medium">{teamActionErr}</p>}
-            {teamLoading && <p className="text-xs text-white/40">Loading…</p>}
+            {teamLoading && <p className="text-xs text-fg/40">Loading…</p>}
             {!teamLoading && teamMembers.length === 0 && (
-              <p className="text-xs text-white/40">No team members yet.</p>
+              <p className="text-xs text-fg/40">No team members yet.</p>
             )}
             <div className="space-y-2">
               {teamMembers.map(member => {
@@ -693,10 +712,10 @@ export default function Settings() {
                         {initials}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white font-medium truncate">
-                          {member.full_name || 'Unnamed'} {isSelf && <span className="text-white/30 font-normal">(you)</span>}
+                        <p className="text-sm text-fg font-medium truncate">
+                          {member.full_name || 'Unnamed'} {isSelf && <span className="text-fg/30 font-normal">(you)</span>}
                         </p>
-                        <p className="text-xs text-white/40">{member.phone ?? 'No phone'}</p>
+                        <p className="text-xs text-fg/40">{member.phone ?? 'No phone'}</p>
                       </div>
                       {profile?.role === 'owner' && !isSelf ? (
                         <div className="flex items-center gap-2 shrink-0">
@@ -704,7 +723,7 @@ export default function Settings() {
                             value={pendingRoles[member.id] ?? member.role}
                             disabled={busy}
                             onChange={e => setPendingRoles(p => ({ ...p, [member.id]: e.target.value }))}
-                            className="bg-navy-700 border border-white/10 text-white rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-50"
+                            className="bg-navy-700 border border-fg/10 text-fg rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-50"
                           >
                             <option value="owner">Admin</option>
                             <option value="dispatcher">Dispatcher</option>
@@ -733,12 +752,12 @@ export default function Settings() {
                           )}
                         </div>
                       ) : (
-                        <span className="text-xs text-white/50 shrink-0 px-2 py-1">{roleLabel(member.role)}</span>
+                        <span className="text-xs text-fg/50 shrink-0 px-2 py-1">{roleLabel(member.role)}</span>
                       )}
                     </div>
                     {canEditPay && (
                       <div className="flex items-center gap-2 pl-11">
-                        <label className="text-xs text-white/40 shrink-0">Pay % of run revenue</label>
+                        <label className="text-xs text-fg/40 shrink-0">Pay % of run revenue</label>
                         <input
                           key={member.pay_percent ?? 'unset'}
                           type="number"
@@ -753,7 +772,7 @@ export default function Settings() {
                             updatePayPercent(member.id, Number(v))
                           }}
                           placeholder="e.g. 30"
-                          className="w-20 bg-navy-700 border border-white/10 text-white rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-50"
+                          className="w-20 bg-navy-700 border border-fg/10 text-fg rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-50"
                         />
                       </div>
                     )}
@@ -764,15 +783,15 @@ export default function Settings() {
           </div>
 
           {canManage && (
-            <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
-              <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Invite Team Member</h2>
-              <p className="text-xs text-white/40">They'll receive a magic link to set up their account.</p>
+            <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
+              <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Invite Team Member</h2>
+              <p className="text-xs text-fg/40">They'll receive a magic link to set up their account.</p>
               <div>
-                <label className="block text-xs text-white/50 mb-1">Email Address</label>
+                <label className="block text-xs text-fg/50 mb-1">Email Address</label>
                 <input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="driver@example.com" className={fieldClass} />
               </div>
               <div>
-                <label className="block text-xs text-white/50 mb-1">Role</label>
+                <label className="block text-xs text-fg/50 mb-1">Role</label>
                 <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className={fieldClass}>
                   <option value="driver">Driver</option>
                   <option value="dispatcher">Dispatcher</option>
@@ -805,7 +824,7 @@ export default function Settings() {
       </form>
 
       <div className="px-4 mt-4 md:px-8">
-        <button onClick={signOut} className="w-full bg-white/10 text-white/70 font-semibold py-3 rounded-xl active:bg-white/20">
+        <button onClick={signOut} className="w-full bg-fg/10 text-fg/70 font-semibold py-3 rounded-xl active:bg-fg/20">
           Sign Out
         </button>
       </div>

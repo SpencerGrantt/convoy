@@ -22,9 +22,9 @@ export default function Hero() {
     <div className="px-5 pt-6 pb-16 md:pt-8 md:pb-24">
       <div className="max-w-6xl mx-auto">
         <nav className="flex items-center justify-between mb-14 md:mb-20">
-          <h1 className="text-2xl font-black text-white tracking-tight">CONVOY</h1>
+          <h1 className="text-2xl font-black text-fg tracking-tight">VANTAR</h1>
           <div className="flex items-center gap-4 md:gap-6">
-            <button onClick={scrollToPricing} className="hidden md:inline text-white/60 text-sm font-medium hover:text-white transition-colors">
+            <button onClick={scrollToPricing} className="hidden md:inline text-fg/60 text-sm font-medium hover:text-fg transition-colors">
               Pricing
             </button>
             <button
@@ -41,12 +41,12 @@ export default function Hero() {
             visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
-          <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
+          <h2 className="text-3xl md:text-5xl font-black text-fg tracking-tight leading-tight">
             Dispatch, Track, and Deliver,{' '}
             <span className="text-brand-400">Built for Any Fleet</span>
           </h2>
-          <p className="text-white/60 text-base md:text-lg mt-5 max-w-2xl mx-auto leading-relaxed">
-            Convoy is the all-in-one dispatch, tracking, and compliance platform for
+          <p className="text-fg/60 text-base md:text-lg mt-5 max-w-2xl mx-auto leading-relaxed">
+            Vantar is the all-in-one dispatch, tracking, and compliance platform for
             logistics and courier companies of any size, with SAM.gov contract
             matching built in for teams that need it.
           </p>
@@ -58,7 +58,7 @@ export default function Hero() {
             >
               Request a Demo
             </button>
-            <Link to="/login" className="text-white/50 text-sm hover:text-white transition-colors">
+            <Link to="/login" className="text-fg/50 text-sm hover:text-fg transition-colors">
               Already have an account? <span className="font-semibold">Login Here</span>
             </Link>
           </div>

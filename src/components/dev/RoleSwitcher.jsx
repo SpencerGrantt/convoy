@@ -21,7 +21,7 @@ export default function RoleSwitcher() {
             key={r.value}
             onClick={() => setViewRole(r.value === realRole ? null : r.value)}
             className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
-              active === r.value ? 'bg-amber-500 text-navy-900' : 'text-white/50 hover:text-white/80'
+              active === r.value ? 'bg-amber-500 text-[#131313]' : 'text-fg/50 hover:text-fg/80'
             }`}
           >
             {r.label}

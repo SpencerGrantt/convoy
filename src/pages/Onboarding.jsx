@@ -10,7 +10,7 @@ import {
   Users, Crown, Mail, DollarSign,
 } from 'lucide-react'
 
-const fieldClass = 'w-full bg-white/[0.07] border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/25 transition-colors'
+const fieldClass = 'w-full bg-fg/[0.07] border border-fg/10 text-fg rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/25 transition-colors'
 
 // path: null = not chosen yet (step 0)
 // path: 'admin'  = starting own company   → steps 1, 2, 3
@@ -257,8 +257,8 @@ export default function Onboarding() {
 
       {/* Logo */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-black text-white tracking-tight">CONVOY</h1>
-        <p className="text-white/35 text-xs mt-0.5">Logistics Platform</p>
+        <h1 className="text-3xl font-black text-fg tracking-tight">VANTAR</h1>
+        <p className="text-fg/35 text-xs mt-0.5">Logistics Platform</p>
       </div>
 
       {/* Step indicator — hidden on step 0 */}
@@ -273,14 +273,14 @@ export default function Onboarding() {
                 <div className={`flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold transition-all
                   ${done    ? 'bg-green-500 text-white'
                   : active  ? 'bg-brand-600 text-white ring-4 ring-brand-600/20'
-                  :           'bg-white/8 text-white/25'}`}>
+                  :           'bg-fg/8 text-fg/25'}`}>
                   {done ? <CheckCircle size={13} /> : i + 1}
                 </div>
-                <span className={`text-xs font-medium hidden sm:block ${active ? 'text-white' : 'text-white/30'}`}>
+                <span className={`text-xs font-medium hidden sm:block ${active ? 'text-fg' : 'text-fg/30'}`}>
                   {label}
                 </span>
                 {i < visSteps.length - 1 && (
-                  <div className={`w-6 h-px mx-0.5 ${done ? 'bg-green-500' : 'bg-white/10'}`} />
+                  <div className={`w-6 h-px mx-0.5 ${done ? 'bg-green-500' : 'bg-fg/10'}`} />
                 )}
               </div>
             )
@@ -292,43 +292,43 @@ export default function Onboarding() {
       {step === 0 && (
         <div className="w-full max-w-md space-y-5">
           <div className="text-center space-y-1.5">
-            <h2 className="text-2xl font-bold text-white">Welcome to Convoy</h2>
-            <p className="text-white/45 text-sm">How would you like to get started?</p>
+            <h2 className="text-2xl font-bold text-fg">Welcome to Vantar</h2>
+            <p className="text-fg/45 text-sm">How would you like to get started?</p>
           </div>
 
           <button
             onClick={() => choosePath('admin')}
-            className="w-full bg-navy-700 hover:bg-navy-600 border border-white/[0.08] hover:border-brand-600/40 rounded-2xl p-5 text-left transition-all group"
+            className="w-full bg-navy-700 hover:bg-navy-600 border border-fg/[0.08] hover:border-brand-600/40 rounded-2xl p-5 text-left transition-all group"
           >
             <div className="flex items-start gap-4">
               <div className="w-11 h-11 rounded-xl bg-brand-600/20 border border-brand-600/30 flex items-center justify-center shrink-0 group-hover:bg-brand-600/30 transition-colors">
                 <Crown size={20} className="text-brand-300" />
               </div>
               <div>
-                <p className="text-white font-bold text-base">Start as Administrator</p>
-                <p className="text-white/45 text-sm mt-0.5 leading-snug">
+                <p className="text-fg font-bold text-base">Start as Administrator</p>
+                <p className="text-fg/45 text-sm mt-0.5 leading-snug">
                   Create your company, manage drivers, scan federal contracts.
                 </p>
               </div>
-              <ChevronRight size={18} className="text-white/20 group-hover:text-white/50 transition-colors shrink-0 mt-0.5 ml-auto" />
+              <ChevronRight size={18} className="text-fg/20 group-hover:text-fg/50 transition-colors shrink-0 mt-0.5 ml-auto" />
             </div>
           </button>
 
           <button
             onClick={() => choosePath('team')}
-            className="w-full bg-navy-700 hover:bg-navy-600 border border-white/[0.08] hover:border-white/20 rounded-2xl p-5 text-left transition-all group"
+            className="w-full bg-navy-700 hover:bg-navy-600 border border-fg/[0.08] hover:border-fg/20 rounded-2xl p-5 text-left transition-all group"
           >
             <div className="flex items-start gap-4">
-              <div className="w-11 h-11 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
-                <Users size={20} className="text-white/50" />
+              <div className="w-11 h-11 rounded-xl bg-fg/[0.06] border border-fg/10 flex items-center justify-center shrink-0 group-hover:bg-fg/10 transition-colors">
+                <Users size={20} className="text-fg/50" />
               </div>
               <div>
-                <p className="text-white font-bold text-base">Join a Team</p>
-                <p className="text-white/45 text-sm mt-0.5 leading-snug">
+                <p className="text-fg font-bold text-base">Join a Team</p>
+                <p className="text-fg/45 text-sm mt-0.5 leading-snug">
                   Your admin already sent you an invite. Use that email link to connect.
                 </p>
               </div>
-              <ChevronRight size={18} className="text-white/20 group-hover:text-white/50 transition-colors shrink-0 mt-0.5 ml-auto" />
+              <ChevronRight size={18} className="text-fg/20 group-hover:text-fg/50 transition-colors shrink-0 mt-0.5 ml-auto" />
             </div>
           </button>
         </div>
@@ -341,8 +341,8 @@ export default function Onboarding() {
             <div className="w-13 h-13 rounded-2xl bg-brand-600/20 border border-brand-600/30 flex items-center justify-center mx-auto mb-3" style={{width:52,height:52}}>
               <User size={24} className="text-brand-400" />
             </div>
-            <h2 className="text-2xl font-bold text-white">About you</h2>
-            <p className="text-white/45 text-sm">
+            <h2 className="text-2xl font-bold text-fg">About you</h2>
+            <p className="text-fg/45 text-sm">
               {path === 'team'
                 ? "Your admin's invite email will link you to the team automatically."
                 : 'Quick intro before setting up your company.'}
@@ -356,14 +356,14 @@ export default function Onboarding() {
               </div>
               <div>
                 <p className="text-xs text-brand-200/70">You're joining</p>
-                <p className="text-white font-bold">{company.name}</p>
+                <p className="text-fg font-bold">{company.name}</p>
               </div>
             </div>
           )}
 
-          <div className="bg-navy-700 rounded-2xl p-5 border border-white/[0.07] space-y-4">
+          <div className="bg-navy-700 rounded-2xl p-5 border border-fg/[0.07] space-y-4">
             <div>
-              <label className="block text-xs text-white/50 mb-1.5 font-medium">Your Full Name</label>
+              <label className="block text-xs text-fg/50 mb-1.5 font-medium">Your Full Name</label>
               <input
                 autoFocus
                 value={fullName}
@@ -376,9 +376,9 @@ export default function Onboarding() {
 
             {session?.user?.email && (
               <div>
-                <label className="block text-xs text-white/50 mb-1.5 font-medium">Email</label>
-                <div className="px-4 py-2.5 bg-white/[0.04] rounded-xl border border-white/[0.06]">
-                  <span className="text-sm text-white/55">{session.user.email}</span>
+                <label className="block text-xs text-fg/50 mb-1.5 font-medium">Email</label>
+                <div className="px-4 py-2.5 bg-fg/[0.04] rounded-xl border border-fg/[0.06]">
+                  <span className="text-sm text-fg/55">{session.user.email}</span>
                 </div>
               </div>
             )}
@@ -386,7 +386,7 @@ export default function Onboarding() {
             {path === 'team' && (
               <>
                 <div>
-                  <label className="block text-xs text-white/50 mb-1.5 font-medium">Phone Number</label>
+                  <label className="block text-xs text-fg/50 mb-1.5 font-medium">Phone Number</label>
                   <input
                     type="tel"
                     value={phone}
@@ -397,7 +397,7 @@ export default function Onboarding() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-white/50 mb-1.5 font-medium">Address</label>
+                  <label className="block text-xs text-fg/50 mb-1.5 font-medium">Address</label>
                   <input
                     value={address}
                     onChange={e => setAddress(e.target.value)}
@@ -407,7 +407,7 @@ export default function Onboarding() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-white/50 mb-1.5 font-medium">Create Password</label>
+                  <label className="block text-xs text-fg/50 mb-1.5 font-medium">Create Password</label>
                   <input
                     type="password"
                     value={password}
@@ -416,10 +416,10 @@ export default function Onboarding() {
                     required
                     className={fieldClass}
                   />
-                  <p className="text-[11px] text-white/30 mt-1">So you can sign in directly next time, without waiting on another email link.</p>
+                  <p className="text-[11px] text-fg/30 mt-1">So you can sign in directly next time, without waiting on another email link.</p>
                 </div>
                 <div>
-                  <label className="block text-xs text-white/50 mb-1.5 font-medium">Confirm Password</label>
+                  <label className="block text-xs text-fg/50 mb-1.5 font-medium">Confirm Password</label>
                   <input
                     type="password"
                     value={confirmPassword}
@@ -445,9 +445,9 @@ export default function Onboarding() {
             )}
 
             <div>
-              <label className="block text-xs text-white/50 mb-1.5 font-medium">Role</label>
-              <div className="px-4 py-2.5 bg-white/[0.04] rounded-xl border border-white/[0.06]">
-                <span className="text-sm text-white/55">
+              <label className="block text-xs text-fg/50 mb-1.5 font-medium">Role</label>
+              <div className="px-4 py-2.5 bg-fg/[0.04] rounded-xl border border-fg/[0.06]">
+                <span className="text-sm text-fg/55">
                   {path === 'admin' ? 'Administrator' : roleLabel(profile?.role) || 'Driver'}
                 </span>
               </div>
@@ -459,7 +459,7 @@ export default function Onboarding() {
           <div className="flex gap-3">
             {!isInvitedTeamMember && (
               <button type="button" onClick={() => { setStep(0); setPath(null) }}
-                className="px-5 py-3.5 bg-white/8 hover:bg-white/12 text-white/60 font-semibold rounded-xl transition-colors">
+                className="px-5 py-3.5 bg-fg/8 hover:bg-fg/12 text-fg/60 font-semibold rounded-xl transition-colors">
                 Back
               </button>
             )}
@@ -483,13 +483,13 @@ export default function Onboarding() {
             <div className="flex items-center justify-center mx-auto mb-3" style={{width:52,height:52,borderRadius:14,background:'rgba(4,35,145,0.2)',border:'1px solid rgba(4,35,145,0.35)'}}>
               <Building2 size={24} className="text-brand-400" />
             </div>
-            <h2 className="text-2xl font-bold text-white">Your Company</h2>
-            <p className="text-white/45 text-sm">Used to match you with federal contracts on SAM.gov.</p>
+            <h2 className="text-2xl font-bold text-fg">Your Company</h2>
+            <p className="text-fg/45 text-sm">Used to match you with federal contracts on SAM.gov.</p>
           </div>
 
-          <div className="bg-navy-700 rounded-2xl p-5 border border-white/[0.07] space-y-4">
+          <div className="bg-navy-700 rounded-2xl p-5 border border-fg/[0.07] space-y-4">
             <div>
-              <label className="block text-xs text-white/50 mb-1.5 font-medium">
+              <label className="block text-xs text-fg/50 mb-1.5 font-medium">
                 Company Name <span className="text-brand-400">*</span>
               </label>
               <input
@@ -504,37 +504,37 @@ export default function Onboarding() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-white/50 mb-1.5 font-medium">CAGE Code</label>
+                <label className="block text-xs text-fg/50 mb-1.5 font-medium">CAGE Code</label>
                 <input value={cageCode} onChange={e => setCageCode(e.target.value)} placeholder="8ABC1" className={fieldClass} />
               </div>
               <div>
-                <label className="block text-xs text-white/50 mb-1.5 font-medium">UEI</label>
+                <label className="block text-xs text-fg/50 mb-1.5 font-medium">UEI</label>
                 <input value={uei} onChange={e => setUei(e.target.value)} placeholder="ABCDEF123456" className={fieldClass} />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs text-white/50 mb-1.5 font-medium">
-                NAICS Codes <span className="text-white/25">(comma-separated)</span>
+              <label className="block text-xs text-fg/50 mb-1.5 font-medium">
+                NAICS Codes <span className="text-fg/25">(comma-separated)</span>
               </label>
               <input value={naics} onChange={e => setNaics(e.target.value)} placeholder="492110, 621610" className={fieldClass} />
             </div>
 
             <div>
-              <label className="block text-xs text-white/50 mb-1.5 font-medium">SAM.gov Expiry Date</label>
+              <label className="block text-xs text-fg/50 mb-1.5 font-medium">SAM.gov Expiry Date</label>
               <input type="date" value={samExpiry} onChange={e => setSamExpiry(e.target.value)} className={fieldClass} />
             </div>
 
             <label className="flex items-center gap-3 cursor-pointer select-none pt-0.5">
               <div
-                className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${sdvosb ? 'bg-brand-600' : 'bg-white/15'}`}
+                className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${sdvosb ? 'bg-brand-600' : 'bg-fg/15'}`}
                 onClick={() => setSdvosb(!sdvosb)}
               >
                 <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${sdvosb ? 'translate-x-5' : ''}`} />
               </div>
               <div>
-                <span className="text-sm text-white font-medium">SDVOSB Certified</span>
-                <p className="text-xs text-white/30">Service-Disabled Veteran-Owned Small Business</p>
+                <span className="text-sm text-fg font-medium">SDVOSB Certified</span>
+                <p className="text-xs text-fg/30">Service-Disabled Veteran-Owned Small Business</p>
               </div>
             </label>
           </div>
@@ -543,7 +543,7 @@ export default function Onboarding() {
 
           <div className="flex gap-3">
             <button type="button" onClick={() => setStep(1)}
-              className="px-5 py-3.5 bg-white/8 hover:bg-white/12 text-white/60 font-semibold rounded-xl transition-colors">
+              className="px-5 py-3.5 bg-fg/8 hover:bg-fg/12 text-fg/60 font-semibold rounded-xl transition-colors">
               Back
             </button>
             <button
@@ -555,7 +555,7 @@ export default function Onboarding() {
             </button>
           </div>
 
-          <p className="text-center text-xs text-white/20">You can update all of this later in Settings.</p>
+          <p className="text-center text-xs text-fg/20">You can update all of this later in Settings.</p>
         </form>
       )}
 
@@ -566,8 +566,8 @@ export default function Onboarding() {
             <div className="flex items-center justify-center mx-auto mb-3" style={{width:52,height:52,borderRadius:14,background:'rgba(4,35,145,0.2)',border:'1px solid rgba(4,35,145,0.35)'}}>
               <DollarSign size={24} className="text-brand-400" />
             </div>
-            <h2 className="text-2xl font-bold text-white">Choose Your Plan</h2>
-            <p className="text-white/45 text-sm">14 days free. No card required to start.</p>
+            <h2 className="text-2xl font-bold text-fg">Choose Your Plan</h2>
+            <p className="text-fg/45 text-sm">14 days free. No card required to start.</p>
           </div>
 
           <div className="flex bg-navy-800 rounded-2xl p-1 gap-1">
@@ -577,7 +577,7 @@ export default function Onboarding() {
                 type="button"
                 onClick={() => setSelectedInterval(v)}
                 className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all
-                  ${selectedInterval === v ? 'bg-brand-600 text-white shadow' : 'text-white/40 hover:text-white/60'}`}
+                  ${selectedInterval === v ? 'bg-brand-600 text-white shadow' : 'text-fg/40 hover:text-fg/60'}`}
               >
                 {label}
               </button>
@@ -593,19 +593,19 @@ export default function Onboarding() {
                 className={`w-full text-left rounded-2xl p-5 border transition-all ${
                   selectedPlan === key
                     ? 'bg-navy-700 border-brand-600/60 ring-2 ring-brand-600/25'
-                    : 'bg-navy-700 border-white/[0.08] hover:border-white/20'
+                    : 'bg-navy-700 border-fg/[0.08] hover:border-fg/20'
                 }`}
               >
                 <div className="flex items-baseline justify-between mb-2">
-                  <p className="text-white font-bold text-base">{meta.label}</p>
-                  <p className="text-white font-bold text-lg">
+                  <p className="text-fg font-bold text-base">{meta.label}</p>
+                  <p className="text-fg font-bold text-lg">
                     ${planPrice(key, selectedInterval)}
-                    <span className="text-white/40 text-xs font-medium">/{selectedInterval === 'yearly' ? 'yr' : 'mo'}</span>
+                    <span className="text-fg/40 text-xs font-medium">/{selectedInterval === 'yearly' ? 'yr' : 'mo'}</span>
                   </p>
                 </div>
                 <ul className="space-y-1">
                   {meta.features.map(f => (
-                    <li key={f} className="text-white/50 text-xs flex items-center gap-2">
+                    <li key={f} className="text-fg/50 text-xs flex items-center gap-2">
                       <CheckCircle size={12} className="text-brand-400 shrink-0" />
                       {f}
                     </li>
@@ -619,7 +619,7 @@ export default function Onboarding() {
 
           <div className="flex gap-3">
             <button type="button" onClick={() => setStep(2)}
-              className="px-5 py-3.5 bg-white/8 hover:bg-white/12 text-white/60 font-semibold rounded-xl transition-colors">
+              className="px-5 py-3.5 bg-fg/8 hover:bg-fg/12 text-fg/60 font-semibold rounded-xl transition-colors">
               Back
             </button>
             <button
@@ -636,7 +636,7 @@ export default function Onboarding() {
             type="button"
             onClick={handleSubscribeNow}
             disabled={billingSaving}
-            className="w-full text-center text-xs text-white/35 hover:text-white/60 transition-colors disabled:opacity-40"
+            className="w-full text-center text-xs text-fg/35 hover:text-fg/60 transition-colors disabled:opacity-40"
           >
             Skip the trial and subscribe now instead
           </button>
@@ -650,15 +650,15 @@ export default function Onboarding() {
             <div className="w-20 h-20 rounded-full bg-green-500/15 border border-green-500/25 flex items-center justify-center mx-auto">
               <CheckCircle size={38} className="text-green-400" />
             </div>
-            <h2 className="text-2xl font-bold text-white">You're all set, {firstName}!</h2>
-            <p className="text-white/45 text-sm">
+            <h2 className="text-2xl font-bold text-fg">You're all set, {firstName}!</h2>
+            <p className="text-fg/45 text-sm">
               {path === 'admin'
                 ? `${companyName || 'Your company'} is ready. Start creating runs, scanning contracts, or invite your team.`
                 : 'Your profile is set up. Check your email for your admin\'s invite to join the team.'}
             </p>
           </div>
 
-          <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] text-left space-y-2.5">
+          <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] text-left space-y-2.5">
             {path === 'admin' ? (
               <>
                 <CheckRow icon={<Shield size={14} className="text-brand-400" />} label="Company profile created" />
@@ -684,9 +684,9 @@ export default function Onboarding() {
       )}
 
       {session?.user?.email && (
-        <p className="text-center text-xs text-white/25 mt-8">
+        <p className="text-center text-xs text-fg/25 mt-8">
           Signed in as {session.user.email} ·{' '}
-          <button type="button" onClick={signOut} className="text-white/40 hover:text-white/60 underline transition-colors">
+          <button type="button" onClick={signOut} className="text-fg/40 hover:text-fg/60 underline transition-colors">
             Sign out
           </button>
         </p>
@@ -699,7 +699,7 @@ function CheckRow({ icon, label }) {
   return (
     <div className="flex items-center gap-3">
       <span className="shrink-0">{icon}</span>
-      <span className="text-sm text-white/65">{label}</span>
+      <span className="text-sm text-fg/65">{label}</span>
     </div>
   )
 }

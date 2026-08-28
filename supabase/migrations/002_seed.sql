@@ -1,11 +1,11 @@
--- Seed data for Convoy — run in Supabase SQL Editor
+-- Seed data for Vantar — run in Supabase SQL Editor
 -- Creates a company, 3 profiles (owner + 2 drivers), 1 vehicle, 1 contract, and 4 runs
 
 -- 1. Company
 insert into companies (id, name, cage_code, uei, naics_codes, sdvosb, sam_expiry)
 values (
   '00000000-0000-0000-0000-000000000001',
-  'Convoy Medical Transport',
+  'Vantar Medical Transport',
   '8ABC1',
   'JNPBNWODKHQY',
   array['492110','621610'],

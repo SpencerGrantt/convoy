@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { AuthContext } from './AuthContext'
 import { isDevUser } from '../lib/devMode'
 
-const VIEW_ROLE_KEY = 'convoy_dev_view_role'
+const VIEW_ROLE_KEY = 'vantar_dev_view_role'
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
   // sign-in always requires the step-up again.
   const [emailMfaVerified, setEmailMfaVerifiedState] = useState(false)
   function markEmailMfaVerified() {
-    if (session?.user?.id) sessionStorage.setItem(`convoy_mfa_verified_${session.user.id}`, '1')
+    if (session?.user?.id) sessionStorage.setItem(`vantar_mfa_verified_${session.user.id}`, '1')
     setEmailMfaVerifiedState(true)
   }
   // supabase-js re-validates the session (and re-fires this listener with a
@@ -56,7 +56,7 @@ export function AuthProvider({ children }) {
           setLoading(false)
           return
         }
-        setEmailMfaVerifiedState(sessionStorage.getItem(`convoy_mfa_verified_${session.user.id}`) === '1')
+        setEmailMfaVerifiedState(sessionStorage.getItem(`vantar_mfa_verified_${session.user.id}`) === '1')
         if (loadedUserId.current === session.user.id) return
         // A new session (e.g. just signed in) means profile is stale/null
         // until this resolves — without this, AuthGate briefly sees
@@ -216,7 +216,7 @@ export function AuthProvider({ children }) {
     } finally {
       // Cleared (not just left stale) so a fresh sign-in as the same user
       // in this same tab still requires the step-up again.
-      if (session?.user?.id) sessionStorage.removeItem(`convoy_mfa_verified_${session.user.id}`)
+      if (session?.user?.id) sessionStorage.removeItem(`vantar_mfa_verified_${session.user.id}`)
       setSession(null)
       setProfile(null)
       setEmailMfaVerifiedState(false)

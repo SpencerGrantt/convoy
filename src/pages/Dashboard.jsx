@@ -14,7 +14,7 @@ import { differenceInMinutes, startOfMonth, startOfYear } from 'date-fns'
 import { safeFormatDate, safeDifferenceInDays } from '../lib/dates'
 import { useNavigate } from 'react-router-dom'
 
-const DISMISSED_KEY = 'convoy-dismissed-alerts'
+const DISMISSED_KEY = 'vantar-dismissed-alerts'
 
 const PERIOD_OPTIONS = [
   { value: 'mtd', label: 'MTD' },
@@ -41,8 +41,8 @@ export default function Dashboard() {
   const { contracts } = useContracts()
   const navigate = useNavigate()
   const [anomalies, setAnomalies] = useState([])
-  const [period, setPeriod] = useState(() => localStorage.getItem('convoy_dashboard_period') || 'mtd')
-  useEffect(() => { localStorage.setItem('convoy_dashboard_period', period) }, [period])
+  const [period, setPeriod] = useState(() => localStorage.getItem('vantar_dashboard_period') || 'mtd')
+  useEffect(() => { localStorage.setItem('vantar_dashboard_period', period) }, [period])
   const periodLabel = PERIOD_OPTIONS.find(p => p.value === period)?.label ?? 'MTD'
   const [periodStats, setPeriodStats] = useState({
     activeRuns: 0, delivered: 0, totalMiles: 0, deadheadMiles: 0, contractRuns: 0, commercialRuns: 0,
@@ -194,7 +194,7 @@ export default function Dashboard() {
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Overview</h2>
+            <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Overview</h2>
             <a
               href="https://loadboard.truckerpath.com/carrier/loads/home"
               target="_blank"
@@ -221,7 +221,7 @@ export default function Dashboard() {
         </div>
 
         <div>
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Miles &amp; Run Type ({periodLabel})</h2>
+          <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide mb-2">Miles &amp; Run Type ({periodLabel})</h2>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <MetricCard label="Total Miles"    value={periodStats.totalMiles.toLocaleString()} color="navy" />
             <MetricCard label="Deadhead Miles" value={periodStats.deadheadMiles.toLocaleString()} sub={periodStats.totalMiles ? `${Math.round(periodStats.deadheadMiles / periodStats.totalMiles * 100)}% of total` : undefined} color="red" />
@@ -232,22 +232,22 @@ export default function Dashboard() {
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Recent Runs</h2>
+            <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Recent Runs</h2>
             <button onClick={() => navigate('/runs')} className="text-xs text-brand-400 font-medium">View all →</button>
           </div>
           <div className="space-y-2">
             {!runsLoading && runs.length === 0 && (
-              <p className="text-sm text-white/40 text-center py-4">No runs yet</p>
+              <p className="text-sm text-fg/40 text-center py-4">No runs yet</p>
             )}
             {runs.map(run => (
               <div
                 key={run.id}
                 onClick={() => navigate(`/runs/${run.id}`)}
-                className="bg-navy-700 rounded-xl p-3 border border-white/[0.07] flex items-center gap-3 active:bg-navy-600 cursor-pointer"
+                className="bg-navy-700 rounded-xl p-3 border border-fg/[0.07] flex items-center gap-3 active:bg-navy-600 cursor-pointer"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{run.dropoff_address}</p>
-                  <p className="text-xs text-white/40 truncate">{run.profiles?.full_name ?? 'Unassigned'}</p>
+                  <p className="text-sm font-medium text-fg truncate">{run.dropoff_address}</p>
+                  <p className="text-xs text-fg/40 truncate">{run.profiles?.full_name ?? 'Unassigned'}</p>
                 </div>
                 <StatusPill status={run.status} />
               </div>

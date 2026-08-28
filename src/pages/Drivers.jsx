@@ -22,10 +22,10 @@ function Sheet({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative bg-navy-700 rounded-t-3xl px-4 pt-4 pb-8 space-y-4 border-t border-white/[0.08]">
+      <div className="relative bg-navy-700 rounded-t-3xl px-4 pt-4 pb-8 space-y-4 border-t border-fg/[0.08]">
         <div className="flex items-center justify-between">
-          <p className="font-bold text-white">{title}</p>
-          <button onClick={onClose} className="text-white/40 text-2xl leading-none">×</button>
+          <p className="font-bold text-fg">{title}</p>
+          <button onClick={onClose} className="text-fg/40 text-2xl leading-none">×</button>
         </div>
         {children}
       </div>
@@ -44,7 +44,7 @@ export default function Drivers() {
   const [docErr, setDocErr] = useState('')
   const [docSaved, setDocSaved] = useState(false)
 
-  const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
+  const fieldClass = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/30'
 
   async function saveDoc() {
     if (!expiry || !selectedDriver) return
@@ -92,17 +92,17 @@ export default function Drivers() {
           </div>
         )}
 
-        {!loading && drivers.length === 0 && <p className="text-sm text-white/40 text-center py-8">No drivers yet</p>}
+        {!loading && drivers.length === 0 && <p className="text-sm text-fg/40 text-center py-8">No drivers yet</p>}
         {drivers.map(driver => {
           const initials = driver.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() ?? '?'
           return (
-            <div key={driver.id} className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07]">
+            <div key={driver.id} className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07]">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-full bg-brand-600/30 flex items-center justify-center text-brand-300 font-bold text-sm">
                   {initials}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-white flex items-center gap-1.5">
+                  <p className="font-semibold text-fg flex items-center gap-1.5">
                     <span className="truncate">{driver.full_name}</span>
                     {ROLE_BADGE[driver.role] && (
                       <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0 ${ROLE_BADGE[driver.role].color}`}>
@@ -110,7 +110,7 @@ export default function Drivers() {
                       </span>
                     )}
                   </p>
-                  <p className="text-xs text-white/40">{driver.phone ?? 'No phone'}</p>
+                  <p className="text-xs text-fg/40">{driver.phone ?? 'No phone'}</p>
                 </div>
                 <button
                   onClick={() => { setSelectedDriver(driver); setSheet('doc') }}
@@ -124,7 +124,7 @@ export default function Drivers() {
                   const doc = (driver.compliance_docs ?? []).find(d => d.doc_type === key)
                   return (
                     <div key={key} className="flex items-center justify-between bg-navy-800 rounded-lg px-2 py-1.5">
-                      <span className="text-xs text-white/50">{label}</span>
+                      <span className="text-xs text-fg/50">{label}</span>
                       <ExpiryBadge date={doc?.expiry_date} />
                     </div>
                   )
@@ -139,13 +139,13 @@ export default function Drivers() {
         <Sheet title={`Add Doc — ${selectedDriver.full_name}`} onClose={() => setSheet(null)}>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs text-white/50 mb-1">Document Type</label>
+              <label className="block text-xs text-fg/50 mb-1">Document Type</label>
               <select value={docType} onChange={e => setDocType(e.target.value)} className={fieldClass}>
                 {DOC_TYPES.map(d => <option key={d.key} value={d.key}>{d.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs text-white/50 mb-1">Expiry Date</label>
+              <label className="block text-xs text-fg/50 mb-1">Expiry Date</label>
               <input type="date" value={expiry} onChange={e => setExpiry(e.target.value)} className={fieldClass} />
             </div>
             {docErr && <p className="text-red-400 text-xs font-medium">{docErr}</p>}

@@ -4,7 +4,7 @@ let dbPromise
 
 function getDb() {
   if (!dbPromise) {
-    dbPromise = openDB('convoy-offline', 1, {
+    dbPromise = openDB('vantar-offline', 1, {
       upgrade(db) {
         db.createObjectStore('queue', { keyPath: 'id', autoIncrement: true })
       },

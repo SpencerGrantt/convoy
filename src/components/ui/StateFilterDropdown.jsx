@@ -50,7 +50,7 @@ export default function StateFilterDropdown({ value, onChange }) {
         type="button"
         onClick={() => setOpen(v => !v)}
         className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap ${
-          value ? 'bg-brand-500/20 border-brand-500/40 text-brand-200' : 'bg-navy-800 border-white/10 text-white/50'
+          value ? 'bg-brand-500/20 border-brand-500/40 text-brand-200' : 'bg-navy-800 border-fg/10 text-fg/50'
         }`}
       >
         <MapPin size={13} />
@@ -59,11 +59,11 @@ export default function StateFilterDropdown({ value, onChange }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-48 max-h-72 overflow-y-auto bg-navy-700 border border-white/[0.1] rounded-2xl shadow-xl z-30 py-1.5">
+        <div className="absolute right-0 mt-2 w-48 max-h-72 overflow-y-auto bg-navy-700 border border-fg/[0.1] rounded-2xl shadow-xl z-30 py-1.5">
           <button
             type="button"
             onClick={() => pick('')}
-            className={`w-full text-left px-3 py-2 text-sm hover:bg-white/[0.06] transition-colors ${!value ? 'text-brand-300 font-semibold' : 'text-white/70'}`}
+            className={`w-full text-left px-3 py-2 text-sm hover:bg-fg/[0.06] transition-colors ${!value ? 'text-brand-300 font-semibold' : 'text-fg/70'}`}
           >
             All States
           </button>
@@ -72,9 +72,9 @@ export default function StateFilterDropdown({ value, onChange }) {
               type="button"
               key={code}
               onClick={() => pick(code)}
-              className={`w-full text-left px-3 py-2 text-sm hover:bg-white/[0.06] transition-colors ${value === code ? 'text-brand-300 font-semibold' : 'text-white/70'}`}
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-fg/[0.06] transition-colors ${value === code ? 'text-brand-300 font-semibold' : 'text-fg/70'}`}
             >
-              {name} <span className="text-white/30">({code})</span>
+              {name} <span className="text-fg/30">({code})</span>
             </button>
           ))}
         </div>

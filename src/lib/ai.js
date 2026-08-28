@@ -13,7 +13,7 @@ export function todayContext() {
 }
 
 export function buildSystemPrompt(company, runs = [], contracts = []) {
-  return `You are an AI assistant built into Convoy, a logistics app for ${company?.name ?? 'your company'},
+  return `You are an AI assistant built into Vantar, a logistics app for ${company?.name ?? 'your company'},
 a logistics and courier company${company?.sdvosb ? ' (Service-Disabled Veteran-Owned Small Business, SDVOSB)' : ''}.
 
 ${todayContext()}

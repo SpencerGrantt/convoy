@@ -29,15 +29,15 @@ export default function MyTeam() {
       <div className="px-4 pt-4 space-y-4 md:px-8 md:pt-6">
 
         {company?.name && (
-          <div className="bg-brand-600 rounded-2xl p-5 relative overflow-hidden">
+          <div className="theme-dark bg-brand-600 rounded-2xl p-5 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-brand-500/40 to-transparent pointer-events-none" />
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
-                <Building2 size={18} className="text-white" />
+              <div className="w-10 h-10 rounded-xl bg-fg/15 flex items-center justify-center shrink-0">
+                <Building2 size={18} className="text-fg" />
               </div>
               <div>
                 <p className="text-brand-200 text-xs font-medium">Your Company</p>
-                <p className="text-white text-lg font-bold">{company.name}</p>
+                <p className="text-fg text-lg font-bold">{company.name}</p>
               </div>
             </div>
           </div>
@@ -49,17 +49,17 @@ export default function MyTeam() {
             const Icon = meta.icon
             const isSelf = member.id === profile?.id
             return (
-              <div key={member.id} className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] flex items-center gap-3">
+              <div key={member.id} className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] flex items-center gap-3">
                 <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 ${meta.color}`}>
                   <Icon size={16} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-white text-sm flex items-center gap-1.5">
+                  <p className="font-semibold text-fg text-sm flex items-center gap-1.5">
                     <span className="truncate">{member.full_name || 'Unnamed'}</span>
-                    {isSelf && <span className="text-[10px] text-white/30 font-normal shrink-0">(You)</span>}
+                    {isSelf && <span className="text-[10px] text-fg/30 font-normal shrink-0">(You)</span>}
                   </p>
                   {member.phone && (
-                    <p className="text-xs text-white/40 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-fg/40 flex items-center gap-1 mt-0.5">
                       <Phone size={10} />
                       {member.phone}
                     </p>
@@ -74,9 +74,9 @@ export default function MyTeam() {
         </div>
 
         {sorted.length === 0 && (
-          <div className="bg-navy-700 rounded-2xl border border-white/[0.07] p-8 text-center space-y-2">
-            <Building2 size={32} className="text-white/20 mx-auto" />
-            <p className="text-white font-semibold">No team data yet</p>
+          <div className="bg-navy-700 rounded-2xl border border-fg/[0.07] p-8 text-center space-y-2">
+            <Building2 size={32} className="text-fg/20 mx-auto" />
+            <p className="text-fg font-semibold">No team data yet</p>
           </div>
         )}
       </div>

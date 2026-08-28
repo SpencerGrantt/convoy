@@ -5,7 +5,7 @@ import TopBar from '../components/layout/TopBar'
 import MetricCard from '../components/ui/MetricCard'
 import { Download, MapPinned } from 'lucide-react'
 
-const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
+const fieldClass = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/30'
 
 const QUARTERS = [
   { value: 1, label: 'Q1', months: 'Jan – Mar' },
@@ -134,12 +134,12 @@ export default function IftaReport() {
       <div className="px-4 pt-4 space-y-4 md:px-8 md:pt-6">
 
         {/* Quarter / year / vehicle filters */}
-        <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
+        <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-brand-600/20 border border-brand-600/25 flex items-center justify-center shrink-0">
               <MapPinned size={16} className="text-brand-300" />
             </div>
-            <h2 className="text-sm font-semibold text-white">Quarterly Mileage by Jurisdiction</h2>
+            <h2 className="text-sm font-semibold text-fg">Quarterly Mileage by Jurisdiction</h2>
           </div>
 
           <div className="grid grid-cols-4 gap-1.5">
@@ -148,7 +148,7 @@ export default function IftaReport() {
                 key={q.value}
                 onClick={() => setQuarter(q.value)}
                 className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                  quarter === q.value ? 'bg-brand-600 text-white' : 'bg-navy-800 text-white/50'
+                  quarter === q.value ? 'bg-brand-600 text-white' : 'bg-navy-800 text-fg/50'
                 }`}
               >
                 {q.label}
@@ -158,13 +158,13 @@ export default function IftaReport() {
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-xs text-white/50 mb-1">Year</label>
+              <label className="block text-xs text-fg/50 mb-1">Year</label>
               <select value={year} onChange={e => setYear(Number(e.target.value))} className={fieldClass}>
                 {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs text-white/50 mb-1">Vehicle</label>
+              <label className="block text-xs text-fg/50 mb-1">Vehicle</label>
               <select value={vehicleId} onChange={e => setVehicleId(e.target.value)} className={fieldClass}>
                 <option value="">All Vehicles</option>
                 {vehicles.map(v => (
@@ -183,13 +183,13 @@ export default function IftaReport() {
         />
 
         {/* Jurisdiction table */}
-        <div className="bg-navy-700 rounded-2xl border border-white/[0.07] overflow-hidden">
+        <div className="bg-navy-700 rounded-2xl border border-fg/[0.07] overflow-hidden">
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
-            <p className="text-xs font-semibold text-white/40 uppercase tracking-wide">Miles by Jurisdiction</p>
+            <p className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Miles by Jurisdiction</p>
             <button
               onClick={exportCsv}
               disabled={loading || jurisdictionRows.length === 0}
-              className="flex items-center gap-1.5 bg-white/10 text-white/80 font-semibold px-3 py-1.5 rounded-lg text-xs disabled:opacity-40 active:bg-white/15 transition-colors"
+              className="flex items-center gap-1.5 bg-fg/10 text-fg/80 font-semibold px-3 py-1.5 rounded-lg text-xs disabled:opacity-40 active:bg-fg/15 transition-colors"
             >
               <Download size={12} />
               Export CSV
@@ -197,34 +197,34 @@ export default function IftaReport() {
           </div>
 
           {loading && (
-            <p className="text-sm text-white/40 text-center py-8">Loading…</p>
+            <p className="text-sm text-fg/40 text-center py-8">Loading…</p>
           )}
 
           {!loading && jurisdictionRows.length === 0 && (
-            <p className="text-sm text-white/40 text-center py-8">No mileage logged for this quarter.</p>
+            <p className="text-sm text-fg/40 text-center py-8">No mileage logged for this quarter.</p>
           )}
 
           {!loading && jurisdictionRows.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[10px] text-white/35 uppercase tracking-wide border-t border-white/[0.06]">
+                  <tr className="text-[10px] text-fg/35 uppercase tracking-wide border-t border-fg/[0.06]">
                     <th className="text-left font-semibold px-4 py-2">Jurisdiction</th>
                     <th className="text-right font-semibold px-4 py-2">Miles</th>
                   </tr>
                 </thead>
                 <tbody>
                   {jurisdictionRows.map(r => (
-                    <tr key={r.jurisdiction} className="border-t border-white/[0.06]">
-                      <td className="px-4 py-2.5 text-white/80 font-medium">{r.jurisdiction}</td>
-                      <td className="px-4 py-2.5 text-right text-white font-semibold">
+                    <tr key={r.jurisdiction} className="border-t border-fg/[0.06]">
+                      <td className="px-4 py-2.5 text-fg/80 font-medium">{r.jurisdiction}</td>
+                      <td className="px-4 py-2.5 text-right text-fg font-semibold">
                         {r.miles.toLocaleString(undefined, { maximumFractionDigits: 1 })}
                       </td>
                     </tr>
                   ))}
-                  <tr className="border-t border-white/[0.12]">
-                    <td className="px-4 py-3 text-white font-bold">Total</td>
-                    <td className="px-4 py-3 text-right text-white font-bold">
+                  <tr className="border-t border-fg/[0.12]">
+                    <td className="px-4 py-3 text-fg font-bold">Total</td>
+                    <td className="px-4 py-3 text-right text-fg font-bold">
                       {totalMiles.toLocaleString(undefined, { maximumFractionDigits: 1 })}
                     </td>
                   </tr>
@@ -234,7 +234,7 @@ export default function IftaReport() {
           )}
         </div>
 
-        <p className="text-[11px] text-white/30 px-1 leading-relaxed">
+        <p className="text-[11px] text-fg/30 px-1 leading-relaxed">
           This report shows raw miles logged per jurisdiction only. It does not calculate tax owed —
           use these totals with your IFTA filing software or accountant.
         </p>

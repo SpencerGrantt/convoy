@@ -1,7 +1,9 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider } from './hooks/AuthProvider'
+import { ThemeProvider } from './hooks/ThemeProvider'
 import { useAuth } from './hooks/useAuth'
+import { useTheme } from './hooks/useTheme'
 import Sidebar from './components/layout/Sidebar'
 import MobileNav from './components/layout/MobileNav'
 import AiFloatingWidget from './components/AiFloatingWidget'
@@ -89,14 +91,14 @@ function OnboardingGate() {
   if (!session) return <Navigate to="/login" replace />
   if (profile?.onboarding_complete) return <Navigate to="/" replace />
   // A signed-in user with no profile and a recorded provisioning error would
-  // otherwise fall through to the generic "Welcome to Convoy" choice screen
+  // otherwise fall through to the generic "Welcome to Vantar" choice screen
   // with zero indication that account setup actually failed server-side —
   // this surfaces it with a way to retry instead of a silent dead end.
   if (!profile && authError) {
     return (
       <div className="min-h-screen bg-navy-900 flex flex-col items-center justify-center px-4 text-center gap-4">
-        <p className="text-white font-bold text-lg">Couldn't set up your account</p>
-        <p className="text-white/50 text-sm max-w-sm">{authError}</p>
+        <p className="text-fg font-bold text-lg">Couldn't set up your account</p>
+        <p className="text-fg/50 text-sm max-w-sm">{authError}</p>
         <button
           onClick={refreshProfile}
           className="bg-brand-600 text-white font-bold px-5 py-2.5 rounded-xl"
@@ -139,6 +141,19 @@ function AppRoutes() {
   // yet — VerifyMfa (rendered by AuthGate below) is a full-screen gate like
   // Login, same as onboarding, not a page with app chrome around it.
   const showNav = !!(session && profile?.onboarding_complete && !mfaPending)
+
+  // Light mode only applies inside the authenticated app shell — signed-out
+  // surfaces (landing, login, onboarding, the MFA gate) always render dark,
+  // regardless of what a signed-in user last picked, since those are public/
+  // pre-auth pages a visitor sees before any preference should apply.
+  const { theme } = useTheme()
+  useEffect(() => {
+    const applyLight = showNav && theme === 'light'
+    if (applyLight) document.documentElement.dataset.theme = 'light'
+    else delete document.documentElement.dataset.theme
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', applyLight ? '#f5f4f1' : '#131313')
+  }, [showNav, theme])
 
   return (
     <div className="min-h-screen bg-navy-900">
@@ -198,9 +213,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

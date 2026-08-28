@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 const MESSAGES = {
   trialing: {
     title: 'Your trial has ended',
-    body: 'Add a payment method to keep using Convoy.',
+    body: 'Add a payment method to keep using Vantar.',
     action: 'Add Payment Method',
   },
   past_due: {
@@ -13,7 +13,7 @@ const MESSAGES = {
   },
   canceled: {
     title: 'Your subscription was canceled',
-    body: 'Reactivate billing to keep using Convoy. Nothing has been deleted.',
+    body: 'Reactivate billing to keep using Vantar. Nothing has been deleted.',
     action: 'Reactivate Billing',
   },
 }
@@ -24,8 +24,8 @@ export default function BillingBlockedScreen({ status, isOwner }) {
 
   return (
     <div className="min-h-screen bg-navy-900 flex flex-col items-center justify-center px-4 text-center gap-4">
-      <p className="text-white font-bold text-lg">{config.title}</p>
-      <p className="text-white/50 text-sm max-w-sm">{config.body}</p>
+      <p className="text-fg font-bold text-lg">{config.title}</p>
+      <p className="text-fg/50 text-sm max-w-sm">{config.body}</p>
       {isOwner ? (
         <button
           onClick={() => navigate('/settings?tab=billing')}
@@ -34,7 +34,7 @@ export default function BillingBlockedScreen({ status, isOwner }) {
           {config.action}
         </button>
       ) : (
-        <p className="text-white/40 text-sm">Ask your company owner to sort out billing.</p>
+        <p className="text-fg/40 text-sm">Ask your company owner to sort out billing.</p>
       )}
     </div>
   )

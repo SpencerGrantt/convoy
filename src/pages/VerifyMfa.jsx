@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { ShieldCheck } from 'lucide-react'
 
-const inputBase = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-4 py-3 text-base text-center tracking-[0.3em] font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/25 placeholder:tracking-normal placeholder:font-normal transition-colors'
+const inputBase = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-4 py-3 text-base text-center tracking-[0.3em] font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/25 placeholder:tracking-normal placeholder:font-normal transition-colors'
 
 // Shown between password sign-in and the rest of the app whenever the
 // account has email 2FA enabled (profiles.mfa_email_enabled) and this
@@ -60,18 +60,18 @@ export default function VerifyMfa() {
     <div className="bg-navy-900 min-h-screen flex flex-col items-center justify-center px-5">
       <div className="w-full max-w-sm space-y-3">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-white tracking-tight">CONVOY</h1>
-          <p className="text-white/40 text-sm mt-1">Logistics Platform</p>
+          <h1 className="text-4xl font-black text-fg tracking-tight">VANTAR</h1>
+          <p className="text-fg/40 text-sm mt-1">Logistics Platform</p>
         </div>
 
-        <div className="bg-navy-700 rounded-2xl p-6 border border-white/[0.08] space-y-4">
+        <div className="bg-navy-700 rounded-2xl p-6 border border-fg/[0.08] space-y-4">
           <div className="text-center space-y-2">
             <ShieldCheck size={28} className="text-brand-300 mx-auto" />
-            <p className="font-semibold text-white text-lg">Verify it's you</p>
-            <p className="text-sm text-white/50 leading-relaxed">
+            <p className="font-semibold text-fg text-lg">Verify it's you</p>
+            <p className="text-sm text-fg/50 leading-relaxed">
               {sending
                 ? 'Sending a code to your email…'
-                : <>Enter the code we sent to <strong className="text-white">{email}</strong>.</>}
+                : <>Enter the code we sent to <strong className="text-fg">{email}</strong>.</>}
             </p>
           </div>
 
@@ -100,7 +100,7 @@ export default function VerifyMfa() {
               <button
                 type="button"
                 onClick={resend}
-                className="w-full text-white/40 text-sm font-medium hover:text-white/60 transition-colors"
+                className="w-full text-fg/40 text-sm font-medium hover:text-fg/60 transition-colors"
               >
                 Resend code
               </button>
@@ -109,7 +109,7 @@ export default function VerifyMfa() {
 
           <button
             onClick={signOut}
-            className="w-full text-white/30 text-xs font-medium hover:text-white/50 transition-colors pt-2"
+            className="w-full text-fg/30 text-xs font-medium hover:text-fg/50 transition-colors pt-2"
           >
             Sign out
           </button>

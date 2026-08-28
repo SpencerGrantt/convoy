@@ -49,17 +49,17 @@ export default function AiFloatingWidget() {
 
       {open && (
         <div
-          className="flex flex-col bg-navy-800 border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden w-[320px] md:w-[360px]"
+          className="flex flex-col bg-navy-800 border border-fg/[0.08] rounded-2xl shadow-2xl overflow-hidden w-[320px] md:w-[360px]"
           style={{ height: 440 }}
         >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-navy-900 shrink-0">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-fg/[0.08] bg-navy-900 shrink-0">
             <div className="flex items-center gap-2">
               <Bot size={15} className="text-brand-400" />
-              <span className="text-sm font-semibold text-white">AI Assistant</span>
+              <span className="text-sm font-semibold text-fg">AI Assistant</span>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="text-white/30 hover:text-white transition-colors"
+              className="text-fg/30 hover:text-fg transition-colors"
             >
               <X size={15} />
             </button>
@@ -68,12 +68,12 @@ export default function AiFloatingWidget() {
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
             {messages.length === 0 && (
               <div className="space-y-1.5 mt-1">
-                <p className="text-[10px] text-white/30 text-center mb-2">Quick prompts</p>
+                <p className="text-[10px] text-fg/30 text-center mb-2">Quick prompts</p>
                 {SUGGESTIONS.map(s => (
                   <button
                     key={s}
                     onClick={() => send(s)}
-                    className="w-full text-left bg-navy-700 border border-white/[0.07] rounded-xl px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-navy-600 transition-colors"
+                    className="w-full text-left bg-navy-700 border border-fg/[0.07] rounded-xl px-3 py-2 text-xs text-fg/60 hover:text-fg hover:bg-navy-600 transition-colors"
                   >
                     {s}
                   </button>
@@ -86,7 +86,7 @@ export default function AiFloatingWidget() {
                 <div className={`max-w-[88%] px-3 py-2 rounded-xl text-xs whitespace-pre-wrap leading-relaxed ${
                   msg.role === 'user'
                     ? 'bg-brand-600 text-white rounded-br-sm'
-                    : 'bg-navy-700 border border-white/[0.07] text-white/90 rounded-bl-sm'
+                    : 'bg-navy-700 border border-fg/[0.07] text-fg/90 rounded-bl-sm'
                 }`}>
                   {msg.text}
                 </div>
@@ -95,10 +95,10 @@ export default function AiFloatingWidget() {
 
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-navy-700 border border-white/[0.07] rounded-xl rounded-bl-sm px-3 py-2">
+                <div className="bg-navy-700 border border-fg/[0.07] rounded-xl rounded-bl-sm px-3 py-2">
                   <div className="flex gap-1">
                     {[0, 1, 2].map(i => (
-                      <div key={i} className="w-1 h-1 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                      <div key={i} className="w-1 h-1 rounded-full bg-fg/40 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
                     ))}
                   </div>
                 </div>
@@ -107,13 +107,13 @@ export default function AiFloatingWidget() {
             <div ref={bottomRef} />
           </div>
 
-          <div className="px-3 py-2.5 border-t border-white/[0.08] flex gap-2 shrink-0">
+          <div className="px-3 py-2.5 border-t border-fg/[0.08] flex gap-2 shrink-0">
             <input
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
               placeholder="Ask anything…"
-              className="flex-1 bg-navy-700 border border-white/10 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 placeholder:text-white/25"
+              className="flex-1 bg-navy-700 border border-fg/10 text-fg rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 placeholder:text-fg/25"
             />
             <button
               onClick={() => send()}
@@ -129,10 +129,10 @@ export default function AiFloatingWidget() {
       <button
         onClick={() => setOpen(v => !v)}
         className={`h-12 w-12 rounded-full flex items-center justify-center shadow-lg transition-colors ${
-          open ? 'bg-navy-700 border border-white/10' : 'bg-brand-600 hover:bg-brand-500'
+          open ? 'bg-navy-700 border border-fg/10' : 'bg-brand-600 hover:bg-brand-500'
         }`}
       >
-        {open ? <X size={18} className="text-white" /> : <Bot size={20} className="text-white" />}
+        {open ? <X size={18} className="text-fg" /> : <Bot size={20} className="text-white" />}
       </button>
     </div>
   )

@@ -1,6 +1,6 @@
 export default function Badge({ children, color = 'gray' }) {
   const colors = {
-    gray:   'bg-white/10 text-white/60',
+    gray:   'bg-fg/10 text-fg/60',
     blue:   'bg-blue-500/20 text-blue-300',
     green:  'bg-green-500/20 text-green-300',
     red:    'bg-red-500/20 text-red-300',

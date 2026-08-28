@@ -2,13 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --navy-950: 10 10 10;
+  --navy-900: 19 19 19;
+  --navy-800: 28 28 28;
+  --navy-700: 35 35 35;
+  --navy-600: 44 44 44;
+  --navy-500: 56 56 56;
+  --fg: 255 255 255;
+  --brand-100: 204 214 255;
+  --brand-200: 153 173 255;
+  --brand-300: 102 133 255;
+  --brand-400: 51 92 255;
+  --green-300: 134 239 172;
+  --green-400: 74 222 128;
+  --red-300: 252 165 165;
+  --red-400: 248 113 113;
+  --yellow-300: 253 224 71;
+  --yellow-400: 250 204 21;
+  --blue-300: 147 197 253;
+  --blue-400: 96 165 250;
+  --orange-300: 253 186 116;
+  --orange-400: 251 146 60;
+}
+
+:root[data-theme='light'] {
+  --navy-950: 239 237 233;
+  --navy-900: 245 244 241;
+  --navy-800: 255 255 255;
+  --navy-700: 236 234 230;
+  --navy-600: 226 224 219;
+  --navy-500: 211 209 202;
+  --fg: 23 22 26;
+  /* Darker than the dark-theme shades so text/icon accents stay readable
+     on light surfaces — the dark-theme values (pale blue) are near-invisible
+     on white/off-white backgrounds. */
+  --brand-100: 20 64 224;
+  --brand-200: 20 64 224;
+  --brand-300: 31 73 242;
+  --brand-400: 10 58 255;
+  --green-300: 21 128 61;
+  --green-400: 22 101 52;
+  --red-300: 185 28 28;
+  --red-400: 153 27 27;
+  --yellow-300: 161 98 7;
+  --yellow-400: 133 77 14;
+  --blue-300: 29 78 216;
+  --blue-400: 30 64 175;
+  --orange-300: 194 65 12;
+  --orange-400: 154 52 18;
+}
+
+/* Scopes a subtree back to the fixed dark palette regardless of the page
+   theme — for "branded" elements (e.g. the bg-brand-600 greeting/company
+   cards) that are always rendered dark by design, never theme-aware, so
+   text/icon children using the fg/brand/status tokens (including nested
+   components like StatusPill) resolve correctly without each one needing
+   its own hardcoded color. */
+.theme-dark {
+  --navy-950: 10 10 10;
+  --navy-900: 19 19 19;
+  --navy-800: 28 28 28;
+  --navy-700: 35 35 35;
+  --navy-600: 44 44 44;
+  --navy-500: 56 56 56;
+  --fg: 255 255 255;
+  --brand-100: 204 214 255;
+  --brand-200: 153 173 255;
+  --brand-300: 102 133 255;
+  --brand-400: 51 92 255;
+  --green-300: 134 239 172;
+  --green-400: 74 222 128;
+  --red-300: 252 165 165;
+  --red-400: 248 113 113;
+  --yellow-300: 253 224 71;
+  --yellow-400: 250 204 21;
+  --blue-300: 147 197 253;
+  --blue-400: 96 165 250;
+  --orange-300: 253 186 116;
+  --orange-400: 251 146 60;
+}
+
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-navy-900 text-white;
+    @apply bg-navy-900 text-fg;
     font-family: 'Inter', system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  :root[data-theme='light'] body {
+    color-scheme: light;
   }
 }
 

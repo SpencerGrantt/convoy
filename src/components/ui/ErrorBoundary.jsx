@@ -20,7 +20,7 @@ export default class ErrorBoundary extends Component {
 
   componentDidCatch(error) {
     if (CHUNK_LOAD_ERROR.test(error?.message ?? '')) {
-      const key = 'convoy_chunk_reload_attempted'
+      const key = 'vantar_chunk_reload_attempted'
       if (!sessionStorage.getItem(key)) {
         sessionStorage.setItem(key, '1')
         window.location.reload()

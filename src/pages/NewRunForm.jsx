@@ -6,7 +6,7 @@ import { geocodeAddress } from '../lib/geocode'
 import { haversineMiles } from '../lib/geo'
 import TopBar from '../components/layout/TopBar'
 
-const fieldClass = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/30'
+const fieldClass = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/30'
 
 const ACTIVE_STATUSES = ['assigned', 'in_transit']
 
@@ -152,50 +152,50 @@ export default function NewRunForm() {
     <div className="pb-24 md:pb-8">
       <TopBar title="New Run" />
       <form onSubmit={submit} className="px-4 pt-4 space-y-4 md:px-8 md:pt-6">
-        <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Addresses</h2>
+        <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
+          <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Addresses</h2>
           <div>
-            <label className="block text-xs text-white/50 mb-1">Pickup Address *</label>
+            <label className="block text-xs text-fg/50 mb-1">Pickup Address *</label>
             <input
               required value={form.pickup_address}
               onChange={e => { set('pickup_address', e.target.value); setPickupCoords(null) }}
               onBlur={() => geocodeField('pickup_address', setPickupCoords)}
               className={fieldClass} placeholder="123 Main St, City, ST"
             />
-            {geocodingField === 'pickup_address' && <p className="text-[10px] text-white/30 mt-1">Locating…</p>}
+            {geocodingField === 'pickup_address' && <p className="text-[10px] text-fg/30 mt-1">Locating…</p>}
           </div>
           <div>
-            <label className="block text-xs text-white/50 mb-1">Dropoff Address *</label>
+            <label className="block text-xs text-fg/50 mb-1">Dropoff Address *</label>
             <input
               required value={form.dropoff_address}
               onChange={e => { set('dropoff_address', e.target.value); setDropoffCoords(null) }}
               onBlur={() => geocodeField('dropoff_address', setDropoffCoords)}
               className={fieldClass} placeholder="456 Oak Ave, City, ST"
             />
-            {geocodingField === 'dropoff_address' && <p className="text-[10px] text-white/30 mt-1">Locating…</p>}
+            {geocodingField === 'dropoff_address' && <p className="text-[10px] text-fg/30 mt-1">Locating…</p>}
           </div>
         </div>
 
-        <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Cargo</h2>
+        <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
+          <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Cargo</h2>
           <textarea value={form.cargo_description} onChange={e => set('cargo_description', e.target.value)} className={fieldClass} rows={2} placeholder="Lab specimens, blood draw kit…" />
           <label className="flex items-center gap-3">
             <div
-              className={`w-12 h-6 rounded-full transition-colors ${form.temp_sensitive ? 'bg-brand-600' : 'bg-white/20'} relative cursor-pointer`}
+              className={`w-12 h-6 rounded-full transition-colors ${form.temp_sensitive ? 'bg-brand-600' : 'bg-fg/20'} relative cursor-pointer`}
               onClick={() => set('temp_sensitive', !form.temp_sensitive)}
             >
               <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${form.temp_sensitive ? 'translate-x-6' : ''}`} />
             </div>
-            <span className="text-sm text-white/70">Temperature sensitive</span>
+            <span className="text-sm text-fg/70">Temperature sensitive</span>
           </label>
         </div>
 
-        <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Assignment</h2>
+        <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
+          <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Assignment</h2>
 
           {suggestedDrivers.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-xs text-white/50">
+              <p className="text-xs text-fg/50">
                 Suggested Crew
                 {!pickupCoords && ' — ranked by availability (enter a pickup address to also rank by distance)'}
               </p>
@@ -205,15 +205,15 @@ export default function NewRunForm() {
                   key={d.id}
                   onClick={() => set('driver_id', d.id)}
                   className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-left transition-colors ${
-                    form.driver_id === d.id ? 'bg-brand-500/20 border border-brand-500/40' : 'bg-navy-800 border border-white/10'
+                    form.driver_id === d.id ? 'bg-brand-500/20 border border-brand-500/40' : 'bg-navy-800 border border-fg/10'
                   }`}
                 >
-                  <span className="text-sm text-white font-medium truncate">{d.full_name}</span>
+                  <span className="text-sm text-fg font-medium truncate">{d.full_name}</span>
                   <span className="flex items-center gap-2 shrink-0">
                     <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${d.activeCount === 0 ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'}`}>
                       {d.activeCount === 0 ? 'Available' : `On ${d.activeCount} run${d.activeCount === 1 ? '' : 's'}`}
                     </span>
-                    <span className="text-[10px] text-white/40 w-20 text-right">
+                    <span className="text-[10px] text-fg/40 w-20 text-right">
                       {d.distance != null ? `${d.distance.toFixed(1)} mi away` : 'Location unknown'}
                     </span>
                   </span>
@@ -223,55 +223,55 @@ export default function NewRunForm() {
           )}
 
           <div>
-            <label className="block text-xs text-white/50 mb-1">Crew</label>
+            <label className="block text-xs text-fg/50 mb-1">Crew</label>
             <select value={form.driver_id} onChange={e => set('driver_id', e.target.value)} className={fieldClass}>
               <option value="">Unassigned</option>
               {drivers.map(d => <option key={d.id} value={d.id}>{d.full_name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs text-white/50 mb-1">Vehicle</label>
+            <label className="block text-xs text-fg/50 mb-1">Vehicle</label>
             <select value={form.vehicle_id} onChange={e => set('vehicle_id', e.target.value)} className={fieldClass}>
               <option value="">None</option>
               {vehicles.map(v => <option key={v.id} value={v.id}>{v.name} · {v.plate}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs text-white/50 mb-1">Contract</label>
+            <label className="block text-xs text-fg/50 mb-1">Contract</label>
             <select value={form.contract_id} onChange={e => set('contract_id', e.target.value)} className={fieldClass}>
               <option value="">None — commercial/broker run</option>
               {contracts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs text-white/50 mb-1">Scheduled Time</label>
+            <label className="block text-xs text-fg/50 mb-1">Scheduled Time</label>
             <input type="datetime-local" value={form.scheduled_at} onChange={e => set('scheduled_at', e.target.value)} className={fieldClass} />
           </div>
         </div>
 
-        <div className="bg-navy-700 rounded-2xl p-4 border border-white/[0.07] space-y-3">
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Load Details</h2>
+        <div className="bg-navy-700 rounded-2xl p-4 border border-fg/[0.07] space-y-3">
+          <h2 className="text-xs font-semibold text-fg/40 uppercase tracking-wide">Load Details</h2>
           {!form.contract_id && (
             <div>
-              <label className="block text-xs text-white/50 mb-1">Broker / Customer</label>
+              <label className="block text-xs text-fg/50 mb-1">Broker / Customer</label>
               <input value={form.broker_name} onChange={e => set('broker_name', e.target.value)} className={fieldClass} placeholder="e.g. ABC Logistics" />
             </div>
           )}
           <div>
-            <label className="block text-xs text-white/50 mb-1">BOL #</label>
+            <label className="block text-xs text-fg/50 mb-1">BOL #</label>
             <input value={form.bol_number} onChange={e => set('bol_number', e.target.value)} className={fieldClass} placeholder="Bill of lading number" />
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs text-white/50 mb-1">Rate/mile</label>
+              <label className="block text-xs text-fg/50 mb-1">Rate/mile</label>
               <input type="number" step="0.01" min="0" value={form.rate_per_mile} onChange={e => set('rate_per_mile', e.target.value)} className={fieldClass} placeholder="$" />
             </div>
             <div>
-              <label className="block text-xs text-white/50 mb-1">Loaded mi</label>
+              <label className="block text-xs text-fg/50 mb-1">Loaded mi</label>
               <input type="number" step="0.1" min="0" value={form.loaded_miles} onChange={e => set('loaded_miles', e.target.value)} className={fieldClass} placeholder="0" />
             </div>
             <div>
-              <label className="block text-xs text-white/50 mb-1">Deadhead mi</label>
+              <label className="block text-xs text-fg/50 mb-1">Deadhead mi</label>
               <input type="number" step="0.1" min="0" value={form.deadhead_miles} onChange={e => set('deadhead_miles', e.target.value)} className={fieldClass} placeholder="0" />
             </div>
           </div>

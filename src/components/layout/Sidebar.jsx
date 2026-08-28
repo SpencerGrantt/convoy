@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Home, Truck, FileText, DollarSign, MessageCircle, Settings, Plus, X, MapPinned, Wrench, Send,
-  ClipboardCheck, ShieldCheck, Users, Wallet, Route,
+  ClipboardCheck, ShieldCheck, Users, Wallet, Route, ChevronDown,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useTeamMembers } from '../../hooks/useTeamMembers'
@@ -23,12 +23,14 @@ const allNavItems = [
 
 // The driver-only pages (DriverDashboard's tile links) have always been
 // open routes — no `roles` restriction in App.jsx — but were only ever
-// reachable through DriverDashboard itself, so an owner had no way to get
-// to them short of typing the URL. Owner already has full dispatcher
-// parity (Contracts/Fleet/Drivers are owner+dispatcher routes); this
-// closes the other half — owner gets driver capability too, for the
-// common small-fleet case where the owner also drives sometimes.
-const ownerDriverTools = [
+// reachable through DriverDashboard itself (or, for a driver, the mobile
+// bottom nav), so there was no desktop-sidebar path to them short of typing
+// the URL. Shown to owner for the common small-fleet case where the owner
+// also drives sometimes (owner already has full dispatcher parity —
+// Contracts/Fleet/Drivers are owner+dispatcher routes — this closes the
+// other half), and to driver so the desktop sidebar has the same reach as
+// their dashboard tiles/mobile nav.
+const driverTools = [
   { to: '/inspections/new', icon: ClipboardCheck, label: 'Vehicle Inspection' },
   { to: '/my-compliance',   icon: ShieldCheck,     label: 'My Documents' },
   { to: '/my-team',         icon: Users,           label: 'My Team' },
@@ -44,8 +46,8 @@ function NavItem({ to, icon: Icon, label, end, showDot }) {
       className={({ isActive }) =>
         `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
           isActive
-            ? 'bg-white/[0.08] text-white'
-            : 'text-white/50 hover:text-white hover:bg-white/[0.05]'
+            ? 'bg-fg/[0.08] text-fg'
+            : 'text-fg/50 hover:text-fg hover:bg-fg/[0.05]'
         }`
       }
     >
@@ -63,7 +65,7 @@ function DriverItem({ driver, onClick, onMessage }) {
     : '?'
 
   return (
-    <div className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[0.05] transition-colors group">
+    <div className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-fg/[0.05] transition-colors group">
       <button onClick={onClick} className="flex items-center gap-2 flex-1 min-w-0 text-left">
         {driver.avatar_url ? (
           <img src={driver.avatar_url} alt={name} className="h-6 w-6 rounded-full object-cover shrink-0" />
@@ -73,8 +75,8 @@ function DriverItem({ driver, onClick, onMessage }) {
           </div>
         )}
         <span className="min-w-0 flex-1">
-          <span className="block text-sm text-white/70 truncate">{name}</span>
-          <span className="block text-[10px] text-white/30 truncate">{roleLabel(driver.role)}</span>
+          <span className="block text-sm text-fg/70 truncate">{name}</span>
+          <span className="block text-[10px] text-fg/30 truncate">{roleLabel(driver.role)}</span>
         </span>
       </button>
       {/* Messaging is one channel per non-owner company member
@@ -86,7 +88,7 @@ function DriverItem({ driver, onClick, onMessage }) {
         <button
           onClick={onMessage}
           title={`Message ${name}`}
-          className="shrink-0 text-white/20 hover:text-brand-400 transition-colors opacity-0 group-hover:opacity-100 p-1"
+          className="shrink-0 text-fg/20 hover:text-brand-400 transition-colors opacity-0 group-hover:opacity-100 p-1"
         >
           <Send size={13} />
         </button>
@@ -108,7 +110,9 @@ export default function Sidebar() {
   const companyPlan = profile?.companies?.plan ?? 'standard'
   const items = allNavItems.filter(item => item.roles.includes(role) && (!BILLING_ENABLED || !item.plan || item.plan === companyPlan))
   const showDrivers = role === 'owner' || role === 'dispatcher'
+  const showDriverTools = role === 'owner' || role === 'driver'
 
+  const [driverToolsOpen, setDriverToolsOpen] = useState(true)
   const [addingDriver, setAddingDriver] = useState(false)
   const [driverEmail, setDriverEmail] = useState('')
   const [inviting, setInviting] = useState(false)
@@ -134,11 +138,11 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full w-60 bg-navy-900 border-r border-white/[0.08] z-50">
+    <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full w-60 bg-navy-900 border-r border-fg/[0.08] z-50">
 
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-white/[0.08] shrink-0">
-        <span className="text-white font-black text-xl tracking-tight">CONVOY</span>
+      <div className="px-5 py-5 border-b border-fg/[0.08] shrink-0">
+        <span className="text-fg font-black text-xl tracking-tight">VANTAR</span>
       </div>
 
       {/* Scrollable middle: nav + drivers */}
@@ -147,22 +151,28 @@ export default function Sidebar() {
           <NavItem key={to} to={to} icon={icon} label={label} end={to === '/'} showDot={to === '/messages' && unreadMessages > 0} />
         ))}
 
-        {role === 'owner' && (
-          <div className="pt-4 mt-4 border-t border-white/[0.08] space-y-0.5">
-            <p className="px-3 pb-1 text-[10px] font-semibold text-white/30 uppercase tracking-widest">My Driver Tools</p>
-            {ownerDriverTools.map(({ to, icon, label }) => (
+        {showDriverTools && (
+          <div className="pt-4 mt-4 border-t border-fg/[0.08] space-y-0.5">
+            <button
+              onClick={() => setDriverToolsOpen(v => !v)}
+              className="w-full flex items-center justify-between px-3 pb-1 text-[10px] font-semibold text-fg/30 uppercase tracking-widest hover:text-fg/50 transition-colors"
+            >
+              <span>My Driver Tools</span>
+              <ChevronDown size={12} className={`transition-transform ${driverToolsOpen ? '' : '-rotate-90'}`} />
+            </button>
+            {driverToolsOpen && driverTools.map(({ to, icon, label }) => (
               <NavItem key={to} to={to} icon={icon} label={label} />
             ))}
           </div>
         )}
 
         {showDrivers && (
-          <div className="pt-4 mt-4 border-t border-white/[0.08]">
+          <div className="pt-4 mt-4 border-t border-fg/[0.08]">
             <div className="flex items-center justify-between px-2 mb-2">
-              <span className="text-xs font-semibold text-white/40 uppercase tracking-widest">Team</span>
+              <span className="text-xs font-semibold text-fg/40 uppercase tracking-widest">Team</span>
               <button
                 onClick={() => { setAddingDriver(v => !v); setInviteMsg('') }}
-                className="text-white/30 hover:text-white transition-colors"
+                className="text-fg/30 hover:text-fg transition-colors"
               >
                 {addingDriver ? <X size={13} /> : <Plus size={13} />}
               </button>
@@ -175,7 +185,7 @@ export default function Sidebar() {
                   onChange={e => setDriverEmail(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && inviteDriver()}
                   placeholder="driver@example.com"
-                  className="w-full bg-navy-800 border border-white/10 text-white rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 placeholder:text-white/25"
+                  className="w-full bg-navy-800 border border-fg/10 text-fg rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 placeholder:text-fg/25"
                 />
                 {inviteMsg && (
                   <p className={`text-[10px] px-1 ${inviteMsg.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>
@@ -194,7 +204,7 @@ export default function Sidebar() {
 
             <div className="space-y-0.5 max-h-36 overflow-y-auto">
               {teammates.length === 0 && !addingDriver && (
-                <p className="text-[10px] text-white/20 px-2 py-1">No teammates yet</p>
+                <p className="text-[10px] text-fg/20 px-2 py-1">No teammates yet</p>
               )}
               {teammates.map(d => (
                 <DriverItem
@@ -210,7 +220,7 @@ export default function Sidebar() {
       </div>
 
       {/* Bottom: settings + user profile */}
-      <div className="shrink-0 border-t border-white/[0.08] px-3 py-3 space-y-0.5">
+      <div className="shrink-0 border-t border-fg/[0.08] px-3 py-3 space-y-0.5">
         <NavItem to="/settings" icon={Settings} label="Settings" />
         {profile && (
           <div className="flex items-center gap-3 px-2 py-2 mt-1">
@@ -218,8 +228,8 @@ export default function Sidebar() {
               {profile.full_name?.charAt(0)?.toUpperCase() ?? '?'}
             </div>
             <div className="min-w-0">
-              <p className="text-white text-xs font-semibold truncate">{profile.full_name || 'Account'}</p>
-              <p className="text-white/40 text-[10px] leading-tight">{roleLabel(profile.role)}</p>
+              <p className="text-fg text-xs font-semibold truncate">{profile.full_name || 'Account'}</p>
+              <p className="text-fg/40 text-[10px] leading-tight">{roleLabel(profile.role)}</p>
             </div>
           </div>
         )}

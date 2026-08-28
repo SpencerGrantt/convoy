@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import Reveal from './Reveal'
 
-const inputBase = 'w-full bg-navy-800 border border-white/10 text-white rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-white/25 transition-colors'
+const inputBase = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/25 transition-colors'
 
 export default function DemoForm() {
   const [name, setName] = useState('')
@@ -26,29 +26,29 @@ export default function DemoForm() {
   }
 
   return (
-    <section id="demo-form" className="px-5 py-16 md:py-24 border-t border-white/[0.07]">
+    <section id="demo-form" className="px-5 py-16 md:py-24 border-t border-fg/[0.07]">
       <div className="max-w-md mx-auto">
         {status === 'success' ? (
-          <div className="bg-navy-700 rounded-2xl p-6 border border-white/[0.08] text-center space-y-4 py-8 animate-fadeIn">
+          <div className="bg-navy-700 rounded-2xl p-6 border border-fg/[0.08] text-center space-y-4 py-8 animate-fadeIn">
             <div className="text-4xl">📬</div>
-            <p className="font-semibold text-white text-lg">Request received</p>
-            <p className="text-sm text-white/50 leading-relaxed">
-              Thanks, <strong className="text-white">{name}</strong>. We'll reach out to{' '}
-              <strong className="text-white">{email}</strong> to schedule your demo.
+            <p className="font-semibold text-fg text-lg">Request received</p>
+            <p className="text-sm text-fg/50 leading-relaxed">
+              Thanks, <strong className="text-fg">{name}</strong>. We'll reach out to{' '}
+              <strong className="text-fg">{email}</strong> to schedule your demo.
             </p>
           </div>
         ) : (
           <Reveal>
             <div className="text-center mb-8">
-              <h3 className="text-2xl font-black text-white tracking-tight">Start Your Demo Today</h3>
-              <p className="text-white/50 text-sm mt-2">
+              <h3 className="text-2xl font-black text-fg tracking-tight">Start Your Demo Today</h3>
+              <p className="text-fg/50 text-sm mt-2">
                 Tell us about your operation and we'll be in touch.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-navy-700 rounded-2xl p-6 border border-white/[0.08] space-y-4">
+            <form onSubmit={handleSubmit} className="bg-navy-700 rounded-2xl p-6 border border-fg/[0.08] space-y-4">
               <div className="space-y-1">
-                <label className="block text-xs font-semibold text-white/40 uppercase tracking-wide">Name</label>
+                <label className="block text-xs font-semibold text-fg/40 uppercase tracking-wide">Name</label>
                 <input
                   type="text"
                   value={name}
@@ -60,7 +60,7 @@ export default function DemoForm() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-semibold text-white/40 uppercase tracking-wide">Email Address</label>
+                <label className="block text-xs font-semibold text-fg/40 uppercase tracking-wide">Email Address</label>
                 <input
                   type="email"
                   value={email}
@@ -72,7 +72,7 @@ export default function DemoForm() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-semibold text-white/40 uppercase tracking-wide">Company (optional)</label>
+                <label className="block text-xs font-semibold text-fg/40 uppercase tracking-wide">Company (optional)</label>
                 <input
                   type="text"
                   value={company}
@@ -83,7 +83,7 @@ export default function DemoForm() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-semibold text-white/40 uppercase tracking-wide">Message</label>
+                <label className="block text-xs font-semibold text-fg/40 uppercase tracking-wide">Message</label>
                 <textarea
                   value={message}
                   onChange={e => setMessage(e.target.value)}

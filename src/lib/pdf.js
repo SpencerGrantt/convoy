@@ -40,7 +40,7 @@ export function generateCustodyPDF(run, photos, signatures, custody) {
   doc.setFontSize(14)
   doc.setFont('helvetica', 'bold')
   doc.setTextColor(240, 244, 248)
-  doc.text('CONVOY', 15, 12)
+  doc.text('VANTAR', 15, 12)
   doc.setFontSize(9)
   doc.setFont('helvetica', 'normal')
   doc.text('Chain of Custody Report', 15, 16.5)
@@ -133,7 +133,7 @@ export function generateCustodyPDF(run, photos, signatures, custody) {
     doc.setPage(i)
     doc.setFontSize(7)
     doc.setTextColor(180, 180, 180)
-    doc.text(`CONVOY Chain of Custody · Page ${i} of ${pageCount} · CONFIDENTIAL`, pageW / 2, 292, { align: 'center' })
+    doc.text(`VANTAR Chain of Custody · Page ${i} of ${pageCount} · CONFIDENTIAL`, pageW / 2, 292, { align: 'center' })
   }
 
   return doc

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import dashboardMockup from '../../assets/landing/hero-dashboard-mockup.png'
 
 function scrollToDemoForm() {
   document.getElementById('demo-form')?.scrollIntoView({ behavior: 'smooth' })
@@ -73,6 +74,14 @@ export default function Hero() {
               </Link>
             </div>
           </div>
+        </div>
+
+        <div
+          className={`max-w-4xl mx-auto mt-14 md:mt-20 transition-all duration-700 ease-out delay-150 motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0 ${
+            visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+          }`}
+        >
+          <img src={dashboardMockup} alt="Vantar dashboard" className="w-full h-auto" />
         </div>
       </div>
     </div>

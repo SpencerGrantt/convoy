@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
+import { Analytics } from '@vercel/analytics/react'
 import './styles/index.css'
 import App from './App.jsx'
 import { migrateLegacyConvoyStorage } from './lib/migrateLegacyStorage.js'
@@ -43,5 +44,6 @@ registerSW({
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
+    <Analytics />
   </StrictMode>,
 )

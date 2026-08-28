@@ -177,7 +177,7 @@ export default function Dashboard() {
       <div className="px-4 pt-4 space-y-4 md:px-8 md:pt-8">
         <p className="text-fg/50 text-sm">
           {greeting()}{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}
-          <span className="hidden sm:inline"> — here's what's happening today.</span>
+          <span className="hidden sm:inline">. Here's what's happening today.</span>
         </p>
 
         {samDaysLeft !== null && samDaysLeft <= 30 && !dismissed.has(samKey) && (

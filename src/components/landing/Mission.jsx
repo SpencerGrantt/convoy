@@ -10,7 +10,7 @@ export default function Mission() {
         </h3>
         <p className="text-fg/60 text-base md:text-lg mt-5 leading-relaxed">
           Vantar automates dispatch, compliance, and reporting so small fleet owners spend
-          less on busywork and more time on what actually grows the company — the
+          less on busywork and more time on what actually grows the company: the
           operations, not the admin behind them. Save time, save money, get back to work.
         </p>
       </Reveal>

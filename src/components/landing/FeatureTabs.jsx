@@ -80,14 +80,12 @@ const MORE_FEATURES = [
 export default function FeatureTabs() {
   const [active, setActive] = useState(0)
   const [imageIndex, setImageIndex] = useState(0)
-  const [hovering, setHovering] = useState(false)
   const current = TABS[active]
   const currentImage = current.images[imageIndex] ?? current.images[0]
 
   function selectTab(i) {
     setActive(i)
     setImageIndex(0)
-    setHovering(false)
   }
 
   return (
@@ -126,18 +124,12 @@ export default function FeatureTabs() {
             key={active}
             className="bg-navy-700 rounded-2xl border border-fg/[0.08] shadow-xl shadow-black/[0.06] animate-fadeIn overflow-hidden"
           >
-            <div
-              onMouseEnter={() => setHovering(true)}
-              onMouseLeave={() => setHovering(false)}
-              className={`relative aspect-[4/3] bg-navy-800 flex items-center justify-center ${hovering ? 'overflow-visible z-30' : 'overflow-hidden z-0'}`}
-            >
+            <div className="relative aspect-[4/3] bg-navy-800 flex items-center justify-center overflow-hidden">
               <img
                 key={currentImage.src}
                 src={currentImage.src}
                 alt={currentImage.label}
-                className={`w-full h-full object-contain transition-transform duration-300 ease-out ${
-                  hovering ? 'scale-[1.15]' : 'scale-100'
-                }`}
+                className="w-full h-full object-contain"
               />
             </div>
 

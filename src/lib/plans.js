@@ -1,11 +1,17 @@
 // Single source of truth for plan names, pricing, and feature copy —
 // consumed by the marketing Pricing section, Onboarding's Plan step, and
 // Settings' Billing tab, so a price change only ever needs updating here.
+// `bestFor` is a Pricing.jsx-only fit descriptor shown under the plan
+// name. Plain "who this is for" framing on purpose - no ROI math, no
+// "worth it" claim, nothing that reads as justifying the price. Kept out
+// of `features` since Settings.jsx joins that array into one sentence; a
+// line like this would read oddly stitched in.
 export const PLAN_META = {
   standard: {
     label: 'Standard',
     monthlyPrice: 49,
     yearlyPrice: 490,
+    bestFor: 'Best for fleets focused on day-to-day operations',
     features: [
       'Dispatch and real-time run tracking',
       'Photo-verified chain-of-custody',
@@ -19,11 +25,6 @@ export const PLAN_META = {
     label: 'Government',
     monthlyPrice: 99,
     yearlyPrice: 990,
-    // Pricing.jsx-only fit descriptor, shown above the feature list. Plain
-    // "who this is for" framing on purpose - no ROI math, no "worth it"
-    // claim, nothing that reads as justifying the price. Kept out of
-    // `features` since Settings.jsx joins that array into one sentence; a
-    // line like this would read oddly stitched in.
     bestFor: 'Best for fleets actively bidding on new government contracts',
     features: [
       'Everything in Standard',

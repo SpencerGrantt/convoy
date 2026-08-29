@@ -19,12 +19,12 @@ export const PLAN_META = {
     label: 'Government',
     monthlyPrice: 99,
     yearlyPrice: 990,
-    // Pricing.jsx-only value framing, shown above the feature list. Kept
-    // soft/conversational on purpose: a flat ROI claim reads as a sales
-    // pitch, this reads as a quiet aside. Kept out of `features` since
-    // Settings.jsx joins that array into one sentence; a pitch line would
-    // read oddly stitched in.
-    pitch: 'Worth it the first time it lands you a contract, or saves you a renewal.',
+    // Pricing.jsx-only fit descriptor, shown above the feature list. Plain
+    // "who this is for" framing on purpose - no ROI math, no "worth it"
+    // claim, nothing that reads as justifying the price. Kept out of
+    // `features` since Settings.jsx joins that array into one sentence; a
+    // line like this would read oddly stitched in.
+    bestFor: 'Best for fleets actively bidding on new government contracts',
     features: [
       'Everything in Standard',
       'Get matched to new SAM.gov opportunities automatically',

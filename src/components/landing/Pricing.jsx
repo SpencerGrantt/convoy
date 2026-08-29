@@ -24,6 +24,9 @@ export default function Pricing() {
             <Reveal key={key} delay={i * 100}>
               <div className="bg-navy-700 rounded-2xl border border-fg/[0.08] p-8 h-full transition-all hover:-translate-y-1 hover:border-brand-600/40 hover:shadow-xl hover:shadow-brand-900/20">
                 <p className="text-fg font-bold text-lg">{meta.label}</p>
+                {meta.bestFor && (
+                  <p className="text-fg/40 text-xs mt-0.5">{meta.bestFor}</p>
+                )}
                 <div className="flex items-baseline gap-1.5 mt-2">
                   <span className="text-4xl font-black text-fg tracking-tight">${meta.monthlyPrice}</span>
                   <span className="text-fg/40 text-sm font-medium">/mo</span>
@@ -31,11 +34,6 @@ export default function Pricing() {
                 <p className="text-fg/40 text-xs mt-1">
                   or ${meta.yearlyPrice}/yr, save ${meta.monthlyPrice * 12 - meta.yearlyPrice}
                 </p>
-                {meta.pitch && (
-                  <p className="text-fg/50 text-sm italic mt-4 leading-relaxed">
-                    {meta.pitch}
-                  </p>
-                )}
                 <ul className="mt-5 space-y-2.5">
                   {meta.features.map(f => (
                     <li key={f} className="flex items-start gap-2.5 text-fg/70 text-sm">

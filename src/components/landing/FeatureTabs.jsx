@@ -132,18 +132,18 @@ export default function FeatureTabs() {
         <Reveal delay={200}>
           <div
             key={active}
-            className="bg-navy-700 rounded-2xl border border-fg/[0.08] shadow-xl shadow-black/[0.06] max-w-3xl mx-auto animate-fadeIn overflow-hidden"
+            className="bg-navy-700 rounded-2xl border border-fg/[0.08] shadow-xl shadow-black/[0.06] animate-fadeIn overflow-hidden"
           >
             <div
               onMouseEnter={() => setHovering(true)}
               onMouseLeave={() => setHovering(false)}
-              className={`relative bg-navy-800 ${hovering ? 'overflow-visible z-30' : 'overflow-hidden z-0'}`}
+              className={`relative aspect-[4/3] bg-navy-800 flex items-center justify-center ${hovering ? 'overflow-visible z-30' : 'overflow-hidden z-0'}`}
             >
               <img
                 key={currentImage.src}
                 src={currentImage.src}
                 alt={currentImage.label}
-                className={`w-full h-auto block transition-transform duration-300 ease-out ${
+                className={`w-full h-full object-contain transition-transform duration-300 ease-out ${
                   hovering ? 'scale-[1.15]' : 'scale-100'
                 }`}
               />

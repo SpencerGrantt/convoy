@@ -19,11 +19,12 @@ export const PLAN_META = {
     label: 'Government',
     monthlyPrice: 99,
     yearlyPrice: 990,
-    // Pricing.jsx-only value framing, shown above the feature list. The
-    // point is that this tier pays for itself, not that it has more
-    // checkboxes. Kept out of `features` since Settings.jsx joins that
-    // array into one sentence; a pitch line would read oddly stitched in.
-    pitch: 'One new contract, or one registration renewed on time, pays for years of this plan.',
+    // Pricing.jsx-only value framing, shown above the feature list. Kept
+    // soft/conversational on purpose: a flat ROI claim reads as a sales
+    // pitch, this reads as a quiet aside. Kept out of `features` since
+    // Settings.jsx joins that array into one sentence; a pitch line would
+    // read oddly stitched in.
+    pitch: 'Worth it the first time it lands you a contract, or saves you a renewal.',
     features: [
       'Everything in Standard',
       'Get matched to new SAM.gov opportunities automatically',

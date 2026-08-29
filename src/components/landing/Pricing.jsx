@@ -32,7 +32,7 @@ export default function Pricing() {
                   or ${meta.yearlyPrice}/yr, save ${meta.monthlyPrice * 12 - meta.yearlyPrice}
                 </p>
                 {meta.pitch && (
-                  <p className="text-brand-300 text-sm font-medium mt-4 leading-relaxed">
+                  <p className="text-fg/50 text-sm italic mt-4 leading-relaxed">
                     {meta.pitch}
                   </p>
                 )}

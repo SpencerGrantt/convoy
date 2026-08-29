@@ -7,7 +7,9 @@ import { useTheme } from './hooks/useTheme'
 import Sidebar from './components/layout/Sidebar'
 import MobileNav from './components/layout/MobileNav'
 import AiFloatingWidget from './components/AiFloatingWidget'
-import RoleSwitcher from './components/dev/RoleSwitcher'
+// Dev role/plan-preview panel disabled for now (uncomment both this import
+// and its render call below to bring it back) - see components/dev/RoleSwitcher.jsx.
+// import RoleSwitcher from './components/dev/RoleSwitcher'
 import LoadingSpinner from './components/ui/LoadingSpinner'
 import ErrorBoundary from './components/ui/ErrorBoundary'
 
@@ -209,7 +211,7 @@ function AppRoutes() {
         </ErrorBoundary>
       )}
       {showNav && <AiFloatingWidget />}
-      {showNav && <RoleSwitcher />}
+      {/* {showNav && <RoleSwitcher />} */}
     </div>
   )
 }

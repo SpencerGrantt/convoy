@@ -82,7 +82,14 @@ export default function Hero() {
             visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
           }`}
         >
-          <img src={dashboardMockup} alt="Vantar dashboard" className="w-full h-auto" />
+          <img
+            src={dashboardMockup}
+            alt="Vantar dashboard"
+            className="w-full h-auto"
+            style={{
+              filter: 'drop-shadow(0 0 30px rgba(51,92,255,0.35)) drop-shadow(0 0 70px rgba(51,92,255,0.2))',
+            }}
+          />
         </div>
       </div>
     </div>

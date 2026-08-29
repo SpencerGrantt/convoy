@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import {
-  Radio, Camera, FileSearch, Calculator, Sparkles, Smartphone,
+  Radio, FileSearch, Calculator, Sparkles, Smartphone,
   MessageSquare, Wrench, FileSpreadsheet, Users,
 } from 'lucide-react'
 import Reveal from './Reveal'
 import dispatchImg from '../../assets/landing/feature-dispatch.jpg'
-import custodyImg from '../../assets/landing/feature-custody.jpg'
 import contractsImg from '../../assets/landing/feature-contracts.jpg'
 import financesImg from '../../assets/landing/feature-finances.jpg'
 import analyticsImg from '../../assets/landing/feature-analytics.jpg'
@@ -20,13 +19,6 @@ const TABS = [
     title: 'Real-Time Dispatch & Tracking',
     description: 'Send run details straight to a driver\'s phone and follow every pickup and delivery live, with automatic status updates along the way.',
     images: [{ src: dispatchImg, label: 'Runs' }],
-  },
-  {
-    icon: Camera,
-    label: 'Chain-of-Custody',
-    title: 'Photo-Verified Chain-of-Custody',
-    description: 'Every handoff is documented with timestamped photos and signatures, so cargo, specimen, and document custody is provable end to end.',
-    images: [{ src: custodyImg, label: 'Run Detail' }],
   },
   {
     icon: FileSearch,

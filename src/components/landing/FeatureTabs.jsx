@@ -132,43 +132,40 @@ export default function FeatureTabs() {
         <Reveal delay={200}>
           <div
             key={active}
-            className="bg-navy-700 rounded-2xl border border-fg/[0.08] shadow-xl shadow-black/[0.06] max-w-5xl mx-auto animate-fadeIn grid grid-cols-1 md:grid-cols-2"
+            className="bg-navy-700 rounded-2xl border border-fg/[0.08] shadow-xl shadow-black/[0.06] max-w-3xl mx-auto animate-fadeIn overflow-hidden"
           >
-            <div className="md:order-1 flex flex-col relative">
-              <div
-                onMouseEnter={() => setHovering(true)}
-                onMouseLeave={() => setHovering(false)}
-                className={`relative aspect-[16/10] md:aspect-auto md:flex-1 bg-navy-800 rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl ${
-                  hovering ? 'overflow-visible z-30' : 'overflow-hidden z-0'
+            <div
+              onMouseEnter={() => setHovering(true)}
+              onMouseLeave={() => setHovering(false)}
+              className={`relative bg-navy-800 ${hovering ? 'overflow-visible z-30' : 'overflow-hidden z-0'}`}
+            >
+              <img
+                key={currentImage.src}
+                src={currentImage.src}
+                alt={currentImage.label}
+                className={`w-full h-auto block transition-transform duration-300 ease-out ${
+                  hovering ? 'scale-[1.15]' : 'scale-100'
                 }`}
-              >
-                <img
-                  key={currentImage.src}
-                  src={currentImage.src}
-                  alt={currentImage.label}
-                  className={`w-full h-full object-cover object-top rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl shadow-2xl transition-transform duration-300 ease-out ${
-                    hovering ? 'scale-[1.5]' : 'scale-100'
-                  }`}
-                />
-              </div>
-
-              {current.images.length > 1 && (
-                <div className="flex items-center gap-1.5 px-4 py-3 bg-navy-800 border-t border-fg/[0.06]">
-                  {current.images.map((img, i) => (
-                    <button
-                      key={img.label}
-                      onClick={() => setImageIndex(i)}
-                      className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-colors ${
-                        imageIndex === i ? 'bg-brand-600 text-white' : 'text-fg/40 hover:text-fg/70 bg-navy-900/60'
-                      }`}
-                    >
-                      {img.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+              />
             </div>
-            <div className="p-6 md:p-10 md:order-2 flex flex-col justify-center">
+
+            {current.images.length > 1 && (
+              <div className="flex items-center gap-1.5 px-4 py-3 bg-navy-800 border-t border-fg/[0.06]">
+                {current.images.map((img, i) => (
+                  <button
+                    key={img.label}
+                    onClick={() => setImageIndex(i)}
+                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-colors ${
+                      imageIndex === i ? 'bg-brand-600 text-white' : 'text-fg/40 hover:text-fg/70 bg-navy-900/60'
+                    }`}
+                  >
+                    {img.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="p-6 md:p-8 border-t border-fg/[0.08]">
               <current.icon size={24} className="text-brand-300 mb-3" />
               <h4 className="text-xl md:text-2xl font-bold text-fg mb-2">{current.title}</h4>
               <p className="text-fg/60 leading-relaxed">{current.description}</p>

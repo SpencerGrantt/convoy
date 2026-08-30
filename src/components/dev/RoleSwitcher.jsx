@@ -12,7 +12,7 @@ const HIDDEN_KEY = 'vantar_dev_panel_hidden'
 // and the real company row's plan is never touched.
 export default function RoleSwitcher() {
   const { isDevUser, viewRole, setViewRole, realRole, viewPlan, setViewPlan, realPlan } = useAuth()
-  const [hidden, setHidden] = useState(() => sessionStorage.getItem(HIDDEN_KEY) === '1')
+  const [hidden, setHidden] = useState(() => sessionStorage.getItem(HIDDEN_KEY) !== '0')
   if (!isDevUser) return null
 
   const active = viewRole ?? realRole

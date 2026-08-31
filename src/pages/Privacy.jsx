@@ -3,9 +3,8 @@
 // an attorney - review before treating this as final, especially now that
 // real payments and real customer business data are flowing through the
 // app. Update the "Last updated" date below whenever this content changes.
-// Contact address is a temporary stand-in (spenag20@gmail.com) - swap for
-// a real privacy@vantar.tech once that inbox actually exists; the domain
-// is only verified for sending via Resend right now, not receiving.
+// privacy@vantar.tech forwards to a real inbox via ImprovMX (set up
+// 2026-08-31), so this is a live, working address.
 import { Link } from 'react-router-dom'
 import Logo from '../components/ui/Logo'
 
@@ -126,7 +125,7 @@ export default function Privacy() {
         <Section title="Contact us">
           <p>
             Questions about this policy or your data can be sent to{' '}
-            <a href="mailto:spenag20@gmail.com" className="text-brand-300 underline">spenag20@gmail.com</a>.
+            <a href="mailto:privacy@vantar.tech" className="text-brand-300 underline">privacy@vantar.tech</a>.
           </p>
         </Section>
 

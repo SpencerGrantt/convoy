@@ -4,9 +4,8 @@
 // refund policy below (14-day money-back on a first purchase, no proration
 // after) is a reasonable default, not a fixed decision - change it here if
 // a different policy is chosen. Update "Last updated" whenever this changes.
-// Contact address is a temporary stand-in (spenag20@gmail.com) - swap for
-// a real support@vantar.tech once that inbox actually exists; the domain
-// is only verified for sending via Resend right now, not receiving.
+// support@vantar.tech forwards to a real inbox via ImprovMX (set up
+// 2026-08-31), so this is a live, working address.
 import { Link } from 'react-router-dom'
 import Logo from '../components/ui/Logo'
 
@@ -149,7 +148,7 @@ export default function Terms() {
         <Section title="Contact us">
           <p>
             Questions about these terms can be sent to{' '}
-            <a href="mailto:spenag20@gmail.com" className="text-brand-300 underline">spenag20@gmail.com</a>.
+            <a href="mailto:support@vantar.tech" className="text-brand-300 underline">support@vantar.tech</a>.
           </p>
         </Section>
 

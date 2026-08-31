@@ -66,10 +66,8 @@ serve(async (req) => {
       }
 
       // Invite links must always land on the real production app, never
-      // wherever the sender happens to be running from (see APP_URL in
-      // src/lib/supabase.js — same constant, duplicated here because this
-      // function runs in Deno, outside that bundle).
-      const APP_URL = 'https://vantartracking.com'
+      // wherever the sender happens to be running from.
+      const APP_URL = 'https://vantar.tech'
 
       const { error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, {
         data: { company_id: caller.company_id, role },

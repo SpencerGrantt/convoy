@@ -147,16 +147,20 @@ export default function Onboarding() {
         full_name: fullName.trim(),
         company_id: company?.id ?? null,
       }
-      // With billing dormant there's no Plan step to reach — finish
-      // onboarding right here instead of leaving it to a step that will
-      // never render.
-      if (!BILLING_ENABLED) body.onboarding_complete = true
+      // Skip the Plan step when billing is dormant, or when this owner
+      // already has a paid subscription — e.g. arrived via the stripe-
+      // webhook invite flow after buying directly from the pricing page,
+      // where asking them to choose and pay for a plan again would be
+      // both redundant and confusing ("14 days free" to someone who
+      // already paid).
+      const alreadySubscribed = company?.subscription_status === 'active'
+      if (!BILLING_ENABLED || alreadySubscribed) body.onboarding_complete = true
       const { data, error: fnErr } = await invokeFn('upsert-company', { body })
       if (fnErr) throw new Error(fnErr.message)
       if (data?.error) throw new Error(data.error)
       if (!data?.profile) throw new Error('Save did not complete — please try again.')
       setProfileDirect(data.profile)
-      setStep(BILLING_ENABLED ? 3 : 4)
+      setStep(BILLING_ENABLED && !alreadySubscribed ? 3 : 4)
     } catch (err) {
       setError(err.message)
     } finally {

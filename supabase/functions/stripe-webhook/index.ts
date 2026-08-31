@@ -59,8 +59,9 @@ serve(async (req) => {
       const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
       const priceId = subscription.items.data[0]?.price.id
       const plan = PRICE_TO_PLAN[priceId] ?? 'standard'
+      const customerId = session.customer as string
 
-      const { error } = await admin
+      const { data: updated, error } = await admin
         .from('companies')
         .update({
           stripe_subscription_id: subscription.id,
@@ -68,8 +69,68 @@ serve(async (req) => {
           subscription_status: mapStatus(subscription.status),
           current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
         })
-        .eq('stripe_customer_id', session.customer as string)
+        .eq('stripe_customer_id', customerId)
+        .select('id')
       if (error) console.error('checkout.session.completed update failed:', error.message)
+
+      // No existing company matched this Stripe customer — this is a
+      // brand-new buyer from a landing-page Payment Link, not an in-app
+      // upgrade (create-checkout-session always sets stripe_customer_id on
+      // an existing company before checkout even starts, so that path
+      // always matches above). Provision their company and invite them —
+      // the invite email is their onboarding email; self-serve signup is
+      // disabled, so this is the only way a new owner account gets created.
+      if (!error && (!updated || updated.length === 0)) {
+        const email = session.customer_details?.email
+        if (!email) {
+          console.error('checkout.session.completed: new customer with no email, cannot invite', customerId)
+        } else {
+          const { data: newCompany, error: insertErr } = await admin
+            .from('companies')
+            .insert({
+              name: session.customer_details?.name || 'My Company',
+              stripe_customer_id: customerId,
+              stripe_subscription_id: subscription.id,
+              plan,
+              subscription_status: mapStatus(subscription.status),
+              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            })
+            .select('id')
+            .single()
+          if (insertErr) {
+            console.error('checkout.session.completed: failed to create company for new buyer:', insertErr.message)
+          } else {
+            const { error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, {
+              data: { company_id: newCompany.id, role: 'owner' },
+              redirectTo: 'https://vantar.tech',
+            })
+            // A pre-existing auth user (e.g. they already had a Vantar
+            // login) can't be re-invited — the company/subscription is
+            // still correctly recorded above either way, this only means
+            // the automatic account-linking step needs a human follow-up.
+            // Notify rather than only logging, since a silently-unlinked
+            // paying customer is exactly the kind of thing nobody happens
+            // to go looking for in function logs.
+            if (inviteErr) {
+              console.error('checkout.session.completed: invite failed for', email, inviteErr.message)
+              const notifyEmail = Deno.env.get('DEMO_NOTIFY_EMAIL')
+              const resendKey = Deno.env.get('RESEND_API_KEY')
+              if (notifyEmail && resendKey) {
+                await fetch('https://api.resend.com/emails', {
+                  method: 'POST',
+                  headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    from: 'Vantar <notifications@vantar.tech>',
+                    to: [notifyEmail],
+                    subject: 'Manual follow-up needed: paid signup could not be auto-linked',
+                    text: `${email} just paid for the ${plan} plan (company id ${newCompany.id}), but already has a Vantar account, so they could not be auto-invited to the new company. The payment and new company record are fine, this just needs the account linked by hand.`,
+                  }),
+                }).catch(() => {})
+              }
+            }
+          }
+        }
+      }
     }
 
     if (event.type === 'customer.subscription.updated') {

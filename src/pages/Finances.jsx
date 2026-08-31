@@ -779,6 +779,8 @@ export default function Finances() {
   const [sheet, setSheet] = useState(null)
   const [editingEntry, setEditingEntry] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
+  const [showAllRevenue, setShowAllRevenue] = useState(false)
+  const [showAllExpenses, setShowAllExpenses] = useState(false)
 
   function openSheet(name, entry = null) {
     setEditingEntry(entry)
@@ -835,7 +837,7 @@ export default function Finances() {
             <div>
               <p className="text-xs font-semibold text-fg/40 uppercase tracking-wide mb-2">Recent Revenue</p>
               {revenue.length === 0 && <p className="text-sm text-fg/40 text-center py-2">No entries this month</p>}
-              {revenue.slice(0, 5).map(r => (
+              {(showAllRevenue ? revenue : revenue.slice(0, 5)).map(r => (
                 <button key={r.id} onClick={() => openSheet('revenue', r)} className="w-full text-left bg-navy-700 rounded-xl px-4 py-3 border border-fg/[0.07] flex items-center justify-between mb-2 active:bg-navy-800">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-fg/80 truncate">{r.description || 'Revenue entry'}</p>
@@ -847,12 +849,17 @@ export default function Finances() {
                   <p className="text-sm font-bold text-green-400 ml-3">{fmt(r.amount)}</p>
                 </button>
               ))}
+              {!showAllRevenue && revenue.length > 5 && (
+                <button onClick={() => setShowAllRevenue(true)} className="w-full text-center text-xs font-semibold text-brand-400 py-2">
+                  View All ({revenue.length})
+                </button>
+              )}
             </div>
 
             <div>
               <p className="text-xs font-semibold text-fg/40 uppercase tracking-wide mb-2">Recent Expenses</p>
               {expenses.length === 0 && <p className="text-sm text-fg/40 text-center py-2">No entries this month</p>}
-              {expenses.slice(0, 5).map(e => (
+              {(showAllExpenses ? expenses : expenses.slice(0, 5)).map(e => (
                 <button key={e.id} onClick={() => openSheet('expense', e)} className="w-full text-left bg-navy-700 rounded-xl px-4 py-3 border border-fg/[0.07] flex items-center justify-between mb-2 active:bg-navy-800">
                   <div>
                     <p className="text-sm text-fg/80">{e.description || e.category.replace('_', ' ')}</p>
@@ -862,6 +869,11 @@ export default function Finances() {
                   <p className="text-sm font-bold text-red-400 ml-3">{fmt(e.amount)}</p>
                 </button>
               ))}
+              {!showAllExpenses && expenses.length > 5 && (
+                <button onClick={() => setShowAllExpenses(true)} className="w-full text-center text-xs font-semibold text-brand-400 py-2">
+                  View All ({expenses.length})
+                </button>
+              )}
             </div>
 
             <div>

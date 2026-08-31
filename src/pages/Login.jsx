@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import Logo from '../components/ui/Logo'
@@ -7,24 +6,15 @@ import Logo from '../components/ui/Logo'
 const inputBase = 'w-full bg-navy-800 border border-fg/10 text-fg rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-fg/25 transition-colors'
 
 export default function Login() {
-  const [searchParams] = useSearchParams()
-  // A pricing-card CTA links here as /login?plan=government — carried
-  // through signUp's user_metadata below so Onboarding's Plan step can
-  // pre-select it. Cosmetic only: the trigger in 021_billing_stripe.sql
-  // means real plan assignment always happens through upsert-company/the
-  // Stripe webhook, never from signup metadata directly.
-  const rawPlan = searchParams.get('plan')
-  const intendedPlan = rawPlan === 'standard' || rawPlan === 'government' ? rawPlan : null
-  // The landing page's "Sign Up" link lands here as /login?view=signup.
-  const requestedSignup = intendedPlan || searchParams.get('view') === 'signup'
-
-  const [view, setView]       = useState(requestedSignup ? 'signup' : 'signin') // 'signin' | 'signup' | 'forgot'
+  // Public self-serve signup is disabled — new accounts are created by the
+  // team (Supabase dashboard or the manage-team invite flow) after a demo,
+  // never directly from this page. See BILLING_ENABLED in lib/billing.js.
+  const [view, setView]       = useState('signin') // 'signin' | 'forgot'
   const [magicLink, setMagicLink] = useState(false)
-  const [step, setStep]       = useState('form')   // 'form' | 'sent' | 'reset-sent' | 'confirm-sent'
+  const [step, setStep]       = useState('form')   // 'form' | 'sent' | 'reset-sent'
 
   const [email, setEmail]         = useState('')
   const [password, setPassword]   = useState('')
-  const [confirmPw, setConfirmPw] = useState('')
   const [showPw, setShowPw]       = useState(false)
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
@@ -34,7 +24,6 @@ export default function Login() {
     setStep('form')
     setError('')
     setPassword('')
-    setConfirmPw('')
     setMagicLink(false)
   }
 
@@ -55,24 +44,6 @@ export default function Login() {
     setLoading(false)
   }
 
-  async function handleSignUp(e) {
-    e.preventDefault()
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
-    if (password !== confirmPw) { setError('Passwords do not match.'); return }
-    setLoading(true); setError('')
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: intendedPlan ? { intended_plan: intendedPlan } : undefined,
-      },
-    })
-    if (error) setError(error.message)
-    else setStep('confirm-sent')
-    setLoading(false)
-  }
-
   async function handleForgot(e) {
     e.preventDefault()
     setLoading(true); setError('')
@@ -85,7 +56,7 @@ export default function Login() {
   }
 
   // ── Sent / confirmation screens ──────────────────────────────────────────
-  if (step === 'sent' || step === 'reset-sent' || step === 'confirm-sent') {
+  if (step === 'sent' || step === 'reset-sent') {
     const config = {
       sent: {
         icon: '📬',
@@ -96,11 +67,6 @@ export default function Login() {
         icon: '🔑',
         title: 'Reset link sent',
         body: <>We sent a password reset link to <strong className="text-fg">{email}</strong>. Check your inbox.</>,
-      },
-      'confirm-sent': {
-        icon: '✉️',
-        title: 'Confirm your email',
-        body: <>We sent a confirmation link to <strong className="text-fg">{email}</strong>. Click it to activate your account.</>,
       },
     }[step]
 
@@ -121,22 +87,6 @@ export default function Login() {
   // ── Main form ────────────────────────────────────────────────────────────
   return (
     <Screen>
-      {/* Tabs */}
-      {view !== 'forgot' && (
-        <div className="flex bg-navy-800 rounded-2xl p-1 mb-1 gap-1">
-          {[['signin', 'Sign In'], ['signup', 'Create Account']].map(([v, label]) => (
-            <button
-              key={v}
-              onClick={() => switchView(v)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all
-                ${view === v ? 'bg-brand-600 text-white shadow' : 'text-fg/40 hover:text-fg/60'}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      )}
-
       <div className="bg-navy-700 rounded-2xl p-6 border border-fg/[0.08] space-y-4">
 
         {/* ── Sign In ── */}
@@ -186,51 +136,6 @@ export default function Login() {
                 {magicLink ? 'Sign in with password instead' : 'Sign in with magic link instead'}
               </button>
             </div>
-          </form>
-        )}
-
-        {/* ── Create Account ── */}
-        {view === 'signup' && (
-          <form onSubmit={handleSignUp} className="space-y-4">
-            <div className="space-y-3">
-              <Field label="Email Address">
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                  placeholder="you@example.com" className={inputBase} required autoFocus />
-              </Field>
-              <Field label="Password">
-                <div className="relative">
-                  <input
-                    type={showPw ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="At least 6 characters"
-                    className={inputBase + ' pr-12'}
-                    required
-                  />
-                  <button type="button" onClick={() => setShowPw(!showPw)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-fg/30 hover:text-fg/60 transition-colors">
-                    {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </Field>
-              <Field label="Confirm Password">
-                <input
-                  type={showPw ? 'text' : 'password'}
-                  value={confirmPw}
-                  onChange={e => setConfirmPw(e.target.value)}
-                  placeholder="••••••••"
-                  className={inputBase}
-                  required
-                />
-              </Field>
-            </div>
-
-            {error && <p className="text-red-400 text-sm">{error}</p>}
-
-            <button type="submit" disabled={loading}
-              className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl disabled:opacity-50 transition-colors hover:bg-brand-700">
-              {loading ? 'Creating account…' : 'Create Account'}
-            </button>
           </form>
         )}
 

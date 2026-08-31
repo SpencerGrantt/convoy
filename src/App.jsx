@@ -17,6 +17,8 @@ import ErrorBoundary from './components/ui/ErrorBoundary'
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
 import Landing from './pages/Landing'
+import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
 import VerifyMfa from './pages/VerifyMfa'
 import RequiresGovernmentPlan from './components/billing/RequiresGovernmentPlan'
 import BillingBlockedScreen from './components/billing/BillingBlockedScreen'
@@ -182,6 +184,8 @@ function AppRoutes() {
             <Suspense fallback={<LoadingSpinner />}>
               <Routes>
                 <Route path="/login"      element={session ? <Navigate to="/" replace /> : <Login />} />
+                <Route path="/privacy"    element={<Privacy />} />
+                <Route path="/terms"      element={<Terms />} />
                 <Route path="/onboarding" element={<OnboardingGate />} />
                 <Route path="/"           element={<RootRoute />} />
                 <Route path="/runs"       element={<AuthGate><Runs /></AuthGate>} />

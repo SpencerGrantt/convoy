@@ -12,6 +12,7 @@ import analyticsImg from '../../assets/landing/feature-analytics.png'
 import iftaImg from '../../assets/landing/feature-ifta.jpg'
 import aiImg from '../../assets/landing/feature-ai.jpg'
 import driverImg from '../../assets/landing/feature-driver.jpg'
+import driverDashImg from '../../assets/landing/feature-driver-dashboard.png'
 
 const TABS = [
   {
@@ -58,7 +59,10 @@ const TABS = [
     label: 'Driver Tools',
     title: 'Driver Mobile Tools',
     description: 'Drivers get pre/post-trip vehicle inspections, compliance status, and their full run history, all from one mobile-first app.',
-    images: [{ src: driverImg, label: 'Inspection' }],
+    images: [
+      { src: driverDashImg, label: 'Dashboard' },
+      { src: driverImg, label: 'Inspection' },
+    ],
   },
 ]
 

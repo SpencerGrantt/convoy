@@ -14,6 +14,9 @@ export default function RoleSwitcher() {
   const { isDevUser, viewRole, setViewRole, realRole, viewPlan, setViewPlan, realPlan } = useAuth()
   const [hidden, setHidden] = useState(() => sessionStorage.getItem(HIDDEN_KEY) !== '0')
   if (!isDevUser) return null
+  // ?noDevPanel suppresses the panel and its collapsed toggle entirely, for
+  // clean screenshots — nothing to tap to bring it back, just drop the param.
+  if (new URLSearchParams(window.location.search).has('noDevPanel')) return null
 
   const active = viewRole ?? realRole
   const activePlan = viewPlan ?? realPlan ?? 'standard'

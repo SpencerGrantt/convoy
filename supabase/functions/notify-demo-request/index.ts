@@ -61,6 +61,12 @@ serve(async (req) => {
           ${company ? `<p><strong>Company:</strong> ${escapeHtml(company)}</p>` : ''}
           <p><strong>Message:</strong><br>${escapeHtml(message ?? '').replace(/\n/g, '<br>')}</p>
         `,
+        text: [
+          `Name: ${name}`,
+          `Email: ${email}`,
+          company ? `Company: ${company}` : null,
+          `Message:\n${message ?? ''}`,
+        ].filter(Boolean).join('\n'),
       }),
     })
 

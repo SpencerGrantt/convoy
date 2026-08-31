@@ -67,6 +67,18 @@ export default function Terms() {
           </p>
         </Section>
 
+        <Section title="Referral program">
+          <p>
+            If you refer another company to Vantar and they subscribe to a paid plan, we'll
+            apply one free month to your own subscription once their subscription has been
+            active for at least 30 days. Referral credit is applied manually — let us know
+            who you referred by emailing us so we can confirm and apply it. A referral must
+            be a genuine new customer who wasn't already in conversation with us; we reserve
+            the right to decline credit for referrals that don't meet that bar, and to change
+            or end this program at any time.
+          </p>
+        </Section>
+
         <Section title="Cancellation and refunds">
           <p>
             You can cancel your subscription at any time from the Billing tab in Settings.

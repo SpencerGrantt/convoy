@@ -19,13 +19,18 @@ export default function Pricing() {
           {Object.entries(PLAN_META).map(([key, meta], i) => (
             <Reveal key={key} delay={i * 100}>
               <div className="bg-navy-700 rounded-2xl border border-fg/[0.08] p-8 h-full transition-all hover:-translate-y-1 hover:border-brand-600/40 hover:shadow-xl hover:shadow-brand-900/20">
-                <p className="text-fg font-bold text-lg">{meta.label}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-fg font-bold text-lg">{meta.label}</p>
+                  <span className="text-[10px] font-bold text-green-300 bg-green-500/15 border border-green-500/25 px-2 py-0.5 rounded-full">
+                    Save ${meta.monthlyPrice * 12 - meta.yearlyPrice}/yr
+                  </span>
+                </div>
                 {meta.bestFor && (
                   <p className="text-fg/40 text-xs mt-0.5">{meta.bestFor}</p>
                 )}
                 <div className="flex items-baseline gap-1.5 mt-2">
-                  <span className="text-4xl font-black text-fg tracking-tight">${meta.monthlyPrice}</span>
-                  <span className="text-fg/40 text-sm font-medium">/mo</span>
+                  <span className="text-4xl font-black text-fg tracking-tight">${Math.round(meta.yearlyPrice / 12)}</span>
+                  <span className="text-fg/40 text-sm font-medium">/mo, billed annually</span>
                 </div>
                 <ul className="mt-5 space-y-2.5">
                   {meta.features.map(f => (
@@ -36,16 +41,16 @@ export default function Pricing() {
                   ))}
                 </ul>
                 <a
-                  href={meta.monthlyPaymentLink}
+                  href={meta.yearlyPaymentLink}
                   className="block text-center w-full mt-8 bg-brand-600 text-white font-bold px-8 py-3 rounded-xl shadow-sm shadow-brand-900/20 transition-all hover:bg-brand-700 hover:shadow-brand-900/25 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  Subscribe Monthly
+                  Subscribe Yearly
                 </a>
                 <a
-                  href={meta.yearlyPaymentLink}
+                  href={meta.monthlyPaymentLink}
                   className="block text-center text-fg/40 text-xs mt-3 font-semibold underline hover:text-fg/60 transition-colors"
                 >
-                  or pay yearly, save ${meta.monthlyPrice * 12 - meta.yearlyPrice}
+                  or pay monthly, ${meta.monthlyPrice}/mo
                 </a>
               </div>
             </Reveal>

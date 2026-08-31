@@ -16,13 +16,22 @@ export default function DemoForm() {
     e.preventDefault()
     setStatus('submitting')
     setError('')
-    const { error } = await supabase.from('demo_requests').insert({ name, email, company, message })
+    // Generated here rather than read back via .select() — demo_requests'
+    // RLS grants anon INSERT only, and RETURNING is subject to the SELECT
+    // policy too, so a read-back would come back empty despite the insert
+    // succeeding.
+    const id = crypto.randomUUID()
+    const { error } = await supabase.from('demo_requests').insert({ id, name, email, company, message })
     if (error) {
       setError(error.message)
       setStatus('error')
       return
     }
     setStatus('success')
+    // Best-effort — the request is already saved above regardless of
+    // whether this succeeds, so a failure here shouldn't block the success
+    // screen or surface as an error to the visitor.
+    supabase.functions.invoke('notify-demo-request', { body: { id } }).catch(() => {})
   }
 
   return (

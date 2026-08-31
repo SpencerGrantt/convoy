@@ -16,10 +16,10 @@ function getCurrentPosition() {
 }
 
 const LABELS = {
-  pickup_before:    { title: 'Pickup — Before Loading', icon: '📦' },
-  pickup_sealed:    { title: 'Pickup — Sealed Package',  icon: '🔒' },
-  delivery_arrived: { title: 'Delivery — Arrived',       icon: '🚪' },
-  delivery_signed:  { title: 'Delivery — Signed',        icon: '✅' },
+  pickup_before:    { title: 'Pickup: Before Loading', icon: '📦' },
+  pickup_sealed:    { title: 'Pickup: Sealed Package',  icon: '🔒' },
+  delivery_arrived: { title: 'Delivery: Arrived',       icon: '🚪' },
+  delivery_signed:  { title: 'Delivery: Signed',        icon: '✅' },
 }
 
 export default function PhotoCapture({ runId, companyId, photoType, existingPath, onCaptured }) {
@@ -68,7 +68,7 @@ export default function PhotoCapture({ runId, companyId, photoType, existingPath
       setMode('done')
       onCaptured?.(path)
     } catch (e) {
-      setError(e.message ?? 'Upload failed — check your connection')
+      setError(e.message ?? 'Upload failed. Check your connection')
       setMode('preview')
     } finally {
       setUploading(false)

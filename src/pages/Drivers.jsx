@@ -86,7 +86,7 @@ export default function Drivers() {
             <p className="text-xs font-semibold text-yellow-300">⚠️ Compliance Alerts</p>
             {expiring.map((e, i) => (
               <p key={i} className="text-xs text-yellow-400/80">
-                {e.driver} — {e.doc.replace('_', ' ')} expires in <strong>{e.days}d</strong>
+                {e.driver}: {e.doc.replace('_', ' ')} expires in <strong>{e.days}d</strong>
               </p>
             ))}
           </div>
@@ -136,7 +136,7 @@ export default function Drivers() {
       </div>
 
       {sheet === 'doc' && selectedDriver && (
-        <Sheet title={`Add Doc — ${selectedDriver.full_name}`} onClose={() => setSheet(null)}>
+        <Sheet title={`Add Doc: ${selectedDriver.full_name}`} onClose={() => setSheet(null)}>
           <div className="space-y-3">
             <div>
               <label className="block text-xs text-fg/50 mb-1">Document Type</label>

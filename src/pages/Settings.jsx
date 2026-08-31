@@ -112,7 +112,7 @@ function SecurityTab({ profile, setProfileDirect, email }) {
         <>
           <div className="flex items-center gap-2.5 bg-green-500/10 border border-green-500/20 rounded-xl px-3 py-2.5">
             <ShieldCheck size={16} className="text-green-400 shrink-0" />
-            <p className="text-sm text-green-300">2FA is active — codes go to {email}.</p>
+            <p className="text-sm text-green-300">2FA is active. Codes go to {email}.</p>
           </div>
           {error && <p className="text-red-400 text-xs font-medium">{error}</p>}
           <button
@@ -342,7 +342,7 @@ export default function Settings() {
       const { data, error: fnErr } = await invokeFn('upsert-company', { body })
       if (fnErr) throw new Error(fnErr.message)
       if (data?.error) throw new Error(data.error)
-      if (!data?.profile) throw new Error('Save did not complete — please try again.')
+      if (!data?.profile) throw new Error('Save did not complete. Please try again.')
       setProfileDirect(data.profile)
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
@@ -402,7 +402,7 @@ export default function Settings() {
       })
       if (error) throw new Error(error.message)
       if (data?.error) throw new Error(data.error)
-      if (!data?.url) throw new Error('Could not start checkout — please try again.')
+      if (!data?.url) throw new Error('Could not start checkout. Please try again.')
       window.location.href = data.url
     } catch (err) {
       setBillingErr(err.message)
@@ -418,7 +418,7 @@ export default function Settings() {
       })
       if (error) throw new Error(error.message)
       if (data?.error) throw new Error(data.error)
-      if (!data?.url) throw new Error('Could not open billing portal — please try again.')
+      if (!data?.url) throw new Error('Could not open billing portal. Please try again.')
       window.location.href = data.url
     } catch (err) {
       setBillingErr(err.message)

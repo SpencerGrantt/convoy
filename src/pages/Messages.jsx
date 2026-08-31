@@ -71,7 +71,7 @@ function ChatThread({ driverId, onBack, headerLabel }) {
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 md:px-8">
         {loading && <LoadingSpinner />}
         {!loading && messages.length === 0 && (
-          <p className="text-sm text-fg/40 text-center py-8">No messages yet — say hello.</p>
+          <p className="text-sm text-fg/40 text-center py-8">No messages yet. Say hello.</p>
         )}
         {messages.map(m => (
           <Bubble key={m.id} message={m} isOwn={m.sender_id === profile?.id} />

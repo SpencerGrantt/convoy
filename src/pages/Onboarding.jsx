@@ -122,7 +122,7 @@ export default function Onboarding() {
       })
       if (fnErr) throw new Error(fnErr.message)
       if (data?.error) throw new Error(data.error)
-      if (!data?.profile) throw new Error('Save did not complete — please try again.')
+      if (!data?.profile) throw new Error('Save did not complete. Please try again.')
       setProfileDirect(data.profile)
       setStep(3)
     } catch (err) {
@@ -158,7 +158,7 @@ export default function Onboarding() {
       const { data, error: fnErr } = await invokeFn('upsert-company', { body })
       if (fnErr) throw new Error(fnErr.message)
       if (data?.error) throw new Error(data.error)
-      if (!data?.profile) throw new Error('Save did not complete — please try again.')
+      if (!data?.profile) throw new Error('Save did not complete. Please try again.')
       setProfileDirect(data.profile)
       setStep(BILLING_ENABLED && !alreadySubscribed ? 3 : 4)
     } catch (err) {
@@ -182,7 +182,7 @@ export default function Onboarding() {
       })
       if (fnErr) throw new Error(fnErr.message)
       if (data?.error) throw new Error(data.error)
-      if (!data?.profile) throw new Error('Save did not complete — please try again.')
+      if (!data?.profile) throw new Error('Save did not complete. Please try again.')
       setProfileDirect(data.profile)
       setStep(4)
     } catch (err) {
@@ -209,7 +209,7 @@ export default function Onboarding() {
       })
       if (fnErr) throw new Error(fnErr.message)
       if (data?.error) throw new Error(data.error)
-      if (!data?.url) throw new Error('Could not start checkout — please try again.')
+      if (!data?.url) throw new Error('Could not start checkout. Please try again.')
       window.location.href = data.url
     } catch (err) {
       setError(err.message)

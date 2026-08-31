@@ -33,7 +33,7 @@ serve(async (req) => {
       authHeader.replace('Bearer ', '')
     )
     if (authErr || !user) {
-      return new Response(JSON.stringify({ error: 'Invalid session — please sign out and back in' }), {
+      return new Response(JSON.stringify({ error: 'Invalid session, please sign out and back in' }), {
         status: 401, headers: { 'Content-Type': 'application/json', ...CORS },
       })
     }

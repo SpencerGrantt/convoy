@@ -25,9 +25,9 @@ function unwrapDefault(mod) {
 const ReactSignatureCanvas = unwrapDefault(SignaturePadModule)
 
 const SLOTS = [
-  { type: 'pickup_before',    icon: '📦', title: 'Pickup — Before Loading' },
-  { type: 'pickup_sealed',    icon: '🔒', title: 'Pickup — Sealed Package' },
-  { type: 'delivery_arrived', icon: '🚪', title: 'Delivery — Arrived' },
+  { type: 'pickup_before',    icon: '📦', title: 'Pickup: Before Loading' },
+  { type: 'pickup_sealed',    icon: '🔒', title: 'Pickup: Sealed Package' },
+  { type: 'delivery_arrived', icon: '🚪', title: 'Delivery: Arrived' },
 ]
 
 function PhotoSlot({ slot, runId, companyId, profile, existingPath, onCaptured }) {

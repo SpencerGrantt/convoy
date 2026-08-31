@@ -18,7 +18,7 @@ function daysFromNow(n: number): string {
 function mockOpportunities() {
   return [
     {
-      title: 'Medical Specimen Transport — VA Medical Center',
+      title: 'Medical Specimen Transport: VA Medical Center',
       score: 8,
       reason: 'Direct match: VA medical logistics with SDVOSB set-aside',
       deadline: daysFromNow(21),
@@ -29,7 +29,7 @@ function mockOpportunities() {
       placeOfPerformance: null,
     },
     {
-      title: 'Lab Courier Services — HHS Region 3',
+      title: 'Lab Courier Services: HHS Region 3',
       score: 7,
       reason: 'Strong fit: HHS lab courier aligns with NAICS 492110',
       deadline: daysFromNow(35),
@@ -40,7 +40,7 @@ function mockOpportunities() {
       placeOfPerformance: null,
     },
     {
-      title: 'DoD Medical Supply Delivery — SDVOSB Set-Aside',
+      title: 'DoD Medical Supply Delivery: SDVOSB Set-Aside',
       score: 6,
       reason: 'Good fit: SDVOSB set-aside for medical supply delivery',
       deadline: daysFromNow(45),
@@ -93,7 +93,7 @@ serve(async (req) => {
       authHeader.replace('Bearer ', '')
     )
     if (authErr || !user) {
-      return new Response(JSON.stringify({ error: 'Invalid session — please sign out and back in' }), {
+      return new Response(JSON.stringify({ error: 'Invalid session, please sign out and back in' }), {
         status: 401, headers: { 'Content-Type': 'application/json', ...CORS },
       })
     }
@@ -167,7 +167,7 @@ serve(async (req) => {
                 opp.typeOfSetAsideDescription,
                 opp.naicsCode ? `NAICS ${opp.naicsCode}` : null,
                 opp.baseType,
-              ].filter(Boolean).join(' — ') || 'Government opportunity',
+              ].filter(Boolean).join(', ') || 'Government opportunity',
               deadline: opp.responseDeadLine ?? opp.archiveDate ?? 'See SAM.gov',
               link: opp.uiLink ?? `https://sam.gov/opp/${opp.noticeId}/view`,
               noticeId: opp.noticeId ?? null,

@@ -10,7 +10,7 @@ import { supabase } from './supabase'
 function withTimeout(promise, ms, label) {
   let timer
   const timeout = new Promise((_, reject) => {
-    timer = setTimeout(() => reject(new Error(`${label} timed out — check your connection and try again`)), ms)
+    timer = setTimeout(() => reject(new Error(`${label} timed out. Check your connection and try again`)), ms)
   })
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer))
 }

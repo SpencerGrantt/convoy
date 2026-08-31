@@ -19,7 +19,7 @@ const CHECKLIST_ITEMS = [
   { key: 'brakes',         label: 'Brakes' },
   { key: 'mirrors',        label: 'Mirrors & Windshield' },
   { key: 'fluids',         label: 'Fluid Levels (oil, coolant, washer)' },
-  { key: 'cargo_area',     label: 'Cargo Area — Clean & Secure' },
+  { key: 'cargo_area',     label: 'Cargo Area: Clean & Secure' },
   { key: 'seatbelts_horn', label: 'Seatbelts & Horn' },
   { key: 'cold_chain',     label: 'Cooler / Temp-Sensitive Storage Seal' },
 ]
@@ -105,7 +105,7 @@ export default function VehicleInspection() {
       setPhotoPath(path)
       setPhotoMode('done')
     } catch (err) {
-      setPhotoError(err.message ?? 'Upload failed — check your connection')
+      setPhotoError(err.message ?? 'Upload failed. Check your connection')
       setPhotoMode('preview')
     } finally {
       setPhotoUploading(false)
@@ -199,7 +199,7 @@ export default function VehicleInspection() {
         {hasFail && (
           <div className="flex items-center gap-2 text-xs text-orange-300 bg-orange-500/10 border border-orange-500/20 rounded-xl px-3 py-2.5">
             <AlertTriangle size={14} className="shrink-0" />
-            One or more items failed — add details in notes below before submitting.
+            One or more items failed. Add details in notes below before submitting.
           </div>
         )}
 

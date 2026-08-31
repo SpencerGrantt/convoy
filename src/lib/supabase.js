@@ -52,7 +52,7 @@ export async function invokeFn(name, options = {}, timeoutMs = 15000) {
     return result
   } catch (err) {
     if (err?.name === 'AbortError') {
-      return { data: null, error: new Error(`Request to "${name}" timed out — please try again`) }
+      return { data: null, error: new Error(`Request to "${name}" timed out. Please try again`) }
     }
     return { data: null, error: err }
   } finally {

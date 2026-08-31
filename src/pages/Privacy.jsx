@@ -48,7 +48,7 @@ export default function Privacy() {
           mileage logs, delivery and chain-of-custody photos, team messages, revenue and
           expense entries, invoices, and IFTA reporting data.</p>
           <p><strong className="text-fg/80">Payment information:</strong> subscription
-          payments are processed by Stripe. We never receive or store your card number —
+          payments are processed by Stripe. We never receive or store your card number,
           only a reference to your Stripe customer and subscription.</p>
           <p><strong className="text-fg/80">Demo requests:</strong> if you submit the "Request
           a Demo" form, we collect the name, email, company, and message you provide.</p>
@@ -60,7 +60,7 @@ export default function Privacy() {
         <Section title="How your data is isolated">
           <p>
             Every company's data is scoped at the database level so that one company can
-            never read another company's runs, drivers, finances, or any other record — this
+            never read another company's runs, drivers, finances, or any other record. This
             isn't just an application-level rule, it's enforced by row-level security on the
             database itself.
           </p>
@@ -73,15 +73,15 @@ export default function Privacy() {
             permitted to use it for their own purposes:
           </p>
           <ul className="list-disc list-inside space-y-1">
-            <li>Supabase — database, authentication, and file storage</li>
-            <li>Stripe — payment processing and billing</li>
-            <li>Resend — transactional email (invites, notifications)</li>
-            <li>Vercel — hosting and site analytics</li>
-            <li>Anthropic — powers the in-app AI assistant feature</li>
+            <li>Supabase: database, authentication, and file storage</li>
+            <li>Stripe: payment processing and billing</li>
+            <li>Resend: transactional email (invites, notifications)</li>
+            <li>Vercel: hosting and site analytics</li>
+            <li>Anthropic: powers the in-app AI assistant feature</li>
           </ul>
           <p>
             If your company uses SAM.gov contract matching, we query SAM.gov's public data
-            using your NAICS codes to surface opportunities — this only reads public
+            using your NAICS codes to surface opportunities. This only reads public
             government contract listings, it does not send your company's private data to
             SAM.gov.
           </p>

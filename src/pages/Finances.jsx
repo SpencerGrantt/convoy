@@ -212,7 +212,7 @@ function ExpenseForm({ companyId, entry, onSave, onClose }) {
       </div>
       <div>
         <label className="block text-xs text-fg/50 mb-1">Description</label>
-        <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Gas — Van 01" className={fieldClass} />
+        <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Gas, Van 01" className={fieldClass} />
       </div>
       {isEdit && <EnteredOnNote entry={entry} />}
       {err && <p className="text-red-400 text-xs font-medium">{err}</p>}
@@ -577,21 +577,21 @@ function AnalyticsTab() {
               value={avgRevenuePerRun != null ? fmt(avgRevenuePerRun) : '—'}
               color="green"
               icon={TrendingUp}
-              sub="Blended average — total revenue ÷ completed runs, not tracked per-run"
+              sub="Blended average: total revenue ÷ completed runs, not tracked per-run"
             />
             <MetricCard
               label="Avg Cost / Completed Run"
               value={avgCostPerRun != null ? fmt(avgCostPerRun) : '—'}
               color="yellow"
               icon={TrendingDown}
-              sub="Blended average — total expenses ÷ completed runs, not tracked per-run"
+              sub="Blended average: total expenses ÷ completed runs, not tracked per-run"
             />
             <MetricCard
               label="Avg Profit / Completed Run"
               value={avgProfitPerRun != null ? fmt(avgProfitPerRun) : '—'}
               color={avgProfitPerRun != null && avgProfitPerRun < 0 ? 'red' : 'green'}
               icon={DollarSign}
-              sub="Blended average — total revenue minus expenses, not tracked per-run"
+              sub="Blended average: total revenue minus expenses, not tracked per-run"
             />
             <MetricCard
               label="Est. Cost / Mile"

@@ -183,7 +183,7 @@ export default function Dashboard() {
         {samDaysLeft !== null && samDaysLeft <= 30 && !dismissed.has(samKey) && (
           <AlertBanner
             type={samDaysLeft <= 7 ? 'error' : 'warning'}
-            message={`SAM.gov expires in ${samDaysLeft} day${samDaysLeft === 1 ? '' : 's'} — renew immediately to keep government contracts active.`}
+            message={`SAM.gov expires in ${samDaysLeft} day${samDaysLeft === 1 ? '' : 's'}. Renew immediately to keep government contracts active.`}
             onDismiss={() => dismiss(samKey)}
           />
         )}
@@ -191,7 +191,7 @@ export default function Dashboard() {
           <AlertBanner
             key={c.alertKey}
             type="error"
-            message={`Contract "${c.name}" expired ${safeFormatDate(c.end_date, 'MMM d')} — ${Math.abs(safeDifferenceInDays(c.end_date, today))} days ago.`}
+            message={`Contract "${c.name}" expired ${safeFormatDate(c.end_date, 'MMM d')}, ${Math.abs(safeDifferenceInDays(c.end_date, today))} days ago.`}
             onDismiss={() => dismiss(c.alertKey)}
           />
         ))}
@@ -199,7 +199,7 @@ export default function Dashboard() {
           <AlertBanner
             key={c.alertKey}
             type="warning"
-            message={`Contract "${c.name}" expires ${safeFormatDate(c.end_date, 'MMM d')} — ${safeDifferenceInDays(c.end_date, today)} days remaining.`}
+            message={`Contract "${c.name}" expires ${safeFormatDate(c.end_date, 'MMM d')}, ${safeDifferenceInDays(c.end_date, today)} days remaining.`}
             onDismiss={() => dismiss(c.alertKey)}
           />
         ))}

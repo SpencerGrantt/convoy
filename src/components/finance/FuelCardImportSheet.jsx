@@ -59,7 +59,7 @@ export default function FuelCardImportSheet({ companyId, onSaved, onClose }) {
       complete: (results) => {
         const cols = results.meta.fields ?? []
         if (cols.length === 0 || results.data.length === 0) {
-          setParseErr('No rows found in that file — check it has a header row.')
+          setParseErr('No rows found in that file. Check it has a header row.')
           return
         }
         setHeaders(cols)
@@ -82,7 +82,7 @@ export default function FuelCardImportSheet({ companyId, onSaved, onClose }) {
       const amount = parseAmount(row[amountCol])
       const vehicle = vehicleCol ? row[vehicleCol]?.trim() : ''
       const merchant = merchantCol ? row[merchantCol]?.trim() : ''
-      const description = [vehicle, merchant].filter(Boolean).join(' — ') || 'Fuel card import'
+      const description = [vehicle, merchant].filter(Boolean).join(', ') || 'Fuel card import'
       const error = !date ? 'Unreadable date' : amount == null ? 'Unreadable amount' : null
       return {
         i,
@@ -147,7 +147,7 @@ export default function FuelCardImportSheet({ companyId, onSaved, onClose }) {
       <div className="space-y-3">
         <p className="text-xs text-fg/50">
           Upload a CSV export from your fuel card provider (WEX, Fuelman, Comdata, etc). Each row is
-          added as a fuel expense — you'll map columns and preview before anything is saved.
+          added as a fuel expense. You'll map columns and preview before anything is saved.
         </p>
         <label className="block border-2 border-dashed border-fg/15 rounded-xl px-4 py-8 text-center cursor-pointer hover:border-fg/25 transition-colors">
           <input type="file" accept=".csv,text/csv" onChange={handleFile} className="hidden" />

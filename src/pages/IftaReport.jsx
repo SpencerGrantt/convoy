@@ -176,7 +176,7 @@ export default function IftaReport() {
         </div>
 
         <MetricCard
-          label={`Total Miles — Q${quarter} ${year}`}
+          label={`Total Miles, Q${quarter} ${year}`}
           value={loading ? '…' : totalMiles.toLocaleString(undefined, { maximumFractionDigits: 1 })}
           color="blue"
           sub={vehicleLabel}
@@ -235,8 +235,8 @@ export default function IftaReport() {
         </div>
 
         <p className="text-[11px] text-fg/30 px-1 leading-relaxed">
-          This report shows raw miles logged per jurisdiction only. It does not calculate tax owed —
-          use these totals with your IFTA filing software or accountant.
+          This report shows raw miles logged per jurisdiction only. It does not calculate tax owed.
+          Use these totals with your IFTA filing software or accountant.
         </p>
       </div>
     </div>

@@ -70,7 +70,7 @@ export default function Terms() {
           <p>
             If you refer another company to Vantar and they subscribe to a paid plan, we'll
             apply one free month to your own subscription once their subscription has been
-            active for at least 30 days. Referral credit is applied manually — let us know
+            active for at least 30 days. Referral credit is applied manually. Let us know
             who you referred by emailing us so we can confirm and apply it. A referral must
             be a genuine new customer who wasn't already in conversation with us; we reserve
             the right to decline credit for referrals that don't meet that bar, and to change
@@ -81,7 +81,7 @@ export default function Terms() {
         <Section title="Cancellation and refunds">
           <p>
             You can cancel your subscription at any time from the Billing tab in Settings.
-            Cancellation takes effect at the end of your current billing period — you keep
+            Cancellation takes effect at the end of your current billing period. You keep
             access until then, and we don't provide prorated refunds for the unused portion
             of a period you cancel mid-cycle.
           </p>
@@ -120,7 +120,7 @@ export default function Terms() {
             Vantar is provided "as is." We work to keep it reliable and accurate, but we
             don't guarantee it will be error-free or uninterrupted, and we're not liable for
             indirect or consequential damages arising from your use of it, to the maximum
-            extent permitted by law. Vantar is a tool to help manage your operations — you're
+            extent permitted by law. Vantar is a tool to help manage your operations. You're
             responsible for verifying compliance, contract, and regulatory obligations that
             apply to your business.
           </p>

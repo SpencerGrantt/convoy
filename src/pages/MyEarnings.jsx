@@ -175,7 +175,7 @@ export default function MyEarnings() {
             label="Total Earned"
             value={fmt(totalEarned)}
             color="green"
-            sub={`At your ${payPercent}% pay rate — runs with no revenue logged yet count as $0 here`}
+            sub={`At your ${payPercent}% pay rate. Runs with no revenue logged yet count as $0 here`}
           />
           <MetricCard
             label="Completed Runs"

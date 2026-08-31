@@ -197,7 +197,7 @@ export default function NewRunForm() {
             <div className="space-y-1.5">
               <p className="text-xs text-fg/50">
                 Suggested Crew
-                {!pickupCoords && ' — ranked by availability (enter a pickup address to also rank by distance)'}
+                {!pickupCoords && ', ranked by availability (enter a pickup address to also rank by distance)'}
               </p>
               {suggestedDrivers.slice(0, 3).map(d => (
                 <button
@@ -239,7 +239,7 @@ export default function NewRunForm() {
           <div>
             <label className="block text-xs text-fg/50 mb-1">Contract</label>
             <select value={form.contract_id} onChange={e => set('contract_id', e.target.value)} className={fieldClass}>
-              <option value="">None — commercial/broker run</option>
+              <option value="">None, commercial/broker run</option>
               {contracts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>

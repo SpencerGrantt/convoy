@@ -192,13 +192,13 @@ export default function ExcelTrackerImportSheet({ companyId, onSaved, onClose })
         .map(r => ({
           company_id: companyId,
           amount: r.revenue,
-          description: [r.origin, r.destination].filter(Boolean).join(' → ') + (r.broker ? ` — ${r.broker}` : ''),
+          description: [r.origin, r.destination].filter(Boolean).join(' → ') + (r.broker ? `, ${r.broker}` : ''),
           entry_date: r.entryDate,
         }))
 
       const loadExpenseRows = []
       for (const r of includedLoads) {
-        const desc = [r.origin, r.destination].filter(Boolean).join(' → ') + (r.broker ? ` — ${r.broker}` : '')
+        const desc = [r.origin, r.destination].filter(Boolean).join(' → ') + (r.broker ? `, ${r.broker}` : '')
         if (r.fuel > 0) loadExpenseRows.push({ company_id: companyId, category: 'fuel', amount: r.fuel, description: desc, entry_date: r.entryDate })
         if (r.driverPay > 0) loadExpenseRows.push({ company_id: companyId, category: 'driver_pay', amount: r.driverPay, description: desc, entry_date: r.entryDate })
         if (r.tolls > 0) loadExpenseRows.push({ company_id: companyId, category: 'tolls', amount: r.tolls, description: desc, entry_date: r.entryDate })
@@ -210,7 +210,7 @@ export default function ExcelTrackerImportSheet({ companyId, onSaved, onClose })
           company_id: companyId,
           category: r.category,
           amount: r.amount,
-          description: [r.rawCategory, r.description].filter(Boolean).join(' — ') || null,
+          description: [r.rawCategory, r.description].filter(Boolean).join(', ') || null,
           entry_date: r.entryDate,
         }))
 
@@ -252,7 +252,7 @@ export default function ExcelTrackerImportSheet({ companyId, onSaved, onClose })
       <div className="space-y-3">
         <p className="text-xs text-fg/50">
           Upload your Miles &amp; Expense Tracker (.xlsx). Loads become revenue + fuel/driver pay/tolls
-          expenses, and tracked expenses are added as expenses — you'll review everything before it's saved.
+          expenses, and tracked expenses are added as expenses. You'll review everything before it's saved.
           Mileage totals aren't logged to the IFTA mileage report since this file doesn't break miles out by state.
         </p>
         <label className="block border-2 border-dashed border-fg/15 rounded-xl px-4 py-8 text-center cursor-pointer hover:border-fg/25 transition-colors">
@@ -273,7 +273,7 @@ export default function ExcelTrackerImportSheet({ companyId, onSaved, onClose })
       {parsed.loadsSheetName && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-fg/60 uppercase tracking-wide">Loads — {includedLoads.length} of {validLoads.length}</p>
+            <p className="text-xs font-semibold text-fg/60 uppercase tracking-wide">Loads: {includedLoads.length} of {validLoads.length}</p>
             <p className="text-xs text-fg/40">+{`$${loadsRevenueTotal.toFixed(0)}`} rev / −{`$${loadsCostTotal.toFixed(0)}`} cost</p>
           </div>
           <div className="bg-navy-800 rounded-xl max-h-48 overflow-y-auto divide-y divide-white/[0.06]">
@@ -292,14 +292,14 @@ export default function ExcelTrackerImportSheet({ companyId, onSaved, onClose })
       {parsed.expenseSheetName && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold text-fg/60 uppercase tracking-wide">Expenses — {includedExpenses.length} of {validExpenses.length}</p>
+            <p className="text-xs font-semibold text-fg/60 uppercase tracking-wide">Expenses: {includedExpenses.length} of {validExpenses.length}</p>
             <p className="text-xs text-fg/40">−${expensesTotal.toFixed(0)}</p>
           </div>
           <div className="bg-navy-800 rounded-xl max-h-48 overflow-y-auto divide-y divide-white/[0.06]">
             {validExpenses.map(r => (
               <label key={r.i} className="flex items-center gap-2.5 px-3 py-2 cursor-pointer">
                 <input type="checkbox" checked={!excludedExpenses.has(r.i)} onChange={() => toggleExpense(r.i)} className="shrink-0 accent-brand-500" />
-                <span className="flex-1 min-w-0 text-xs text-fg/70 truncate">{r.rawCategory ?? r.category} — {r.description || 'Expense'}</span>
+                <span className="flex-1 min-w-0 text-xs text-fg/70 truncate">{r.rawCategory ?? r.category}: {r.description || 'Expense'}</span>
                 <span className="text-xs text-fg/40 shrink-0">{r.entryDate}</span>
                 <span className="text-xs font-semibold text-fg shrink-0 w-14 text-right">${r.amount.toFixed(0)}</span>
               </label>

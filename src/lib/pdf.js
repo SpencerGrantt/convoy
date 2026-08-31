@@ -70,10 +70,10 @@ export function generateCustodyPDF(run, photos, signatures, custody) {
     body('No photos captured.')
   } else {
     const typeLabels = {
-      pickup_before: 'Pickup — Before Loading',
-      pickup_sealed: 'Pickup — Sealed Package',
-      delivery_arrived: 'Delivery — Arrived',
-      delivery_signed: 'Delivery — Signed',
+      pickup_before: 'Pickup: Before Loading',
+      pickup_sealed: 'Pickup: Sealed Package',
+      delivery_arrived: 'Delivery: Arrived',
+      delivery_signed: 'Delivery: Signed',
     }
     photos.forEach(p => {
       doc.setFontSize(9)

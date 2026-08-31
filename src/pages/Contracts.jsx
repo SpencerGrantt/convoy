@@ -203,7 +203,7 @@ export default function Contracts() {
             <div>
               <p className="text-sm font-semibold text-fg">Contract Opportunities</p>
               <p className="text-xs text-fg/40">
-                {matched && liveResults ? 'Live SAM.gov results' : matched ? 'SAM.gov unavailable — showing sample results' : 'SAM.gov matches for your NAICS codes'}
+                {matched && liveResults ? 'Live SAM.gov results' : matched ? 'SAM.gov unavailable, showing sample results' : 'SAM.gov matches for your NAICS codes'}
               </p>
               {matched && !liveResults && liveDebugReason && (
                 <p className="text-[10px] text-fg/25 mt-0.5">{liveDebugReason}</p>
@@ -250,7 +250,7 @@ export default function Contracts() {
           </form>
           <StateFilterDropdown value={manualState} onChange={setManualState} />
           <p className="text-xs text-fg/40">
-            {manualMatched && manualLive ? 'Live SAM.gov results' : manualMatched ? 'SAM.gov unavailable — showing sample results' : 'Search SAM.gov opportunities by keyword'}
+            {manualMatched && manualLive ? 'Live SAM.gov results' : manualMatched ? 'SAM.gov unavailable, showing sample results' : 'Search SAM.gov opportunities by keyword'}
           </p>
           {manualError && <p className="text-xs text-red-400 font-medium">{manualError}</p>}
           {manualMatched && !manualError && manualResults.length === 0 && (

@@ -51,7 +51,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Vantar <onboarding@resend.dev>',
+        from: 'Vantar <notifications@vantar.tech>',
         to: [Deno.env.get('DEMO_NOTIFY_EMAIL')!],
         reply_to: email,
         subject: `New demo request: ${name}${company ? ` (${company})` : ''}`,
